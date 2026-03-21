@@ -1,9 +1,71 @@
 "use client";
 
-import { FaPhoneAlt, FaEnvelope, FaClock, FaFacebookF, FaInstagram } from "react-icons/fa";
+import { useState } from "react";
+import {
+  FaPhoneAlt,
+  FaEnvelope,
+  FaClock,
+  FaFacebookF,
+  FaInstagram,
+} from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
+import { sendContactForm } from "@/features/contact/api/contact.api";
+import { ContactFormData } from "@/features/contact/types/contact.types";
+
 export default function ContactSection() {
+  const [formData, setFormData] = useState<ContactFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  // handle input change
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // submit form
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setSuccess("");
+    setError("");
+
+    try {
+      setLoading(true);
+
+      await sendContactForm(formData);
+
+      setSuccess("Message sent successfully!");
+
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      });
+    } catch (err) {
+      setError("Failed to send message. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className="bg-[#F5F5F5] py-20">
       <div className="max-w-7xl mx-auto px-6 md:px-8">
@@ -12,7 +74,6 @@ export default function ContactSection() {
 
           {/* LEFT SIDE */}
           <div className="bg-black text-white p-8 md:p-10 flex flex-col justify-between">
-
             <div>
               <h3 className="text-2xl font-semibold mb-4 leading-snug">
                 Share love,<br /> donate hope.
@@ -28,7 +89,6 @@ export default function ContactSection() {
               </p>
 
               <div className="space-y-3 text-sm">
-
                 <div className="flex items-center gap-3">
                   <FaPhoneAlt className="text-[#D2252B]" />
                   <span>+863-267-3634</span>
@@ -43,11 +103,9 @@ export default function ContactSection() {
                   <FaClock className="text-[#D2252B]" />
                   <span>Mon-Fri: 8:00am - 6:00pm</span>
                 </div>
-
               </div>
             </div>
 
-            {/* SOCIAL */}
             <div className="flex gap-4 mt-8">
               <FaFacebookF className="cursor-pointer hover:text-[#D2252B]" />
               <FaXTwitter className="cursor-pointer hover:text-[#D2252B]" />
@@ -57,61 +115,88 @@ export default function ContactSection() {
 
           {/* RIGHT SIDE FORM */}
           <div className="p-8 md:p-10 bg-white">
-
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-              {/* First Name */}
+            <form
+              onSubmit={handleSubmit}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
               <input
-                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
                 placeholder="First Name"
-                className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm bg-white text-black placeholder-gray-400 focus:outline-none focus:border-[#D2252B]"
+                className="input"
+                required
               />
 
-              {/* Last Name */}
               <input
-                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
                 placeholder="Last Name"
-                className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm bg-white text-black placeholder-gray-400 focus:outline-none focus:border-[#D2252B]"
+                className="input"
+                required
               />
 
-              {/* Email */}
               <input
+                name="email"
                 type="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="Email Address"
-                className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm bg-white text-black placeholder-gray-400 focus:outline-none focus:border-[#D2252B]"
+                className="input"
+                required
               />
 
-              {/* Phone */}
               <input
-                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
                 placeholder="Phone Number"
-                className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm bg-white text-black placeholder-gray-400 focus:outline-none focus:border-[#D2252B]"
+                className="input"
               />
 
-              {/* Subject */}
               <input
-                type="text"
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
                 placeholder="Subject"
-                className="md:col-span-2 w-full border border-gray-200 rounded-md px-4 py-3 text-sm bg-white text-black placeholder-gray-400 focus:outline-none focus:border-[#D2252B]"
+                className="input md:col-span-2"
+                required
               />
 
-              {/* Message */}
               <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 placeholder="Message"
                 rows={5}
-                className="md:col-span-2 w-full border border-gray-200 rounded-md px-4 py-3 text-sm bg-white text-black placeholder-gray-400 focus:outline-none focus:border-[#D2252B]"
+                className="input md:col-span-2"
+                required
               />
 
-              {/* Button */}
+              {/* STATUS MESSAGES */}
+              {success && (
+                <p className="text-green-600 text-sm md:col-span-2">
+                  {success}
+                </p>
+              )}
+
+              {error && (
+                <p className="text-red-500 text-sm md:col-span-2">
+                  {error}
+                </p>
+              )}
+
+              {/* BUTTON */}
               <div className="md:col-span-2 mt-4">
                 <button
                   type="submit"
-                  className="bg-[#D2252B] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition"
+                  disabled={loading}
+                  className="bg-[#D2252B] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition w-full disabled:opacity-50"
                 >
-                  SEND MESSAGE
+                  {loading ? "Sending..." : "SEND MESSAGE"}
                 </button>
               </div>
-
             </form>
           </div>
 

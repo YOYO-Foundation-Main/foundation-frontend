@@ -25,17 +25,41 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* ✅ HIDE SCROLLBAR (for testimonial slider etc.) */
+/* ✅ SCROLLBAR HIDE */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;             /* Chrome, Safari */
+  display: none;
 }
 
-/* ✅ SMOOTH SCROLL (nice UX for sliders) */
+/* ✅ SMOOTH SCROLL */
 html {
   scroll-behavior: smooth;
+}
+
+/* ✅ INPUT FIX (VERY IMPORTANT) */
+.input {
+  @apply w-full border border-gray-300 rounded-md px-4 py-3 text-sm 
+  bg-white text-black placeholder-gray-500 
+  focus:outline-none focus:ring-2 focus:ring-[#D2252B] 
+  focus:border-[#D2252B] transition;
+}
+
+/* ✅ REMOVE BLUR / FADE ISSUE */
+input,
+textarea {
+  opacity: 1 !important;
+  filter: none !important;
+  color: #000 !important;
+  background-color: #fff !important;
+}
+
+/* ✅ PLACEHOLDER FIX */
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;
 }
