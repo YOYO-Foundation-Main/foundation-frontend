@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import useAuthModal from "@/features/auth/hooks/useAuthModal";
@@ -7,7 +6,6 @@ import AuthModal from "@/features/auth/components/AuthModal";
 
 export default function Navbar() {
   const { isOpen, openModal, closeModal } = useAuthModal();
-
   return (
     <>
       <header className="w-full absolute top-0 left-0 z-50 bg-black">
@@ -29,10 +27,19 @@ export default function Navbar() {
           {/* Nav */}
           <nav className="hidden md:flex gap-8 text-sm font-medium">
             <Link href="/">Home</Link>
-            <Link href="/causes">Causes</Link>
-            <Link href="/impact">Impact</Link>
             <Link href="/about">About Us</Link>
-            <Link href="/contact">Contact Us</Link>
+            
+            <Link href="/campaigns">Campaigns</Link>
+            <Link href="/get-involved">Get Involved</Link>
+            <Link href="/">Events</Link>
+            <Link href="/">Success Story</Link>
+            <Link href="/">Pages</Link>
+
+
+            {/* <Link href="/causes">Causes</Link> */}
+            {/* <Link href="/impact">Impact</Link> */}
+            
+            {/* <Link href="/contact">Contact Us</Link> */}
           </nav>
 
           {/* Buttons */}
@@ -53,7 +60,6 @@ export default function Navbar() {
           </div>
         </div>
       </header>
-
       {/* MODAL */}
       <AuthModal isOpen={isOpen} onClose={closeModal} />
     </>

@@ -25,7 +25,16 @@ export default function CausesSection() {
         {/* Grid */}
         <div className="grid md:grid-cols-3 gap-8">
           {causes.map((cause) => (
-            <CauseCard key={cause.id} {...cause} />
+            <CauseCard
+              key={cause.id} // ✅ IMPORTANT
+              id={String(cause.id)} // ✅ for routing
+              title={cause.title}
+              image={cause.image}
+              description={cause.description}
+              goal={cause.goal}
+              raised={cause.raised}
+              donations={cause.donations}
+            />
           ))}
         </div>
       </div>

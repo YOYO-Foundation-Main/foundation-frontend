@@ -1,6 +1,10 @@
+"use client";
+
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface Cause {
+  id: string; // ✅ REQUIRED
   title: string;
   image: string;
   description: string;
@@ -10,6 +14,7 @@ interface Cause {
 }
 
 export default function CauseCard({
+  id,
   title,
   image,
   description,
@@ -17,11 +22,13 @@ export default function CauseCard({
   raised,
   donations,
 }: Cause) {
+  const router = useRouter();
+
   const progress = (raised / goal) * 100;
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
-      
+
       {/* Image */}
       <Image
         src={image}
@@ -54,8 +61,11 @@ export default function CauseCard({
           </div>
         </div>
 
-        {/* Button */}
-        <button className="mt-5 w-full bg-black text-white py-2 rounded-md text-sm hover:bg-gray-800 transition">
+        {/* ✅ BUTTON FIXED */}
+        <button
+          onClick={() => router.push(`/causes/${id}`)}
+          className="mt-5 w-full bg-black text-white py-2 rounded-md text-sm hover:bg-gray-800 transition"
+        >
           VIEW DETAILS
         </button>
       </div>
