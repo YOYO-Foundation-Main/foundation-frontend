@@ -10,6 +10,7 @@ export default function CausesListSection() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+
   const selectedCauses = causes.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE
@@ -35,7 +36,6 @@ export default function CausesListSection() {
         {/* FILTERS */}
         <div className="flex flex-wrap gap-3 mb-10">
           
-          {/* Filter Buttons */}
           {["Today", "Yesterday", "Last 7 days", "Last 30 days"].map((item) => (
             <button
               key={item}
@@ -45,13 +45,11 @@ export default function CausesListSection() {
             </button>
           ))}
 
-          {/* Search Input */}
           <input
             placeholder="Search..."
             className="border border-gray-300 px-4 py-2 rounded text-sm text-[#282828] placeholder:text-gray-400 outline-none focus:border-[#D2252B]"
           />
 
-          {/* Search Button */}
           <button className="bg-[#D2252B] text-white px-5 py-2 rounded text-sm hover:bg-[#b91f24] transition">
             Search
           </button>
@@ -60,7 +58,16 @@ export default function CausesListSection() {
         {/* GRID */}
         <div className="grid md:grid-cols-3 gap-8">
           {selectedCauses.map((cause) => (
-            <CauseCard key={cause.id} {...cause} />
+            <CauseCard
+              key={cause.id} // ✅ FIXED
+              id={String(cause.id)} // ✅ IMPORTANT for routing
+              title={cause.title}
+              image={cause.image}
+              description={cause.description}
+              goal={cause.goal}
+              raised={cause.raised}
+              donations={cause.donations}
+            />
           ))}
         </div>
 
