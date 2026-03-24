@@ -1,6 +1,11 @@
 import PageHero from "@/components/common/PageHero";
 import ImpactSection from "@/components/campaigns/ImpactSection";
 import CampaignCategories from "@/components/campaigns/CampaignCategories";
+import CampaignListSection from "@/components/campaigns/CampaignListSection";
+import EventsSection from "@/components/campaigns/EventsSection";
+import GallerySection from "@/components/campaigns/GallerySection";
+import ImpactVideoSection from "@/components/campaigns/ImpactVideoSection";
+import BlogSection from "@/components/common/BlogSection";
 
 export default function CampaignsPage() {
   return (
@@ -14,6 +19,12 @@ export default function CampaignsPage() {
 
       <ImpactSection />
       <CampaignCategories />
+      <CampaignListSection />
+      <EventsSection />
+      <GallerySection />
+      <ImpactVideoSection />
+      <BlogSection />
+
 
     </div>
   );

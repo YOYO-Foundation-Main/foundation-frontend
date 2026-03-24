@@ -1,50 +1,41 @@
 "use client";
-
 import { useState } from "react";
-import { IoClose } from "react-icons/io5";
-import SideBanner from "./SideBanner";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
+// import OtpForm from "./OtpForm";
+import OtpForm from "./OTPForm";
+  
 
-interface Props {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export default function AuthModal({ isOpen, onClose }: Props) {
-  const [isSignup, setIsSignup] = useState(false);
+export default function AuthModal({ isOpen, onClose }: any) {
+  const [step, setStep] = useState<"login" | "signup" | "otp">("login");
+  const [email, setEmail] = useState("");
 
   if (!isOpen) return null;
 
+  console.log("🧠 MODAL STATE:", step);
+
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
+      <div className="bg-white w-[500px] p-6 relative">
 
-      {/* BACKDROP (ONLY THIS SHOULD BLUR) */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* MODAL */}
-      <div className="relative z-10 w-[90%] max-w-5xl flex rounded-2xl overflow-hidden bg-white shadow-2xl">
-
-        {/* CLOSE BUTTON */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-600 hover:text-black text-2xl"
-        >
-          <IoClose />
-        </button>
-
-        <SideBanner />
-
-        {/* SWITCH FORMS */}
-        {isSignup ? (
-          <SignupForm switchToLogin={() => setIsSignup(false)} />
-        ) : (
-          <LoginForm switchToSignup={() => setIsSignup(true)} />
+        {step === "login" && (
+          <LoginForm
+            setStep={setStep}
+            setEmail={setEmail}
+          />
         )}
 
+        {step === "signup" && (
+          <SignupForm setStep={setStep} />
+        )}
+
+        {step === "otp" && (
+          <OtpForm email={email} />
+        )}
+
+        <button onClick={onClose} className="absolute top-2 right-2">
+          ❌
+        </button>
       </div>
     </div>
   );

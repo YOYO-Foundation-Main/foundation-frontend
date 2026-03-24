@@ -1,71 +1,61 @@
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebookF } from "react-icons/fa";
+"use client";
+import { useState } from "react";
+import { sendOtp } from "@/features/auth/api/auth.api";
 
-export default function LoginForm({ switchToSignup }: any) {
+export default function LoginForm({ setStep, setEmail }: any) {
+  const [email, setEmailLocal] = useState("");
+
+  const handleOtp = async () => {
+    console.log("👉 CLICK LOGIN VIA OTP");
+    console.log("📧 Email:", email);
+
+    if (!email) {
+      alert("Please enter email");
+      return;
+    }
+
+    try {
+      const res = await sendOtp(email);
+
+      console.log("✅ OTP SENT:", res);
+
+      alert("OTP sent ✅");
+
+      setEmail(email);   // store globally
+      setStep("otp");    // go to OTP screen
+    } catch (err: any) {
+      console.log("❌ OTP ERROR:", err.message);
+      alert(err.message);
+    }
+  };
+
   return (
-    <div className="w-full md:w-1/2 bg-white p-8 md:p-12">
+    <div className="p-6">
+      <h2 className="text-xl mb-4">Login via OTP</h2>
 
-      <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">
-        Sign in to continue
-      </h2>
+      <input
+        placeholder="Enter Email"
+        value={email}
+        onChange={(e) => {
+          console.log("✏️ Typing:", e.target.value);
+          setEmailLocal(e.target.value);
+        }}
+        className="border px-4 py-2 w-full mb-4"
+      />
 
-      {/* INPUT */}
-      <div className="mb-6">
-        <label className="text-sm text-gray-600">
-          Login via Email <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Enter your username/email"
-          className="w-full mt-2 px-4 py-3 rounded-full border border-gray-300 bg-white text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
-        />
-      </div>
+      <button
+        onClick={handleOtp}
+        className="bg-red-500 text-white w-full py-2"
+      >
+        Send OTP
+      </button>
 
-      {/* PHONE LOGIN */}
-      <p className="text-sm text-gray-500 text-center mb-4">
-        Login with Phone number?{" "}
-        <span className="text-red-500 cursor-pointer">
-          Click here
-        </span>
+      <p
+        onClick={() => setStep("signup")}
+        className="mt-4 text-sm text-blue-500 cursor-pointer text-center"
+      >
+        Create Account
       </p>
-
-      <p className="text-center text-gray-500 mb-4">Or</p>
-
-      {/* SOCIAL */}
-      <div className="flex justify-center gap-4 mb-6">
-        <button className="p-3 border rounded-full">
-          <FcGoogle size={20} />
-        </button>
-        <button className="p-3 bg-blue-600 text-white rounded-full">
-          <FaFacebookF size={16} />
-        </button>
-      </div>
-
-      {/* REGISTER SWITCH */}
-      <p className="text-center text-sm text-gray-600">
-        Don’t have an account?{" "}
-        <span
-          onClick={switchToSignup}
-          className="text-red-500 cursor-pointer"
-        >
-          Register
-        </span>
-      </p>
-
-      {/* TERMS */}
-      <p className="text-xs text-gray-400 text-center mt-6 leading-relaxed">
-        By continuing, you agree to the YOYO Foundation{" "}
-        <span className="underline cursor-pointer">terms</span> and acknowledge
-        receipt of our{" "}
-        <span className="underline cursor-pointer">privacy notice</span>.
-      </p>
-
-      {/* BUTTON */}
-      <div className="mt-8">
-        <button className="w-full py-3 rounded-full bg-gray-300 text-white">
-          Sign In
-        </button>
-      </div>
     </div>
   );
 }
