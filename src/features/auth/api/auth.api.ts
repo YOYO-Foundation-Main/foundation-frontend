@@ -1,114 +1,102 @@
 const BASE_URL = "https://foundationbackendrepo.onrender.com/api/auth";
 
-// ================= SIGNUP =================
-export const signupUser = async (data: any) => {
-  try {
-    console.log("📤 [SIGNUP]:", data);
+// ================= LOGIN =================
+export const loginUser = async (data: {
+  email: string;
+  password: string;
+}) => {
+  console.log("📤 [LOGIN]:", data);
 
-    const res = await fetch(`${BASE_URL}/signup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+  const res = await fetch(`${BASE_URL}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 
-    console.log("📡 [SIGNUP STATUS]:", res.status);
+  const result = await res.json();
 
-    const result = await res.json();
-    console.log("📥 [SIGNUP RESPONSE]:", result);
+  console.log("📡 [LOGIN STATUS]:", res.status);
+  console.log("📥 [LOGIN RESPONSE]:", result);
 
-    if (!res.ok) throw new Error(result.message);
-
-    return result;
-  } catch (err: any) {
-    console.error("🔥 SIGNUP ERROR:", err.message);
-    throw err;
+  if (!res.ok) {
+    throw new Error(result.message || "Login failed");
   }
+
+  // ✅ SAVE TOKEN
+  if (result.token) {
+    localStorage.setItem("token", result.token);
+    console.log("🔐 TOKEN SAVED");
+  }
+
+  return result;
 };
 
-// ================= LOGIN =================
-export const loginUser = async (data: any) => {
-  try {
-    console.log("📤 [LOGIN]:", data);
+// ================= SIGNUP =================
+export const signupUser = async (data: any) => {
+  const res = await fetch(`${BASE_URL}/signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 
-    const res = await fetch(`${BASE_URL}/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+  const result = await res.json();
 
-    console.log("📡 [LOGIN STATUS]:", res.status);
-
-    const result = await res.json();
-    console.log("📥 [LOGIN RESPONSE]:", result);
-
-    if (!res.ok) throw new Error(result.message);
-
-    return result;
-  } catch (err: any) {
-    console.error("🔥 LOGIN ERROR:", err.message);
-    throw err;
+  if (!res.ok) {
+    throw new Error(result.message || "Signup failed");
   }
+
+  return result;
 };
 
 // ================= SEND OTP =================
 export const sendOtp = async (email: string) => {
-  try {
-    console.log("📤 [SEND OTP]:", email);
+  console.log("📤 [SEND OTP]:", email);
 
-    const res = await fetch(`${BASE_URL}/send-otp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        identifier: email, // ✅ IMPORTANT
-      }),
-    });
+  const res = await fetch(`${BASE_URL}/send-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ identifier: email }),
+  });
 
-    console.log("📡 [SEND OTP STATUS]:", res.status);
+  const result = await res.json();
 
-    const data = await res.json();
-    console.log("📥 [SEND OTP RESPONSE]:", data);
+  console.log("📡 [SEND OTP STATUS]:", res.status);
+  console.log("📥 [SEND OTP RESPONSE]:", result);
 
-    if (!res.ok) throw new Error(data.message);
-
-    return data;
-  } catch (err: any) {
-    console.error("🔥 SEND OTP ERROR:", err.message);
-    throw err;
+  if (!res.ok) {
+    throw new Error(result.error || result.message || "Failed to send OTP");
   }
+
+  return result;
 };
 
 // ================= VERIFY OTP =================
 export const verifyOtp = async (email: string, otp: string) => {
-  try {
-    console.log("📤 [VERIFY OTP]:", { email, otp });
+  console.log("📤 [VERIFY OTP]:", email, otp);
 
-    const res = await fetch(`${BASE_URL}/verify-otp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        identifier: email,
-        otp,
-      }),
-    });
+  const res = await fetch(`${BASE_URL}/verify-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      identifier: email,
+      otp,
+    }),
+  });
 
-    console.log("📡 [VERIFY OTP STATUS]:", res.status);
+  const result = await res.json();
 
-    const data = await res.json();
-    console.log("📥 [VERIFY OTP RESPONSE]:", data);
+  console.log("📡 [VERIFY OTP STATUS]:", res.status);
+  console.log("📥 [VERIFY OTP RESPONSE]:", result);
 
-    if (!res.ok) throw new Error(data.message);
-
-    return data;
-  } catch (err: any) {
-    console.error("🔥 VERIFY OTP ERROR:", err.message);
-    throw err;
+  if (!res.ok) {
+    throw new Error(result.error || result.message || "OTP verification failed");
   }
+
+  // ✅ SAVE TOKEN AFTER OTP LOGIN
+  if (result.token) {
+    localStorage.setItem("token", result.token);
+    console.log("🔐 TOKEN SAVED (OTP)");
+  }
+
+  return result;
 };
