@@ -1,41 +1,84 @@
 "use client";
-import { useState } from "react";
-import LoginForm from "./LoginForm";
+import { useState, useEffect } from "react";
+import SideBanner from "./SideBanner";
 import SignupForm from "./SignupForm";
+import LoginForm from "./LoginForm";
 // import OtpForm from "./OtpForm";
 import OtpForm from "./OTPForm";
-  
 
-export default function AuthModal({ isOpen, onClose }: any) {
-  const [step, setStep] = useState<"login" | "signup" | "otp">("login");
-  const [email, setEmail] = useState("");
+type Step = "signup" | "login" | "otp";
+
+export default function AuthModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const [step, setStep] = useState<Step>("signup");
+  const [email, setEmail] = useState(""); // ✅ for OTP
+
+  // Reset when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setStep("signup");
+      setEmail("");
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  console.log("🧠 MODAL STATE:", step);
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
-      <div className="bg-white w-[500px] p-6 relative">
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+      <div
+        className="bg-white w-full max-w-[780px] rounded-2xl overflow-hidden flex shadow-2xl"
+        style={{ minHeight: 520 }}
+      >
+        {/* LEFT */}
+        <SideBanner />
 
-        {step === "login" && (
-          <LoginForm
-            setStep={setStep}
-            setEmail={setEmail}
-          />
-        )}
+        {/* RIGHT */}
+        <div className="flex flex-col flex-1 relative">
 
-        {step === "signup" && (
-          <SignupForm setStep={setStep} />
-        )}
+          {/* TOP RIGHT BUTTON */}
+          <div className="absolute top-4 right-4 z-10">
+            {step === "login" ? (
+              <button
+                onClick={() => setStep("signup")}
+                className="border border-red-500 text-red-500 text-sm px-5 py-1.5 rounded-full hover:bg-red-50 transition"
+              >
+                Sign Up
+              </button>
+            ) : (
+              <button
+                onClick={() => setStep("login")}
+                className="border border-red-500 text-red-500 text-sm px-5 py-1.5 rounded-full hover:bg-red-50 transition"
+              >
+                Sign In
+              </button>
+            )}
+          </div>
 
-        {step === "otp" && (
-          <OtpForm email={email} />
-        )}
+          {/* STEPS */}
+          {step === "signup" && (
+            <SignupForm setStep={setStep} />
+          )}
 
-        <button onClick={onClose} className="absolute top-2 right-2">
-          ❌
-        </button>
+          {step === "login" && (
+            <LoginForm
+              setStep={setStep}
+              setEmail={setEmail} // ✅ pass email to OTP
+              onClose={onClose}
+            />
+          )}
+
+          {step === "otp" && (
+            <OtpForm
+              email={email} // ✅ send email
+              onClose={onClose} // optional close after verify
+            />
+          )}
+        </div>
       </div>
     </div>
   );
