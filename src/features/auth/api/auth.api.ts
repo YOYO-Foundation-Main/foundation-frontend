@@ -1,4 +1,4 @@
-const BASE_URL = "https://foundationbackendrepo.onrender.com/api/auth";
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth`;
 
 // ================= LOGIN =================
 export const loginUser = async (data: {

@@ -44,7 +44,7 @@ export default function Navbar() {
             <Link href="/campaigns">Campaigns</Link>
             <Link href="/get-involved">Get Involved</Link>
             <Link href="/volunteers">Volunteers</Link>
-            <Link href="/">Events</Link>
+            <Link href="/events">Events</Link>
           </nav>
 
           {/* RIGHT SIDE */}
