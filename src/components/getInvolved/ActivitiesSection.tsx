@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function ActivitiesSection() {
   return (
-    <section className="bg-[#F5F5F5] py-20 px-6">
+    <section className="bg-[#F7F2ED] py-20 px-6">
       <div className="max-w-6xl mx-auto">
 
         {/* TOP TITLE */}
