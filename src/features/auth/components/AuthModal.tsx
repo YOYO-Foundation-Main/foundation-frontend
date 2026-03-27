@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
+import { RxCross2 } from "react-icons/rx";
 import SideBanner from "./SideBanner";
 import SignupForm from "./SignupForm";
 import LoginForm from "./LoginForm";
-// import OtpForm from "./OtpForm";
 import OtpForm from "./OTPForm";
 
 type Step = "signup" | "login" | "otp";
@@ -16,9 +16,8 @@ export default function AuthModal({
   onClose: () => void;
 }) {
   const [step, setStep] = useState<Step>("signup");
-  const [email, setEmail] = useState(""); // ✅ for OTP
+  const [email, setEmail] = useState("");
 
-  // Reset when modal opens
   useEffect(() => {
     if (isOpen) {
       setStep("signup");
@@ -38,10 +37,17 @@ export default function AuthModal({
         <SideBanner />
 
         {/* RIGHT */}
-        <div className="flex flex-col flex-1 relative">
+        <div className="flex flex-col flex-1">
 
-          {/* TOP RIGHT BUTTON */}
-          <div className="absolute top-4 right-4 z-10">
+          {/* ✅ TOP BAR — X on left, toggle button on right, no overlap */}
+          <div className="flex items-center justify-between px-4 pt-3">
+            <button
+              onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition"
+            >
+              <RxCross2 size={16} />
+            </button>
+
             {step === "login" ? (
               <button
                 onClick={() => setStep("signup")}
@@ -67,15 +73,15 @@ export default function AuthModal({
           {step === "login" && (
             <LoginForm
               setStep={setStep}
-              setEmail={setEmail} // ✅ pass email to OTP
+              setEmail={setEmail}
               onClose={onClose}
             />
           )}
 
           {step === "otp" && (
             <OtpForm
-              email={email} // ✅ send email
-              onClose={onClose} // optional close after verify
+              email={email}
+              onClose={onClose}
             />
           )}
         </div>

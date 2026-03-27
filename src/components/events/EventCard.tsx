@@ -1,42 +1,41 @@
 import Image from "next/image";
 
 interface Props {
-  image: string;
   title: string;
   date: string;
   location: string;
-  large?: boolean;
+  image: string;
+  size?: "large" | "small";
 }
 
 export default function EventCard({
-  image,
   title,
   date,
   location,
-  large = false,
+  image,
+  size = "small",
 }: Props) {
   return (
     <div
-      className={`relative rounded-xl overflow-hidden ${
-        large ? "h-[420px]" : "h-[200px]"
+      className={`relative rounded-xl overflow-hidden group ${
+        size === "large" ? "h-[420px]" : "h-[200px]"
       }`}
     >
-      {/* IMAGE */}
       <Image
         src={image}
         alt={title}
         fill
-        className="object-cover"
+        className="object-cover group-hover:scale-105 transition duration-300"
       />
 
-      {/* DARK OVERLAY */}
+      {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" />
 
-      {/* CONTENT */}
+      {/* Content */}
       <div className="absolute bottom-4 left-4 right-4 text-white">
         <p className="text-xs mb-1">{date}</p>
 
-        <h3 className="font-semibold text-sm md:text-base leading-snug">
+        <h3 className="font-semibold text-sm md:text-lg leading-snug">
           {title}
         </h3>
 

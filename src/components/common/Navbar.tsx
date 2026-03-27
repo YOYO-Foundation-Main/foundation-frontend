@@ -1,171 +1,296 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { RxCross2, RxHamburgerMenu } from "react-icons/rx";
+import { FiLogOut, FiUser } from "react-icons/fi";
 import useAuthModal from "@/features/auth/hooks/useAuthModal";
 import AuthModal from "@/features/auth/components/AuthModal";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 
-
+const NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about" },
+  { label: "Campaigns", href: "/campaigns" },
+  { label: "Get Involved", href: "/get-involved" },
+  { label: "Volunteers", href: "/volunteers" },
+  { label: "Events", href: "/events" },
+];
 
 export default function Navbar() {
   const { isOpen, openModal, closeModal } = useAuthModal();
   const { user, logout } = useAuthStore();
+  const pathname = usePathname();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  // ✅ first letter
+  const profileRef = useRef<HTMLDivElement>(null);
+
   const firstLetter = user?.name?.charAt(0)?.toUpperCase() || "";
+
+  // Scroll detection — navbar gets subtle bg on scroll
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Lock body scroll when mobile menu open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
 
   return (
     <>
-      <header className="w-full absolute top-0 left-0 z-50  bg-black">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-8 py-4 text-white">
+      <header
+        className={`w-full fixed top-0 left-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-black/95 backdrop-blur-md shadow-lg shadow-black/20"
+            : "bg-black"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-8 py-3 text-white">
 
           {/* LOGO */}
-          <div className="flex items-center gap-2">
-            <Image
-              src="/assets/logo.png"
-              alt="YOYO Foundation"
-              width={60}
-              height={60}
-            />
-            <span className="font-semibold text-sm md:text-base">
-              YOYO Foundation
-            </span>
-          </div>
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+            <div className="relative">
+              <Image
+                src="/assets/logo.png"
+                alt="YOYO Foundation"
+                width={48}
+                height={48}
+                className="transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+            <div className="hidden sm:flex flex-col leading-tight">
+              <span className="font-bold text-sm tracking-widest text-white uppercase">YOYO</span>
+              <span className="text-[10px] tracking-[0.2em] text-[#D2252B] uppercase font-medium">Foundation</span>
+            </div>
+          </Link>
 
           {/* DESKTOP NAV */}
-          <nav className="hidden md:flex gap-8 text-sm font-medium">
-            <Link href="/">Home</Link>
-            <Link href="/about">About Us</Link>
-            <Link href="/campaigns">Campaigns</Link>
-            <Link href="/get-involved">Get Involved</Link>
-            <Link href="/volunteers">Volunteers</Link>
-            <Link href="/events">Events</Link>
+          <nav className="hidden lg:flex items-center gap-1">
+            {NAV_LINKS.map(({ label, href }) => {
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`relative px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 rounded-md group ${
+                    isActive ? "text-white" : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  {label}
+                  {/* Active underline */}
+                  <span
+                    className={`absolute bottom-0 left-4 right-4 h-[2px] bg-[#D2252B] rounded-full transition-all duration-300 ${
+                      isActive ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 group-hover:opacity-60 group-hover:scale-x-100"
+                    }`}
+                  />
+                </Link>
+              );
+            })}
           </nav>
 
           {/* RIGHT SIDE */}
           <div className="flex items-center gap-3">
 
-            {/* ✅ IF NOT LOGGED IN */}
+            {/* NOT LOGGED IN */}
             {!user && (
               <>
                 <button
                   onClick={openModal}
-                  className="hidden md:block border border-white px-5 py-2 rounded-full hover:bg-white hover:text-black transition"
+                  className="hidden md:flex items-center gap-2 border border-white/30 hover:border-white px-5 py-2 rounded-full text-sm font-medium tracking-wide hover:bg-white hover:text-black transition-all duration-200"
                 >
-                  LOGIN
+                  Login
                 </button>
 
-                <button className="hidden md:block bg-[#D2252B] px-6 py-2 rounded-full">
-                  DONATE
+                <button className="hidden md:flex items-center gap-2 bg-[#D2252B] hover:bg-[#b91c22] px-5 py-2 rounded-full text-sm font-semibold tracking-wide transition-all duration-200 shadow-lg shadow-red-900/30">
+                  Donate
                 </button>
               </>
             )}
 
-            {/* ✅ IF LOGGED IN */}
+            {/* LOGGED IN */}
             {user && (
-              <div className="relative">
-                <div
+              <div ref={profileRef} className="relative hidden md:block">
+                <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="w-10 h-10 rounded-full bg-[#D2252B] flex items-center justify-center font-bold cursor-pointer"
+                  className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full border border-white/10 hover:border-white/30 bg-white/5 hover:bg-white/10 transition-all duration-200"
                 >
-                  {firstLetter}
-                </div>
+                  {/* Avatar */}
+                  <div className="w-8 h-8 rounded-full bg-[#D2252B] flex items-center justify-center font-bold text-sm shadow-md">
+                    {firstLetter}
+                  </div>
+                  <span className="text-sm font-medium text-gray-200 max-w-[100px] truncate">
+                    {user.name}
+                  </span>
+                  {/* Chevron */}
+                  <svg
+                    className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
 
-                {/* DROPDOWN */}
+                {/* Dropdown */}
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded-lg shadow-lg overflow-hidden">
-                    
-                    <div className="px-4 py-2 border-b text-sm font-medium">
-                      {user.name}
+                  <div className="absolute right-0 top-12 w-52 bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100 z-50">
+                    {/* User info */}
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-[#D2252B] flex items-center justify-center font-bold text-white text-sm">
+                          {firstLetter}
+                        </div>
+                        <div className="overflow-hidden">
+                          <p className="text-sm font-semibold text-gray-800 truncate">{user.name}</p>
+                          <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                        </div>
+                      </div>
                     </div>
 
-                    <button
-                      onClick={() => {
-                        logout();
-                        setProfileOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                      Logout
-                    </button>
-
+                    {/* Actions */}
+                    <div className="py-1">
+                      <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
+                        <FiUser size={15} />
+                        My Profile
+                      </button>
+                      <button
+                        onClick={() => { logout(); setProfileOpen(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition font-medium"
+                      >
+                        <FiLogOut size={15} />
+                        Logout
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* MOBILE MENU BUTTON */}
+            {/* MOBILE HAMBURGER */}
             <button
-              className="md:hidden text-2xl"
               onClick={() => setMenuOpen(true)}
+              className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full border border-white/20 hover:border-white/50 hover:bg-white/10 transition"
             >
-              ☰
+              <RxHamburgerMenu size={18} />
             </button>
           </div>
         </div>
+      </header>
 
-        {/* MOBILE MENU */}
-        {menuOpen && (
-          <div className="fixed inset-0 bg-black z-50 flex flex-col p-6 text-white">
+      {/* MOBILE MENU OVERLAY */}
+      <div
+        className={`fixed inset-0 z-[60] lg:hidden transition-all duration-300 ${
+          menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          onClick={() => setMenuOpen(false)}
+        />
 
-            <div className="flex justify-end">
-              <button
-                onClick={() => setMenuOpen(false)}
-                className="text-3xl"
-              >
-                ✕
-              </button>
+        {/* Drawer */}
+        <div
+          className={`absolute right-0 top-0 h-full w-[300px] bg-[#0a0a0a] border-l border-white/10 flex flex-col transition-transform duration-300 ${
+            menuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          {/* Drawer header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <Image src="/assets/logo.png" alt="YOYO" width={36} height={36} />
+              <div>
+                <p className="text-xs font-bold tracking-widest text-white uppercase">YOYO</p>
+                <p className="text-[9px] tracking-[0.2em] text-[#D2252B] uppercase">Foundation</p>
+              </div>
             </div>
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+            >
+              <RxCross2 size={16} />
+            </button>
+          </div>
 
-            <nav className="flex flex-col gap-6 mt-10 text-lg font-medium">
-              <Link href="/" onClick={() => setMenuOpen(false)}>Home</Link>
-              <Link href="/about" onClick={() => setMenuOpen(false)}>About Us</Link>
-              <Link href="/campaigns" onClick={() => setMenuOpen(false)}>Campaigns</Link>
-              <Link href="/get-involved" onClick={() => setMenuOpen(false)}>Get Involved</Link>
-              <Link href="/volunteers" onClick={() => setMenuOpen(false)}>Volunteers</Link>
-              <Link href="/" onClick={() => setMenuOpen(false)}>Events</Link>
-            </nav>
-
-            {/* MOBILE ACTION */}
-            {!user ? (
-              <div className="mt-10 flex flex-col gap-4">
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    openModal();
-                  }}
-                  className="border border-white py-3 rounded-full"
+          {/* Nav links */}
+          <nav className="flex flex-col px-4 py-6 gap-1 flex-1">
+            {NAV_LINKS.map(({ label, href }, i) => {
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  style={{ animationDelay: `${i * 50}ms` }}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                    isActive
+                      ? "bg-[#D2252B]/15 text-white border border-[#D2252B]/30"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                  }`}
                 >
-                  LOGIN
-                </button>
+                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#D2252B]" />}
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
 
-                <button className="bg-[#D2252B] py-3 rounded-full">
-                  DONATE
+          {/* Bottom actions */}
+          <div className="px-4 pb-8 pt-4 border-t border-white/10">
+            {!user ? (
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => { setMenuOpen(false); openModal(); }}
+                  className="w-full border border-white/30 hover:border-white py-2.5 rounded-full text-sm font-medium tracking-wide hover:bg-white hover:text-black transition-all"
+                >
+                  Login
+                </button>
+                <button className="w-full bg-[#D2252B] hover:bg-[#b91c22] py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all">
+                  Donate
                 </button>
               </div>
             ) : (
-              <div className="mt-10 flex flex-col gap-4">
-                <div className="text-lg">Hi, {user.name}</div>
-
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10">
+                  <div className="w-9 h-9 rounded-full bg-[#D2252B] flex items-center justify-center font-bold text-white">
+                    {firstLetter}
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-sm font-semibold text-white truncate">{user.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  </div>
+                </div>
                 <button
-                  onClick={() => {
-                    logout();
-                    setMenuOpen(false);
-                  }}
-                  className="border border-white py-3 rounded-full"
+                  onClick={() => { logout(); setMenuOpen(false); }}
+                  className="w-full flex items-center justify-center gap-2 border border-red-500/40 text-red-400 hover:bg-red-500/10 py-2.5 rounded-full text-sm font-medium transition-all"
                 >
-                  LOGOUT
+                  <FiLogOut size={15} />
+                  Logout
                 </button>
               </div>
             )}
           </div>
-        )}
-      </header>
+        </div>
+      </div>
 
       {/* AUTH MODAL */}
       <AuthModal isOpen={isOpen} onClose={closeModal} />
