@@ -9,49 +9,47 @@ import {
   FaFemale,
 } from "react-icons/fa";
 
-export default function CampaignCategories() {
-  const categories = [
-    {
-      icon: <FaGraduationCap />,
-      title: "Education",
-      desc: "Empowering future leaders through access to quality education.",
-    },
-    {
-      icon: <FaHeartbeat />,
-      title: "Healthcare",
-      desc: "Providing essential healthcare services to underserved communities.",
-    },
-    {
-      icon: <FaLeaf />,
-      title: "Environmental",
-      desc: "Promoting sustainability and protecting natural resources.",
-    },
-    {
-      icon: <FaAppleAlt />,
-      title: "Hunger",
-      desc: "Fighting hunger by providing nutritious food to those in need.",
-    },
-    {
-      icon: <FaBolt />,
-      title: "Disaster Response",
-      desc: "Providing urgent aid to rebuild lives after disasters.",
-    },
-    {
-      icon: <FaTint />,
-      title: "Clean Water",
-      desc: "Ensuring access to safe, clean water for all communities.",
-    },
-    {
-      icon: <FaUsers />,
-      title: "Youth Empowerment",
-      desc: "Supporting young leaders to shape a brighter future.",
-    },
-    {
-      icon: <FaFemale />,
-      title: "Women’s Rights",
-      desc: "Advocating for equality and empowering women worldwide.",
-    },
-  ];
+import { getCampaigns } from "@/features/campaigns/api/campaign.api";
+import { Campaign } from "@/features/campaigns/types/campaign.types";
+
+// Icon mapping (based on cause name)
+const iconMap: Record<string, any> = {
+  Education: <FaGraduationCap />,
+  Healthcare: <FaHeartbeat />,
+  Environmental: <FaLeaf />,
+  Hunger: <FaAppleAlt />,
+  "Disaster Response": <FaBolt />,
+  "Clean Water": <FaTint />,
+  "Youth Empowerment": <FaUsers />,
+  "Women’s Rights": <FaFemale />,
+};
+
+export default async function CampaignCategories() {
+  let campaigns: Campaign[] = [];
+
+  try {
+    const data = await getCampaigns();
+    campaigns = data.campaigns;
+  } catch (err) {
+    console.error("❌ CampaignCategories error:", err);
+  }
+
+  // ✅ Extract unique causes
+  const categoriesMap = new Map();
+
+  campaigns.forEach((item) => {
+    const causeName = item.cause?.name || "General";
+
+    if (!categoriesMap.has(causeName)) {
+      categoriesMap.set(causeName, {
+        title: causeName,
+        desc: item.cause?.description || "No description available",
+        icon: iconMap[causeName] || <FaUsers />,
+      });
+    }
+  });
+
+  const categories = Array.from(categoriesMap.values());
 
   return (
     <section className="py-20 px-6">

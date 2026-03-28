@@ -1,57 +1,43 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-type AuthState = {
-  user: any;
-  token: string | null;
-  setUser: (user: any, token: string) => void;
-  logout: () => void;
-  hydrate: () => void;
+type User = {
+  id: number | null;
+  name: string;
+  email: string;
 };
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,          // ✅ NO localStorage here
-  token: null,
+type AuthState = {
+  user: User | null;
+  token: string | null;
+  setUser: (user: User, token: string) => void;
+  logout: () => void;
+};
 
-  // ✅ SET USER
-  setUser: (user, token) => {
-    try {
-      console.log("🧠 SET USER:", user);
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
 
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", token);
+      setUser: (user, token) => {
+        set({ user, token });
+      },
 
-      set({ user, token });
-    } catch (err) {
-      console.error("❌ setUser error:", err);
+      logout: () => {
+        // ✅ Clear cookie too so middleware knows user is logged out
+        if (typeof document !== "undefined") {
+          document.cookie = "token=; path=/; max-age=0";
+        }
+        set({ user: null, token: null });
+      },
+    }),
+    {
+      name: "auth-storage", // localStorage key
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+      }),
     }
-  },
-
-  // ✅ LOGOUT
-  logout: () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    set({ user: null, token: null });
-  },
-
-  // ✅ SAFE HYDRATE
-  hydrate: () => {
-    try {
-      const user = localStorage.getItem("user");
-      const token = localStorage.getItem("token");
-
-      if (user && token) {
-        set({
-          user: JSON.parse(user),
-          token,
-        });
-      }
-    } catch (err) {
-      console.error("❌ Invalid localStorage, clearing...");
-
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-
-      set({ user: null, token: null });
-    }
-  },
-}));
+  )
+);

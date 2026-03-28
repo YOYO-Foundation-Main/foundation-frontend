@@ -6,98 +6,96 @@ import { loginUser, sendOtp } from "@/features/auth/api/auth.api";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 
 type Step = "signup" | "login" | "otp";
+type Mode = "password" | "otp";
 
 interface Props {
   setStep: (s: Step) => void;
-  setEmail?: (email: string) => void; // for OTP flow
+  setEmail: (email: string) => void;
   onClose: () => void;
 }
 
+function decodeJwt(token: string) {
+  try { return JSON.parse(atob(token.split(".")[1])); }
+  catch { return null; }
+}
+
 export default function LoginForm({ setStep, setEmail, onClose }: Props) {
+  const [mode, setMode] = useState<Mode>("password");
   const [email, setEmailLocal] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState("");
+  const [toast, setToast] = useState({ msg: "", type: "" });
 
-  const { setUser } = useAuthStore(); // ✅ STORE
+  const { setUser } = useAuthStore();
 
-  const isReady = !!email && !!password;
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(""), 3000);
+  const showToast = (msg: string, type: "success" | "error") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast({ msg: "", type: "" }), 3000);
   };
 
-  // ================= NORMAL LOGIN =================
+  // ✅ Email + Password login
   const handleLogin = async () => {
+    if (!email || !password) { showToast("Please fill all fields", "error"); return; }
     try {
       setLoading(true);
-
-      console.log("📤 LOGIN:", { email, password });
-
       const res = await loginUser({ email, password });
 
-      console.log("✅ LOGIN RESPONSE:", res);
+      const decoded = decodeJwt(res.token);
+      const user = {
+        id: decoded?.userId || null,
+        name: decoded?.name || email.split("@")[0],
+        email: decoded?.email || email,
+      };
 
-      // ✅ SAVE USER + TOKEN
-      setUser(res.user, res.token);
+      setUser(user, res.token);
+      document.cookie = `token=${res.token}; path=/; max-age=${60 * 60 * 24 * 7}`;
 
-      showToast("✅ Login successful!");
-
+      showToast("✅ Login successful!", "success");
       setTimeout(() => onClose(), 1000);
     } catch (err: any) {
-      console.error("❌ LOGIN ERROR:", err);
-      showToast(`❌ ${err.message}`);
+      showToast(err.message || "Login failed", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  // ================= SEND OTP =================
-  const handleOtpLogin = async () => {
+  // ✅ Send OTP then go to OTP screen
+  const handleSendOtp = async () => {
+    if (!email) { showToast("Please enter your email first", "error"); return; }
     try {
       setLoading(true);
-
-      console.log("📤 SEND OTP:", email);
-
       await sendOtp(email);
-
-      console.log("✅ OTP SENT");
-
-      showToast("📩 OTP sent to email");
-
-      // move to OTP screen
-      setEmail && setEmail(email);
-      setStep("otp");
+      setEmail(email); // pass email up to AuthModal
+      showToast("📩 OTP sent!", "success");
+      setTimeout(() => setStep("otp"), 800);
     } catch (err: any) {
-      console.error("❌ OTP ERROR:", err);
-      showToast(`❌ ${err.message}`);
+      showToast(err.message || "Failed to send OTP", "error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex-1 px-8 py-8 flex flex-col justify-center">
+    <div className="flex-1 px-8 py-8 flex flex-col justify-center overflow-y-auto">
+
       {/* Toast */}
-      {toast && (
-        <div
-          className={`mb-4 text-sm text-center px-4 py-2 rounded-full font-medium ${
-            toast.startsWith("✅") || toast.startsWith("📩")
-              ? "bg-green-50 text-green-600"
-              : "bg-red-50 text-red-500"
-          }`}
-        >
-          {toast}
+      {toast.msg && (
+        <div className={`mb-4 text-sm text-center px-4 py-2 rounded-full font-medium ${
+          toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
+        }`}>
+          {toast.msg}
         </div>
       )}
 
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-        Sign in to continue
-      </h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-2">Sign in to continue</h2>
 
-      {/* Email */}
+      {/* Mode indicator */}
+      <p className="text-sm text-gray-400 mb-6">
+        {mode === "password" ? "Login with your email and password" : "We'll send an OTP to your email"}
+      </p>
+
+      {/* Email — shown in both modes */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Email <span className="text-red-500">*</span>
@@ -107,42 +105,53 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmailLocal(e.target.value)}
-          className="w-full border border-gray-200 rounded-full px-4 py-2.5 text-sm outline-none
-            focus:border-gray-400 bg-gray-50 placeholder:text-gray-400 transition"
+          className="w-full border border-gray-200 rounded-full px-4 py-2.5 text-sm outline-none focus:border-gray-400 bg-gray-50 placeholder:text-gray-400 transition"
         />
       </div>
 
-      {/* Password */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Password <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <input
-            type={showPass ? "text" : "password"}
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-200 rounded-full px-4 py-2.5 text-sm outline-none
-              focus:border-gray-400 bg-gray-50 placeholder:text-gray-400 pr-11 transition"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPass(!showPass)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {showPass ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-          </button>
+      {/* Password mode only */}
+      {mode === "password" && (
+        <div className="mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Password <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <input
+              type={showPass ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-gray-200 rounded-full px-4 py-2.5 text-sm outline-none focus:border-gray-400 bg-gray-50 placeholder:text-gray-400 pr-11 transition"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPass(!showPass)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPass ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* ✅ LOGIN VIA OTP (WORKING NOW) */}
-      <p
-        onClick={handleOtpLogin}
-        className="text-sm text-right text-blue-500 cursor-pointer hover:underline mb-4 -mt-2"
-      >
-        Login via OTP instead
-      </p>
+      {/* Toggle mode */}
+      <div className="flex justify-end mb-4 mt-1">
+        {mode === "password" ? (
+          <button
+            onClick={() => setMode("otp")}
+            className="text-sm text-blue-500 hover:underline"
+          >
+            Login via OTP instead →
+          </button>
+        ) : (
+          <button
+            onClick={() => setMode("password")}
+            className="text-sm text-blue-500 hover:underline"
+          >
+            ← Login with password instead
+          </button>
+        )}
+      </div>
 
       {/* Social */}
       <div className="mt-1">
@@ -159,34 +168,44 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
 
       <p className="text-center text-sm mt-4 text-gray-500">
         Don't have an account?{" "}
-        <button
-          onClick={() => setStep("signup")}
-          className="text-red-500 font-medium hover:underline"
-        >
+        <button onClick={() => setStep("signup")} className="text-red-500 font-medium hover:underline">
           Register
         </button>
       </p>
 
       <p className="text-xs text-center text-gray-400 mt-4 leading-relaxed">
         By continuing, you agree to the YOYO Foundation{" "}
-        <span className="underline cursor-pointer">terms</span> and acknowledge
-        receipt of our{" "}
+        <span className="underline cursor-pointer">terms</span> and acknowledge receipt of our{" "}
         <span className="underline cursor-pointer">privacy notice</span>.
       </p>
 
-      {/* Footer */}
+      {/* Footer button */}
       <div className="border-t border-gray-100 pt-4 mt-4 flex justify-end">
-        <button
-          onClick={handleLogin}
-          disabled={!isReady || loading}
-          className={`px-8 py-2.5 rounded-full text-sm font-medium transition ${
-            isReady && !loading
-              ? "bg-[#D2252B] text-white hover:bg-red-700 cursor-pointer"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-          }`}
-        >
-          {loading ? "Please wait..." : "Sign In"}
-        </button>
+        {mode === "password" ? (
+          <button
+            onClick={handleLogin}
+            disabled={!email || !password || loading}
+            className={`px-8 py-2.5 rounded-full text-sm font-medium transition ${
+              email && password && !loading
+                ? "bg-[#D2252B] text-white hover:bg-red-700 cursor-pointer"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            {loading ? "Please wait..." : "Sign In"}
+          </button>
+        ) : (
+          <button
+            onClick={handleSendOtp}
+            disabled={!email || loading}
+            className={`px-8 py-2.5 rounded-full text-sm font-medium transition ${
+              email && !loading
+                ? "bg-[#D2252B] text-white hover:bg-red-700 cursor-pointer"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            {loading ? "Sending..." : "Send OTP"}
+          </button>
+        )}
       </div>
     </div>
   );
