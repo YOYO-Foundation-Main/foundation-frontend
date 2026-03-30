@@ -2,7 +2,7 @@ import VolunteerHero from "@/components/volunteer/VolunteerHero";
 import VolunteerStory from "@/components/volunteer/VolunteerStory";
 import VolunteerStats from "@/components/volunteer/VolunteerStats";
 import VolunteerForm from "@/components/volunteer/VolunteerForm";
-import VolunteersSection from "@/components/about/VolunteersSection";
+import VolunteersSection from "@/components/volunteer/VolunteersSection";
 import BlogSection from "@/components/common/BlogSection";
 
 export default function VolunteerPage() {
@@ -12,8 +12,9 @@ export default function VolunteerPage() {
       <VolunteerStory />
       <VolunteerStats />
       <VolunteerForm />
+      {/* <VolunteersSection /> */}
+      {/* <BlogSection />  */}
       <VolunteersSection />
-      <BlogSection /> 
     </div>
   );
 }
