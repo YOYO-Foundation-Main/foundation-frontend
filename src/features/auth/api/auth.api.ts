@@ -1,18 +1,15 @@
 const BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth`;
 
-// ✅ Helper — save token in both localStorage AND cookie
+// ✅ Save token in localStorage + cookie
 function saveToken(token: string) {
-  // localStorage — for Zustand store
   localStorage.setItem("token", token);
-
-  // cookie — for middleware (can't read localStorage)
-  document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
+  document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`;
 }
 
-// ✅ Helper — remove token from both
+// ✅ Clear token from both
 function clearToken() {
   localStorage.removeItem("token");
-  document.cookie = "token=; path=/; max-age=0"; // delete cookie
+  document.cookie = "token=; path=/; max-age=0";
 }
 
 // ================= LOGIN =================
@@ -26,16 +23,13 @@ export const loginUser = async (data: { email: string; password: string }) => {
   });
 
   const result = await res.json();
-
   console.log("📡 [LOGIN STATUS]:", res.status);
   console.log("📥 [LOGIN RESPONSE]:", result);
 
-  if (!res.ok) {
-    throw new Error(result.message || "Login failed");
-  }
+  if (!res.ok) throw new Error(result.message || "Login failed");
 
   if (result.token) {
-    saveToken(result.token); // ✅ save in both
+    saveToken(result.token);
     console.log("🔐 TOKEN SAVED");
   }
 
@@ -53,18 +47,15 @@ export const signupUser = async (data: any) => {
   });
 
   const result = await res.json();
-
   console.log("📡 [SIGNUP STATUS]:", res.status);
   console.log("📥 [SIGNUP RESPONSE]:", result);
 
-  if (!res.ok) {
-    throw new Error(result.message || "Signup failed");
-  }
+  if (!res.ok) throw new Error(result.message || "Signup failed");
 
   return result;
 };
 
-// ================= SEND OTP =================
+// ================= SEND OTP (first time) =================
 export const sendOtp = async (email: string) => {
   console.log("📤 [SEND OTP]:", email);
 
@@ -75,13 +66,29 @@ export const sendOtp = async (email: string) => {
   });
 
   const result = await res.json();
-
   console.log("📡 [SEND OTP STATUS]:", res.status);
   console.log("📥 [SEND OTP RESPONSE]:", result);
 
-  if (!res.ok) {
-    throw new Error(result.error || result.message || "Failed to send OTP");
-  }
+  if (!res.ok) throw new Error(result.error || result.message || "Failed to send OTP");
+
+  return result;
+};
+
+// ================= RESEND OTP (different endpoint) =================
+export const resendOtp = async (email: string) => {
+  console.log("📤 [RESEND OTP]:", email);
+
+  const res = await fetch(`${BASE_URL}/resend-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ identifier: email }),
+  });
+
+  const result = await res.json();
+  console.log("📡 [RESEND OTP STATUS]:", res.status);
+  console.log("📥 [RESEND OTP RESPONSE]:", result);
+
+  if (!res.ok) throw new Error(result.error || result.message || "Failed to resend OTP");
 
   return result;
 };
@@ -97,16 +104,13 @@ export const verifyOtp = async (email: string, otp: string) => {
   });
 
   const result = await res.json();
-
   console.log("📡 [VERIFY OTP STATUS]:", res.status);
   console.log("📥 [VERIFY OTP RESPONSE]:", result);
 
-  if (!res.ok) {
-    throw new Error(result.error || result.message || "OTP verification failed");
-  }
+  if (!res.ok) throw new Error(result.error || result.message || "OTP verification failed");
 
   if (result.token) {
-    saveToken(result.token); // ✅ save in both
+    saveToken(result.token);
     console.log("🔐 TOKEN SAVED (OTP)");
   }
 
@@ -115,5 +119,5 @@ export const verifyOtp = async (email: string, otp: string) => {
 
 // ================= LOGOUT =================
 export const logoutUser = () => {
-  clearToken(); // ✅ clear from both localStorage and cookie
+  clearToken();
 };

@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FiClock } from "react-icons/fi";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
-import { verifyOtp, sendOtp } from "@/features/auth/api/auth.api";
+import { verifyOtp, resendOtp } from "@/features/auth/api/auth.api";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 
 interface Props {
@@ -11,16 +11,14 @@ interface Props {
 }
 
 function decodeJwt(token: string) {
-  try {
-    return JSON.parse(atob(token.split(".")[1]));
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(atob(token.split(".")[1])); }
+  catch { return null; }
 }
 
 export default function OTPForm({ email, onClose }: Props) {
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]); // 6 digits
-  const [timer, setTimer] = useState(300); // ✅ 5 minutes = 300 seconds
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [timer, setTimer] = useState(60);         // ✅ first OTP: 1 min
+  const [isResent, setIsResent] = useState(false); // track if resend was used
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ msg: "", type: "" });
 
@@ -35,14 +33,14 @@ export default function OTPForm({ email, onClose }: Props) {
     useRef<HTMLInputElement>(null),
   ];
 
-  // ✅ 5 min countdown
+  // Countdown
   useEffect(() => {
     if (timer <= 0) return;
     const t = setTimeout(() => setTimer((v) => v - 1), 1000);
     return () => clearTimeout(t);
   }, [timer]);
 
-  // Auto focus first box
+  // Auto focus first box on mount
   useEffect(() => {
     refs[0].current?.focus();
   }, []);
@@ -52,7 +50,7 @@ export default function OTPForm({ email, onClose }: Props) {
     setTimeout(() => setToast({ msg: "", type: "" }), 3000);
   };
 
-  // Format timer as MM:SS
+  // Format as MM:SS
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60).toString().padStart(2, "0");
     const s = (secs % 60).toString().padStart(2, "0");
@@ -64,7 +62,6 @@ export default function OTPForm({ email, onClose }: Props) {
     const next = [...otp];
     next[i] = val;
     setOtp(next);
-    // Auto advance
     if (val && i < 5) refs[i + 1].current?.focus();
   };
 
@@ -74,7 +71,7 @@ export default function OTPForm({ email, onClose }: Props) {
     }
   };
 
-  // ✅ Paste support — paste 6 digits at once
+  // Paste full OTP
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
@@ -82,12 +79,11 @@ export default function OTPForm({ email, onClose }: Props) {
     const next = [...otp];
     pasted.split("").forEach((char, i) => { next[i] = char; });
     setOtp(next);
-    // Focus last filled box
     const lastIdx = Math.min(pasted.length, 5);
     refs[lastIdx].current?.focus();
   };
 
-  // ✅ Verify OTP and login
+  // ✅ Verify OTP
   const handleVerify = async () => {
     const code = otp.join("");
     if (code.length < 6) { showToast("Enter all 6 digits", "error"); return; }
@@ -105,15 +101,12 @@ export default function OTPForm({ email, onClose }: Props) {
       };
 
       setUser(user, res.token);
-
-      // Save cookie for middleware
       document.cookie = `token=${res.token}; path=/; max-age=${60 * 60 * 24 * 7}`;
 
       showToast("✅ Login successful!", "success");
       setTimeout(() => onClose(), 1000);
     } catch (err: any) {
       showToast(err.message || "Invalid OTP", "error");
-      // Clear boxes on wrong OTP
       setOtp(["", "", "", "", "", ""]);
       refs[0].current?.focus();
     } finally {
@@ -121,20 +114,22 @@ export default function OTPForm({ email, onClose }: Props) {
     }
   };
 
-  // ✅ Resend OTP — reset timer to 5 min
+  // ✅ Resend OTP — uses /resend-otp endpoint, resets to 30 sec
   const handleResend = async () => {
     try {
-      await sendOtp(email);
-      setTimer(300); // reset to 5 min
+      await resendOtp(email);
+      setIsResent(true);
+      setTimer(30); // ✅ resent OTP expires in 30 sec
       setOtp(["", "", "", "", "", ""]);
       setTimeout(() => refs[0].current?.focus(), 100);
-      showToast("📩 OTP resent to your email!", "success");
+      showToast("📩 New OTP sent to your email!", "success");
     } catch (err: any) {
       showToast(err.message || "Failed to resend OTP", "error");
     }
   };
 
   const otpFilled = otp.every((d) => d !== "");
+  const isExpired = timer === 0;
 
   return (
     <div className="flex-1 px-8 py-8 flex flex-col justify-center overflow-y-auto">
@@ -149,12 +144,17 @@ export default function OTPForm({ email, onClose }: Props) {
       )}
 
       <h2 className="text-2xl font-semibold text-gray-800 mb-2">Enter OTP</h2>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-gray-500 mb-1">
         We sent a 6-digit code to{" "}
         <span className="font-semibold text-gray-700">{email}</span>
       </p>
+      <p className="text-xs text-gray-400 mb-6">
+        {isResent
+          ? "Resent OTP expires in 30 seconds"
+          : "OTP expires in 1 minute"}
+      </p>
 
-      {/* ✅ 6-box OTP input */}
+      {/* 6-box OTP */}
       <div className="flex gap-2 mb-4" onPaste={handlePaste}>
         {otp.map((digit, i) => (
           <input
@@ -175,24 +175,23 @@ export default function OTPForm({ email, onClose }: Props) {
         ))}
       </div>
 
-      {/* ✅ Timer */}
+      {/* Timer + Resend */}
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
           <FiClock
-            className={timer <= 60 ? "text-red-500" : "text-[#D2252B]"}
+            className={timer <= 10 ? "text-red-500" : "text-[#D2252B]"}
             size={14}
           />
           <span className={`text-sm font-semibold ${
-            timer <= 60 ? "text-red-500" : "text-gray-600"
+            timer <= 10 ? "text-red-500" : "text-gray-600"
           }`}>
-            {timer > 0 ? formatTime(timer) : "OTP Expired"}
+            {isExpired ? "OTP Expired" : formatTime(timer)}
           </span>
-          {timer > 0 && (
+          {!isExpired && (
             <span className="text-xs text-gray-400">remaining</span>
           )}
         </div>
 
-        {/* Resend button */}
         <button
           onClick={handleResend}
           disabled={timer > 0}
@@ -207,9 +206,9 @@ export default function OTPForm({ email, onClose }: Props) {
       </div>
 
       {/* Expired warning */}
-      {timer === 0 && (
-        <p className="text-xs text-red-400 mb-4">
-          Your OTP has expired. Please click Resend OTP to get a new one.
+      {isExpired && (
+        <p className="text-xs text-red-400 mb-2">
+          Your OTP has expired. Click Resend OTP to get a new one.
         </p>
       )}
 
@@ -232,13 +231,13 @@ export default function OTPForm({ email, onClose }: Props) {
         <span className="underline cursor-pointer">privacy notice</span>.
       </p>
 
-      {/* Footer button */}
+      {/* Footer */}
       <div className="border-t border-gray-100 pt-4 mt-4 flex justify-end">
         <button
           onClick={handleVerify}
-          disabled={!otpFilled || loading || timer === 0}
+          disabled={!otpFilled || loading || isExpired}
           className={`px-8 py-2.5 rounded-full text-sm font-medium transition ${
-            otpFilled && !loading && timer > 0
+            otpFilled && !loading && !isExpired
               ? "bg-[#D2252B] text-white hover:bg-red-700 cursor-pointer"
               : "bg-gray-200 text-gray-400 cursor-not-allowed"
           }`}
