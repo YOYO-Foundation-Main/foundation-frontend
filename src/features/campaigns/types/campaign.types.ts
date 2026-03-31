@@ -5,6 +5,7 @@ export interface CampaignCause {
     image:string;
     isActive:boolean;
     createdAt: string;
+    
 
 }
 
@@ -23,6 +24,7 @@ export interface Campaign {
     createdAt: string;
     updatedAt: string;
     cause: CampaignCause;
+    status: string; 
 
 }
 
