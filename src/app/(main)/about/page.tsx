@@ -1,4 +1,5 @@
 import AboutHero from "@/components/about/AboutHero";
+import PageHero from "@/components/common/PageHero";
 import AboutStorySection from "@/components/about/AboutStorySection";
 import CTASection from "@/components/about/CTASection";
 import VolunteersSection from "@/components/about/VolunteersSection";
@@ -9,7 +10,11 @@ import StatsSection from "@/components/common/StatsSection";
 export default function AboutPage() {
   return (
     <>
-      <AboutHero />
+      <PageHero
+  title="United for Good, Strong for Charity"
+  breadcrumb="Home > About Us"
+  description="Libero dictum ut purus ut vel sit egestas..."
+/>
       <StatsSection />
       <AboutStorySection/>
       <CTASection />    

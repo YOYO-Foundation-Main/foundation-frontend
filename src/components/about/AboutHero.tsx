@@ -15,7 +15,7 @@ export default function AboutHero() {
         </div>
 
         {/* Heading */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#121212] leading-tight mb-6">
+        <h1 className="text-2xl sm:text-4xl md:text-4xl font-bold text-[#121212] leading-tight mb-6">
           United for Good, Strong for Charity
         </h1>
 
