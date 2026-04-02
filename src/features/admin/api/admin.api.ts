@@ -124,6 +124,21 @@ export const adminUpdateCampaign = async (id: number, data: FormData) => {
   if (!res.ok) throw new Error(result.message || "Failed to update campaign");
   return result;
 };
+export const adminUpdateCampaignStatus = async (id: number, status: string) => {
+  const res = await fetch(`${BASE_URL}/api/campaigns/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAdminToken()}`,
+    },
+    body: JSON.stringify({ status }),
+  });
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Failed to update status");
+
+  return result;
+};
 
 export const adminDeleteCampaign = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/campaigns/${id}`, {

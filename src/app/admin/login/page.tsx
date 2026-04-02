@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
-      setLoading(false);
+      setLoading(false);    
     }
   };
 
