@@ -39,17 +39,17 @@ const donorGrowth = [
 
 const categoryData = [
   { name: "Community & Environment", value: 34, color: "#1e3a5f", amount: "₹1,65,200" },
-  { name: "Education & Empowerment", value: 27, color: "#3b82f6", amount: "₹1,31,400" },
+  { name: "Education & Empowerment", value: 27, color: "#FEC7C9", amount: "₹1,31,400" },
   { name: "Health & Medical Aid", value: 23, color: "#93c5fd", amount: "₹1,12,000" },
   { name: "Others", value: 16, color: "#e2e8f0", amount: "₹74,160" },
 ];
 
 const topDonors = [
-  { name: "Claire Mason", donations: "14x Donate", amount: "₹12,450", initials: "CM", color: "bg-pink-400" },
-  { name: "Marcus Delgad", donations: "11x Donate", amount: "₹9,980", initials: "MD", color: "bg-blue-400" },
-  { name: "Mira Hong", donations: "9x Donate", amount: "₹8,520", initials: "MH", color: "bg-purple-400" },
-  { name: "Brian Keller", donations: "7x Donate", amount: "₹6,740", initials: "BK", color: "bg-green-400" },
-  { name: "Naomi Bennett", donations: "6x Donate", amount: "₹5,380", initials: "NB", color: "bg-orange-400" },
+  { name: "Claire Mason", donations: "14x Donate", amount: "₹12,450", initials: "CM", color: "bg-[#FEC7C9]" },
+  { name: "Marcus Delgad", donations: "11x Donate", amount: "₹9,980", initials: "MD", color: "bg-[#FEC7C9]" },
+  { name: "Mira Hong", donations: "9x Donate", amount: "₹8,520", initials: "MH", color: "bg-[#FEC7C9]" },
+  { name: "Brian Keller", donations: "7x Donate", amount: "₹6,740", initials: "BK", color: "bg-[#FEC7C9]" },
+  { name: "Naomi Bennett", donations: "6x Donate", amount: "₹5,380", initials: "NB", color: "bg-[#FEC7C9]" },
 ];
 
 const activeCampaigns = [
@@ -89,14 +89,14 @@ function StatusBadge({ status }: { status: string }) {
     Failed: "bg-red-50 text-red-500",
   };
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${map[status] || "bg-gray-100 text-gray-500"}`}>
+    <span className={`px-2 py-0.5 sm:px-2.5 rounded-full text-[10px] sm:text-xs font-medium ${map[status] || "bg-gray-100 text-gray-500"}`}>
       {status}
     </span>
   );
 }
 
 function StatSkeleton() {
-  return <div className="h-7 w-24 bg-gray-200 rounded animate-pulse" />;
+  return <div className="h-6 sm:h-7 w-20 sm:w-24 bg-gray-200 rounded animate-pulse" />;
 }
 
 export default function AdminDashboardPage() {
@@ -119,180 +119,186 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-4 md:space-y-5">
 
       {/* ── STAT CARDS ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-3">
-            <p className="text-xs text-gray-500 font-medium">Total Donations</p>
-            <div className="w-8 h-8 rounded-lg bg-pink-400 flex items-center justify-center">
-              <HiOutlineCurrencyRupee size={16} className="text-white" />
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between mb-2 sm:mb-3">
+            <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Total Donations</p>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#FEC7C9] flex items-center justify-center shrink-0">
+              <HiOutlineCurrencyRupee size={14} className="text-white" />
             </div>
           </div>
           {loadingStats ? <StatSkeleton /> : (
-            <p className="text-2xl font-bold text-gray-800">
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 break-words">
               {stats ? fmtCurrency(stats.totalAmount) : "—"}
             </p>
           )}
-          <p className="text-xs text-green-500 mt-1 flex items-center gap-1">
-            <FiArrowUpRight size={12} /> +18.4% than last month
+          <p className="text-[10px] sm:text-xs text-green-500 mt-1 flex items-center gap-1">
+            <FiArrowUpRight size={10} /> +18.4% than last month
           </p>
         </div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-3">
-            <p className="text-xs text-gray-500 font-medium">Active Campaigns</p>
-            <div className="w-8 h-8 rounded-lg bg-blue-400 flex items-center justify-center">
-              <MdCampaign size={16} className="text-white" />
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between mb-2 sm:mb-3">
+            <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Active Campaigns</p>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#C1E9FF] flex items-center justify-center shrink-0">
+              <MdCampaign size={14} className="text-white" />
             </div>
           </div>
           {loadingStats ? <StatSkeleton /> : (
-            <p className="text-2xl font-bold text-gray-800">
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
               {stats ? fmt(stats.activeCampaigns) : "—"}
             </p>
           )}
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-[10px] sm:text-xs text-gray-400 mt-1">
             {stats ? `${fmt(stats.pendingCampaigns)} pending · ${fmt(stats.totalCampaigns)} total` : ""}
           </p>
         </div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-3">
-            <p className="text-xs text-gray-500 font-medium">Total Donors</p>
-            <div className="w-8 h-8 rounded-lg bg-purple-400 flex items-center justify-center">
-              <HiOutlineUsers size={16} className="text-white" />
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between mb-2 sm:mb-3">
+            <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Total Donors</p>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#FEC7C9] flex items-center justify-center shrink-0">
+              <HiOutlineUsers size={14} className="text-white" />
             </div>
           </div>
           {loadingStats ? <StatSkeleton /> : (
-            <p className="text-2xl font-bold text-gray-800">
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
               {stats ? fmt(stats.totalDonors) : "—"}
             </p>
           )}
-          <p className="text-xs text-green-500 mt-1 flex items-center gap-1">
-            <FiArrowUpRight size={12} /> +9.2% than last month
+          <p className="text-[10px] sm:text-xs text-green-500 mt-1 flex items-center gap-1">
+            <FiArrowUpRight size={10} /> +9.2% than last month
           </p>
         </div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-3">
-            <p className="text-xs text-gray-500 font-medium">Total Users</p>
-            <div className="w-8 h-8 rounded-lg bg-orange-400 flex items-center justify-center">
-              <HiOutlineUsers size={16} className="text-white" />
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between mb-2 sm:mb-3">
+            <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Total Users</p>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#C1E9FF] flex items-center justify-center shrink-0">
+              <HiOutlineUsers size={14} className="text-white" />
             </div>
           </div>
           {loadingStats ? <StatSkeleton /> : (
-            <p className="text-2xl font-bold text-gray-800">
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
               {stats ? fmt(stats.totalUsers) : "—"}
             </p>
           )}
-          <p className="text-xs text-green-500 mt-1 flex items-center gap-1">
-            <FiArrowUpRight size={12} /> +6.8% than last month
+          <p className="text-[10px] sm:text-xs text-green-500 mt-1 flex items-center gap-1">
+            <FiArrowUpRight size={10} /> +6.8% than last month
           </p>
         </div>
       </div>
 
-      {/* ── ROW 2: Charts + Categories ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* ── ROW 2: Charts + Categories ── */}  
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
 
-        <div className="lg:col-span-1 bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm font-semibold text-gray-700">Donation Trends</p>
-            <span className="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-lg">Last 8 Months</span>
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-3 sm:mb-4 flex-wrap gap-2">
+            <p className="text-xs sm:text-sm font-semibold text-gray-700">Donation Trends</p>
+            <span className="text-[10px] sm:text-xs text-gray-400 bg-gray-100 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg shrink-0">Last 8 Months</span>
           </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={donationTrend}>
-              <defs>
-                <linearGradient id="colorAmt" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 1000).toLocaleString("en-US")}k`} />
-              <Tooltip formatter={(v: any) => fmtCurrency(v)} />
-              <Area type="monotone" dataKey="amount" stroke="#3b82f6" strokeWidth={2} fill="url(#colorAmt)" dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="w-full h-[160px] sm:h-[180px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={donationTrend}>
+                <defs>
+                  <linearGradient id="colorAmt" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#FEC7C9" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#FEC7C9" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="month" tick={{ fontSize: 9, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 9, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 1000).toLocaleString("en-US")}k`} />
+                <Tooltip formatter={(v: any) => fmtCurrency(v)} />
+                <Area type="monotone" dataKey="amount" stroke="#FEC7C9" strokeWidth={2} fill="url(#colorAmt)" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        <div className="lg:col-span-1 bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm font-semibold text-gray-700">Donor Growth</p>
-            <span className="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-lg">Last 8 Months</span>
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-3 sm:mb-4 flex-wrap gap-2">
+            <p className="text-xs sm:text-sm font-semibold text-gray-700">Donor Growth</p>
+            <span className="text-[10px] sm:text-xs text-gray-400 bg-gray-100 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg shrink-0">Last 8 Months</span>
           </div>
-          <div className="flex items-center gap-4 mb-2">
-            <span className="flex items-center gap-1 text-xs text-gray-500"><span className="w-2 h-2 rounded-full bg-blue-400 inline-block" />New Donors</span>
-            <span className="flex items-center gap-1 text-xs text-gray-500"><span className="w-2 h-2 rounded-full bg-blue-200 inline-block" />Returning</span>
+          <div className="flex items-center gap-3 sm:gap-4 mb-2 flex-wrap">
+            <span className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500"><span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-400 inline-block" />New Donors</span>
+            <span className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500"><span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-200 inline-block" />Returning</span>
           </div>
-          <ResponsiveContainer width="100%" height={165}>
-            <BarChart data={donorGrowth} barSize={8}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-              <Tooltip />
-              <Bar dataKey="new" fill="#3b82f6" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="returning" fill="#bfdbfe" radius={[3, 3, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="w-full h-[145px] sm:h-[165px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={donorGrowth} barSize={6}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="month" tick={{ fontSize: 9, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 9, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+                <Tooltip />
+                <Bar dataKey="new" fill="#FEC7C9" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="returning" fill="#bfdbfe" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm font-semibold text-gray-700">Top Campaign Categories</p>
-            <FiMoreHorizontal size={16} className="text-gray-400" />
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <p className="text-xs sm:text-sm font-semibold text-gray-700">Top Campaign Categories</p>
+            <FiMoreHorizontal size={14} className="text-gray-400 shrink-0" />
           </div>
-          <div className="flex justify-center mb-3">
-            <PieChart width={140} height={140}>
-              <Pie data={categoryData} cx={65} cy={65} innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={2}>
-                {categoryData.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </div>
-          <div className="space-y-2">
-            {categoryData.map((cat) => (
-              <div key={cat.name} className="flex items-start justify-between">
-                <div className="flex items-start gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full mt-0.5 shrink-0" style={{ background: cat.color }} />
-                  <p className="text-xs text-gray-600 leading-tight">
-                    {cat.name}
-                    <br />
-                    <span className="text-[10px] text-gray-400">Total: {cat.amount}</span>
-                  </p>
+          <div className="flex flex-col sm:flex-row lg:flex-col items-center gap-3 sm:gap-4">
+            <div className="flex justify-center">
+              <PieChart width={120} height={120}>
+                <Pie data={categoryData} cx={60} cy={60} innerRadius={35} outerRadius={55} dataKey="value" paddingAngle={2}>
+                  {categoryData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </div>
+            <div className="w-full space-y-1.5 sm:space-y-2">
+              {categoryData.map((cat) => (
+                <div key={cat.name} className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-1.5 sm:gap-2 flex-1 min-w-0">
+                    <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full mt-0.5 shrink-0" style={{ background: cat.color }} />
+                    <p className="text-[10px] sm:text-xs text-gray-600 leading-tight flex-1">
+                      <span className="hidden xs:inline">{cat.name}</span>
+                      <span className="xs:hidden">{cat.name.split(' ').slice(0,2).join(' ')}</span>
+                      <br />
+                      <span className="text-[8px] sm:text-[10px] text-gray-400">Total: {cat.amount}</span>
+                    </p>
+                  </div>
+                  <span className="text-[10px] sm:text-xs font-semibold text-gray-700 shrink-0">{cat.value}%</span>
                 </div>
-                <span className="text-xs font-semibold text-gray-700">{cat.value}%</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* ── ROW 3: Active Campaigns + Top Donors ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
 
-        <div className="lg:col-span-2 bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm font-semibold text-gray-700">Active Campaigns</p>
-            <FiMoreHorizontal size={16} className="text-gray-400" />
+        <div className="lg:col-span-2 bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <p className="text-xs sm:text-sm font-semibold text-gray-700">Active Campaigns</p>
+            <FiMoreHorizontal size={14} className="text-gray-400 shrink-0" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {activeCampaigns.map((c) => (
               <div key={c.title} className="rounded-xl overflow-hidden border border-gray-100">
-                <div className="relative h-28 bg-gray-200 flex items-end p-2">
-                  <span className="bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">{c.category}</span>
+                <div className="relative h-24 sm:h-28 bg-gray-200 flex items-end p-2">
+                  <span className="bg-black/60 text-white text-[8px] sm:text-[10px] px-1.5 py-0.5 sm:px-2 rounded-full">{c.category}</span>
                 </div>
-                <div className="p-3">
-                  <p className="text-[10px] text-gray-400">{c.org}</p>
-                  <p className="text-xs font-semibold text-gray-800 mt-0.5 line-clamp-2">{c.title}</p>
-                  <div className="mt-2 w-full h-1.5 bg-gray-100 rounded-full">
-                    <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: `${c.progress}%` }} />
+                <div className="p-2 sm:p-3">
+                  <p className="text-[8px] sm:text-[10px] text-gray-400 truncate">{c.org}</p>
+                  <p className="text-[10px] sm:text-xs font-semibold text-gray-800 mt-0.5 line-clamp-2">{c.title}</p>
+                  <div className="mt-2 w-full h-1 bg-gray-100 rounded-full">
+                    <div className="h-1 bg-[#C1E9FF] rounded-full" style={{ width: `${c.progress}%` }} />
                   </div>
-                  {/* ✅ Fixed: explicit en-US locale */}
-                  <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                  <div className="flex justify-between text-[8px] sm:text-[10px] text-gray-400 mt-1 flex-wrap gap-1">
                     <span>₹{c.raised.toLocaleString("en-US")} / ₹{c.goal.toLocaleString("en-US")}</span>
                     <span>{c.daysLeft} Days left</span>
                   </div>
@@ -302,24 +308,24 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm font-semibold text-gray-700">Top Donors</p>
-            <FiMoreHorizontal size={16} className="text-gray-400" />
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <p className="text-xs sm:text-sm font-semibold text-gray-700">Top Donors</p>
+            <FiMoreHorizontal size={14} className="text-gray-400 shrink-0" />
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {topDonors.map((d) => (
-              <div key={d.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-full ${d.color} flex items-center justify-center text-white text-xs font-bold`}>
+              <div key={d.name} className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <div className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full ${d.color} flex items-center justify-center text-white text-[10px] sm:text-xs font-bold shrink-0`}>
                     {d.initials}
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">{d.name}</p>
-                    <p className="text-[10px] text-gray-400">{d.donations}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] sm:text-xs md:text-sm font-medium text-gray-700 truncate">{d.name}</p>
+                    <p className="text-[8px] sm:text-[10px] text-gray-400">{d.donations}</p>
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-gray-800">{d.amount}</span>
+                <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-800 shrink-0">{d.amount}</span>
               </div>
             ))}
           </div>
@@ -327,41 +333,41 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* ── ROW 4: Recent Donations + Recent Activity ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
 
-        <div className="lg:col-span-2 bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm font-semibold text-gray-700">Recent Donations</p>
-            <span className="text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-lg cursor-pointer">All Category ▾</span>
+        <div className="lg:col-span-2 bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-3 sm:mb-4 flex-wrap gap-2">
+            <p className="text-xs sm:text-sm font-semibold text-gray-700">Recent Donations</p>
+            <span className="text-[9px] sm:text-xs bg-gray-100 text-gray-500 px-2 py-0.5 sm:px-3 sm:py-1 rounded-lg cursor-pointer shrink-0">All Category ▾</span>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[550px] sm:min-w-[600px]">
               <thead>
                 <tr className="border-b border-gray-100">
                   {["Donation ID", "Date & Time", "Donor", "Campaign", "Amount", "Status"].map((h) => (
-                    <th key={h} className="text-left text-[10px] font-semibold text-gray-400 uppercase pb-2 pr-4 whitespace-nowrap">{h}</th>
+                    <th key={h} className="text-left text-[9px] sm:text-[10px] font-semibold text-gray-400 uppercase pb-2 pr-2 sm:pr-3 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {recentDonations.map((row) => (
                   <tr key={row.id} className="hover:bg-gray-50 transition">
-                    <td className="py-3 pr-4 text-xs font-medium text-gray-600 whitespace-nowrap">{row.id}</td>
-                    <td className="py-3 pr-4 text-[10px] text-gray-400 whitespace-pre-line">{row.date}</td>
-                    <td className="py-3 pr-4">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-7 h-7 rounded-full ${row.color} flex items-center justify-center text-white text-[10px] font-bold shrink-0`}>
+                    <td className="py-2 sm:py-3 pr-2 sm:pr-3 text-[10px] sm:text-xs font-medium text-gray-600 whitespace-nowrap">{row.id}</td>
+                    <td className="py-2 sm:py-3 pr-2 sm:pr-3 text-[8px] sm:text-[10px] text-gray-400 whitespace-pre-line">{row.date}</td>
+                    <td className="py-2 sm:py-3 pr-2 sm:pr-3">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full ${row.color} flex items-center justify-center text-white text-[8px] sm:text-[10px] font-bold shrink-0`}>
                           {row.initials}
                         </div>
-                        <span className="text-xs text-gray-700 whitespace-nowrap">{row.donor}</span>
+                        <span className="text-[10px] sm:text-xs text-gray-700 whitespace-nowrap">{row.donor}</span>
                       </div>
                     </td>
-                    <td className="py-3 pr-4">
-                      <p className="text-xs text-gray-700 line-clamp-1 max-w-[140px]">{row.campaign}</p>
-                      <p className="text-[10px] text-gray-400">{row.category}</p>
+                    <td className="py-2 sm:py-3 pr-2 sm:pr-3">
+                      <p className="text-[10px] sm:text-xs text-gray-700 line-clamp-1 max-w-[100px] sm:max-w-[140px]">{row.campaign}</p>
+                      <p className="text-[8px] sm:text-[10px] text-gray-400 hidden sm:block">{row.category}</p>
                     </td>
-                    <td className="py-3 pr-4 text-xs font-semibold text-gray-700 whitespace-nowrap">{row.amount}</td>
-                    <td className="py-3"><StatusBadge status={row.status} /></td>
+                    <td className="py-2 sm:py-3 pr-2 sm:pr-3 text-[10px] sm:text-xs font-semibold text-gray-700 whitespace-nowrap">{row.amount}</td>
+                    <td className="py-2 sm:py-3"><StatusBadge status={row.status} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -369,21 +375,21 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm font-semibold text-gray-700">Recent Activity</p>
-            <FiMoreHorizontal size={16} className="text-gray-400" />
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <p className="text-xs sm:text-sm font-semibold text-gray-700">Recent Activity</p>
+            <FiMoreHorizontal size={14} className="text-gray-400 shrink-0" />
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 max-h-[350px] sm:max-h-[400px] overflow-y-auto">
             {recentActivity.map((act, i) => (
-              <div key={i} className="flex gap-3">
+              <div key={i} className="flex gap-2 sm:gap-3">
                 <div className="flex flex-col items-center">
-                  <div className={`w-2 h-2 rounded-full shrink-0 mt-1 ${act.color}`} />
+                  <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0 mt-1 ${act.color}`} />
                   {i < recentActivity.length - 1 && <div className="w-px flex-1 bg-gray-100 mt-1" />}
                 </div>
-                <div className="pb-3">
-                  <p className="text-[10px] text-gray-400 mb-0.5">{act.time}</p>
-                  <p className="text-xs text-gray-600 leading-relaxed">{act.text}</p>
+                <div className="pb-2 sm:pb-3 flex-1">
+                  <p className="text-[8px] sm:text-[10px] text-gray-400 mb-0.5">{act.time}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-600 leading-relaxed break-words">{act.text}</p>
                 </div>
               </div>
             ))}
