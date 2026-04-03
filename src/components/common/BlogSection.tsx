@@ -8,7 +8,7 @@ export default async function BlogSection() {
 
   try {
     const res = await getBlogs();
-    blogs = res.data;
+    blogs = res.data.slice(0, 3); // show only 3 on homepage
   } catch (error) {
     return (
       <section className="py-16 text-center">
@@ -28,13 +28,13 @@ export default async function BlogSection() {
   return (
     <section className="bg-[#f5f5f5] py-16">
       <div className="max-w-7xl mx-auto px-8">
-        
+
         {/* Header */}
         <div className="flex justify-between items-center mb-10">
           <h2 className="text-3xl font-semibold text-black">
             Latest News and Blog
           </h2>
-
+          {/* ✅ Links to /blog page */}
           <Link
             href="/blog"
             className="border text-black border-black px-5 py-2 rounded-md text-sm hover:bg-black hover:text-white transition"
@@ -48,6 +48,7 @@ export default async function BlogSection() {
           {blogs.map((blog) => (
             <BlogCard
               key={blog.id}
+              id={blog.id}             // ✅ pass id for routing
               title={blog.title}
               date={new Date(blog.createdAt).toDateString()}
               image={blog.image}
