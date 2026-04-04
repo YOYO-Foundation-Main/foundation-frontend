@@ -141,7 +141,7 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
                     }
                   </div>
                   <div>
-                    <button onClick={() => fileRef.current?.click()} className="px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition">
+                    <button onClick={() => fileRef.current?.click()} className="px-4 py-2 bg-[#334E79] text-white text-xs font-semibold rounded-lg hover:bg-[#2a3e60] transition">
                       {imagePreview ? "Change Image" : "Upload Image"}
                     </button>
                     {imageFile && (
@@ -232,7 +232,7 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
           <button onClick={onClose} className="px-5 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium transition">Cancel</button>
           <button onClick={handleSubmit} disabled={loading}
             className={`px-6 py-2 rounded-xl text-sm font-semibold transition ${
-              loading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white"
+              loading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#334E79] hover:bg-[#2a3e60] text-white"
             }`}>
             {loading ? "Saving..." : "Save Changes"}
           </button>
