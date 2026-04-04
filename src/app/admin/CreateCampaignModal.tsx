@@ -165,7 +165,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onSuccess }: Prop
                   <div>
                     <button
                       onClick={() => fileRef.current?.click()}
-                      className="px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition"
+                      className="px-4 py-2 bg-[#334E79] text-white text-xs font-semibold rounded-lg hover:bg-[#2a3e60] transition"
                     >
                       {imagePreview ? "Change Image" : "Upload Image"}
                     </button>
@@ -321,7 +321,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onSuccess }: Prop
             className={`px-6 py-2 rounded-xl text-sm font-semibold transition ${
               loading
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
+                : "bg-[#334E79] hover:bg-[#2a3e60] text-white"
             }`}
           >
             {loading ? "Creating..." : "Publish Campaign"}
