@@ -5,10 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { RxCross2, RxHamburgerMenu } from "react-icons/rx";
-import { FiLogOut, FiUser } from "react-icons/fi";
+import { FiLogOut, FiUser, FiPlus } from "react-icons/fi"; // ✅ Added FiPlus
 import useAuthModal from "@/features/auth/hooks/useAuthModal";
 import AuthModal from "@/features/auth/components/AuthModal";
 import { useAuthStore } from "@/features/auth/store/auth.store";
+import CreateCampaignUserModal from "@/components/campaigns/CreateCampaignUserModal"; // ✅ Import your modal
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -27,6 +28,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false); // ✅ Modal state
 
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -129,60 +131,82 @@ export default function Navbar() {
 
             {/* LOGGED IN */}
             {user && (
-              <div ref={profileRef} className="relative hidden md:block">
+              <>
+                {/* ✅ CREATE CAMPAIGN BUTTON - Desktop */}
                 <button
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full border border-white/10 hover:border-white/30 bg-white/5 hover:bg-white/10 transition-all duration-200"
+                  onClick={() => setShowCreateModal(true)}
+                  className="hidden md:flex items-center gap-2 bg-[#D2252B] hover:bg-[#b91c22] px-4 py-2 rounded-full text-sm font-semibold tracking-wide transition-all duration-200 shadow-lg shadow-red-900/30"
                 >
-                  {/* Avatar */}
-                  <div className="w-8 h-8 rounded-full bg-[#D2252B] flex items-center justify-center font-bold text-sm shadow-md">
-                    {firstLetter}
-                  </div>
-                  <span className="text-sm font-medium text-gray-200 max-w-[100px] truncate">
-                    {user.name}
-                  </span>
-                  {/* Chevron */}
-                  <svg
-                    className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`}
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <FiPlus size={14} />
+                  Create Campaign
                 </button>
 
-                {/* Dropdown */}
-                {profileOpen && (
-                  <div className="absolute right-0 top-12 w-52 bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100 z-50">
-                    {/* User info */}
-                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#D2252B] flex items-center justify-center font-bold text-white text-sm">
-                          {firstLetter}
-                        </div>
-                        <div className="overflow-hidden">
-                          <p className="text-sm font-semibold text-gray-800 truncate">{user.name}</p>
-                          <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                <div ref={profileRef} className="relative hidden md:block">
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full border border-white/10 hover:border-white/30 bg-white/5 hover:bg-white/10 transition-all duration-200"
+                  >
+                    {/* Avatar */}
+                    <div className="w-8 h-8 rounded-full bg-[#D2252B] flex items-center justify-center font-bold text-sm shadow-md">
+                      {firstLetter}
+                    </div>
+                    <span className="text-sm font-medium text-gray-200 max-w-[100px] truncate">
+                      {user.name}
+                    </span>
+                    {/* Chevron */}
+                    <svg
+                      className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown */}
+                  {profileOpen && (
+                    <div className="absolute right-0 top-12 w-52 bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100 z-50">
+                      {/* User info */}
+                      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-[#D2252B] flex items-center justify-center font-bold text-white text-sm">
+                            {firstLetter}
+                          </div>
+                          <div className="overflow-hidden">
+                            <p className="text-sm font-semibold text-gray-800 truncate">{user.name}</p>
+                            <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Actions */}
-                    <div className="py-1">
-                      <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
-                        <FiUser size={15} />
-                        My Profile
-                      </button>
-                      <button
-                        onClick={() => { logout(); setProfileOpen(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition font-medium"
-                      >
-                        <FiLogOut size={15} />
-                        Logout
-                      </button>
+                      {/* Actions */}
+                      <div className="py-1">
+                        {/* ✅ CREATE CAMPAIGN in dropdown */}
+                        <button
+                          onClick={() => {
+                            setShowCreateModal(true);
+                            setProfileOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition"
+                        >
+                          <FiPlus size={15} />
+                          Create Campaign
+                        </button>
+                        <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
+                          <FiUser size={15} />
+                          My Profile
+                        </button>
+                        <button
+                          onClick={() => { logout(); setProfileOpen(false); }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition font-medium"
+                        >
+                          <FiLogOut size={15} />
+                          Logout
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              </>
             )}
 
             {/* MOBILE HAMBURGER */}
@@ -279,6 +303,19 @@ export default function Navbar() {
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                 </div>
+                
+                {/* ✅ CREATE CAMPAIGN in mobile menu */}
+                <button
+                  onClick={() => {
+                    setShowCreateModal(true);
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 bg-[#D2252B] hover:bg-[#b91c22] py-2.5 rounded-full text-sm font-semibold transition-all"
+                >
+                  <FiPlus size={15} />
+                  Create Campaign
+                </button>
+                
                 <button
                   onClick={() => { logout(); setMenuOpen(false); }}
                   className="w-full flex items-center justify-center gap-2 border border-red-500/40 text-red-400 hover:bg-red-500/10 py-2.5 rounded-full text-sm font-medium transition-all"
@@ -291,6 +328,12 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* ✅ CREATE CAMPAIGN MODAL */}
+      <CreateCampaignUserModal 
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+      />
 
       {/* AUTH MODAL */}
       <AuthModal isOpen={isOpen} onClose={closeModal} />

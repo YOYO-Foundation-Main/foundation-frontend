@@ -11,7 +11,7 @@ function getAdminToken(): string {
   }
 }
 
-function authHeaders() {
+function authHeaders() {  
   return {
     "Content-Type": "application/json",
     Authorization: `Bearer ${getAdminToken()}`,

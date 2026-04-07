@@ -20,20 +20,37 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
 
+      // ✅ Save user + token in Zustand persist (auto saves to localStorage as "auth-storage")
       setUser: (user, token) => {
+        console.log("🧠 setUser called:", user, token?.slice(0, 20));
+
+        // Save cookie for middleware
+        if (typeof document !== "undefined") {
+          document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`;
+        }
+
         set({ user, token });
       },
 
+      // ✅ On logout — clear everything
       logout: () => {
-        // ✅ Clear cookie too so middleware knows user is logged out
+        console.log("🚪 logout called");
+
+        // Remove cookie
         if (typeof document !== "undefined") {
           document.cookie = "token=; path=/; max-age=0";
         }
+
+        // Remove old standalone token key if it exists
+        if (typeof localStorage !== "undefined") {
+          localStorage.removeItem("token");
+        }
+
         set({ user: null, token: null });
       },
     }),
     {
-      name: "auth-storage", // localStorage key
+      name: "auth-storage", // ← key in localStorage
       partialize: (state) => ({
         user: state.user,
         token: state.token,
