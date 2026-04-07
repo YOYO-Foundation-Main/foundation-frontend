@@ -34,22 +34,29 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
     setTimeout(() => setToast({ msg: "", type: "" }), 3000);
   };
 
-  // ✅ Email + Password login
   const handleLogin = async () => {
     if (!email || !password) { showToast("Please fill all fields", "error"); return; }
     try {
       setLoading(true);
       const res = await loginUser({ email, password });
 
+      console.log("✅ LOGIN RES:", res);
+      console.log("🔑 TOKEN:", res.token?.slice(0, 30));
+
+      // ✅ Decode JWT to get user info (API only returns token, no user object)
       const decoded = decodeJwt(res.token);
+      console.log("🔓 DECODED:", decoded);
+
       const user = {
         id: decoded?.userId || null,
         name: decoded?.name || email.split("@")[0],
         email: decoded?.email || email,
       };
 
+      console.log("👤 USER TO SAVE:", user);
+
+      // ✅ This saves to Zustand + localStorage "auth-storage" + cookie
       setUser(user, res.token);
-      document.cookie = `token=${res.token}; path=/; max-age=${60 * 60 * 24 * 7}`;
 
       showToast("✅ Login successful!", "success");
       setTimeout(() => onClose(), 1000);
@@ -60,13 +67,12 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
     }
   };
 
-  // ✅ Send OTP then go to OTP screen
   const handleSendOtp = async () => {
     if (!email) { showToast("Please enter your email first", "error"); return; }
     try {
       setLoading(true);
       await sendOtp(email);
-      setEmail(email); // pass email up to AuthModal
+      setEmail(email);
       showToast("📩 OTP sent!", "success");
       setTimeout(() => setStep("otp"), 800);
     } catch (err: any) {
@@ -79,7 +85,6 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
   return (
     <div className="flex-1 px-8 py-8 flex flex-col justify-center overflow-y-auto">
 
-      {/* Toast */}
       {toast.msg && (
         <div className={`mb-4 text-sm text-center px-4 py-2 rounded-full font-medium ${
           toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
@@ -89,13 +94,10 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
       )}
 
       <h2 className="text-2xl font-semibold text-gray-800 mb-2">Sign in to continue</h2>
-
-      {/* Mode indicator */}
       <p className="text-sm text-gray-400 mb-6">
         {mode === "password" ? "Login with your email and password" : "We'll send an OTP to your email"}
       </p>
 
-      {/* Email — shown in both modes */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Email <span className="text-red-500">*</span>
@@ -109,7 +111,6 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
         />
       </div>
 
-      {/* Password mode only */}
       {mode === "password" && (
         <div className="mb-2">
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -123,37 +124,26 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-gray-200 rounded-full px-4 py-2.5 text-sm outline-none focus:border-gray-400 bg-gray-50 placeholder:text-gray-400 pr-11 transition"
             />
-            <button
-              type="button"
-              onClick={() => setShowPass(!showPass)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
+            <button type="button" onClick={() => setShowPass(!showPass)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
               {showPass ? <FiEyeOff size={18} /> : <FiEye size={18} />}
             </button>
           </div>
         </div>
       )}
 
-      {/* Toggle mode */}
       <div className="flex justify-end mb-4 mt-1">
         {mode === "password" ? (
-          <button
-            onClick={() => setMode("otp")}
-            className="text-sm text-blue-500 hover:underline"
-          >
+          <button onClick={() => setMode("otp")} className="text-sm text-blue-500 hover:underline">
             Login via OTP instead →
           </button>
         ) : (
-          <button
-            onClick={() => setMode("password")}
-            className="text-sm text-blue-500 hover:underline"
-          >
+          <button onClick={() => setMode("password")} className="text-sm text-blue-500 hover:underline">
             ← Login with password instead
           </button>
         )}
       </div>
 
-      {/* Social */}
       <div className="mt-1">
         <p className="text-center text-sm text-gray-500 mb-3">Or</p>
         <div className="flex justify-center gap-4">
@@ -168,9 +158,7 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
 
       <p className="text-center text-sm mt-4 text-gray-500">
         Don't have an account?{" "}
-        <button onClick={() => setStep("signup")} className="text-red-500 font-medium hover:underline">
-          Register
-        </button>
+        <button onClick={() => setStep("signup")} className="text-red-500 font-medium hover:underline">Register</button>
       </p>
 
       <p className="text-xs text-center text-gray-400 mt-4 leading-relaxed">
@@ -179,30 +167,23 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
         <span className="underline cursor-pointer">privacy notice</span>.
       </p>
 
-      {/* Footer button */}
       <div className="border-t border-gray-100 pt-4 mt-4 flex justify-end">
         {mode === "password" ? (
-          <button
-            onClick={handleLogin}
-            disabled={!email || !password || loading}
+          <button onClick={handleLogin} disabled={!email || !password || loading}
             className={`px-8 py-2.5 rounded-full text-sm font-medium transition ${
               email && password && !loading
                 ? "bg-[#D2252B] text-white hover:bg-red-700 cursor-pointer"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }`}
-          >
+            }`}>
             {loading ? "Please wait..." : "Sign In"}
           </button>
         ) : (
-          <button
-            onClick={handleSendOtp}
-            disabled={!email || loading}
+          <button onClick={handleSendOtp} disabled={!email || loading}
             className={`px-8 py-2.5 rounded-full text-sm font-medium transition ${
               email && !loading
                 ? "bg-[#D2252B] text-white hover:bg-red-700 cursor-pointer"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }`}
-          >
+            }`}>
             {loading ? "Sending..." : "Send OTP"}
           </button>
         )}

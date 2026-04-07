@@ -9,9 +9,9 @@ import BlogSection from "@/components/common/BlogSection";
 
 export default function CampaignsPage() {
   return (
-    <div className="bg-[#F5F5F5]">
+<div className="bg-[#F5F5F5]">
 
-      <PageHero
+  <PageHero
   title="United for Good, Strong for Charity"
   breadcrumb="Home > Campaigns"
   description="Libero dictum ut purus ut vel sit egestas..."

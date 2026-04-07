@@ -1,20 +1,8 @@
 const BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth`;
 
-// ✅ Save token in localStorage + cookie
-function saveToken(token: string) {
-  localStorage.setItem("token", token);
-  document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`;
-}
-
-// ✅ Clear token from both
-function clearToken() {
-  localStorage.removeItem("token");
-  document.cookie = "token=; path=/; max-age=0";
-}
-
 // ================= LOGIN =================
 export const loginUser = async (data: { email: string; password: string }) => {
-  console.log("📤 [LOGIN]:", data);
+  console.log("📤 [LOGIN]:", data.email);
 
   const res = await fetch(`${BASE_URL}/login`, {
     method: "POST",
@@ -28,17 +16,12 @@ export const loginUser = async (data: { email: string; password: string }) => {
 
   if (!res.ok) throw new Error(result.message || "Login failed");
 
-  if (result.token) {
-    saveToken(result.token);
-    console.log("🔐 TOKEN SAVED");
-  }
-
-  return result;
+  return result; // { message, token }
 };
 
 // ================= SIGNUP =================
 export const signupUser = async (data: any) => {
-  console.log("📤 [SIGNUP]:", data);
+  console.log("📤 [SIGNUP]:", data.email);
 
   const res = await fetch(`${BASE_URL}/signup`, {
     method: "POST",
@@ -55,7 +38,7 @@ export const signupUser = async (data: any) => {
   return result;
 };
 
-// ================= SEND OTP (first time) =================
+// ================= SEND OTP =================
 export const sendOtp = async (email: string) => {
   console.log("📤 [SEND OTP]:", email);
 
@@ -67,14 +50,13 @@ export const sendOtp = async (email: string) => {
 
   const result = await res.json();
   console.log("📡 [SEND OTP STATUS]:", res.status);
-  console.log("📥 [SEND OTP RESPONSE]:", result);
 
   if (!res.ok) throw new Error(result.error || result.message || "Failed to send OTP");
 
   return result;
 };
 
-// ================= RESEND OTP (different endpoint) =================
+// ================= RESEND OTP =================
 export const resendOtp = async (email: string) => {
   console.log("📤 [RESEND OTP]:", email);
 
@@ -86,7 +68,6 @@ export const resendOtp = async (email: string) => {
 
   const result = await res.json();
   console.log("📡 [RESEND OTP STATUS]:", res.status);
-  console.log("📥 [RESEND OTP RESPONSE]:", result);
 
   if (!res.ok) throw new Error(result.error || result.message || "Failed to resend OTP");
 
@@ -109,15 +90,5 @@ export const verifyOtp = async (email: string, otp: string) => {
 
   if (!res.ok) throw new Error(result.error || result.message || "OTP verification failed");
 
-  if (result.token) {
-    saveToken(result.token);
-    console.log("🔐 TOKEN SAVED (OTP)");
-  }
-
-  return result;
-};
-
-// ================= LOGOUT =================
-export const logoutUser = () => {
-  clearToken();
+  return result; // { message, token }
 };
