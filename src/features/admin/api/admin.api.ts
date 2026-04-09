@@ -195,7 +195,7 @@ export const adminGetBlogs = async () => {
 };
 
 export const adminCreateBlog = async (data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/blog`, {
+  const res = await fetch(`${BASE_URL}/api/blog/create`, {
     method: "POST",
     headers: { Authorization: `Bearer ${getAdminToken()}` },
     body: data,
@@ -238,5 +238,49 @@ export const adminDeleteUser = async (id: number) => {
     headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Failed to delete user");
+  return res.json();
+};
+
+// ================= PRODUCTS =================
+
+
+export const adminGetProducts = async () => {
+  const res = await fetch(`${BASE_URL}/api/products`, {
+    headers: authHeaders(),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to fetch products");
+  return res.json(); // { success: true, Products: [...] }
+};
+
+
+export const adminCreateProduct = async (data: FormData) => {
+  const res = await fetch(`${BASE_URL}/api/products`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${getAdminToken()}` },
+    body: data,
+  });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Failed to create product");
+  return result;
+};
+
+export const adminUpdateProduct = async (id: number, data: FormData) => {
+  const res = await fetch(`${BASE_URL}/api/products/${id}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${getAdminToken()}` },
+    body: data,
+  });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Failed to update product");
+  return result;
+};
+
+export const adminDeleteProduct = async (id: number) => {
+  const res = await fetch(`${BASE_URL}/api/products/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error("Failed to delete product");
   return res.json();
 };

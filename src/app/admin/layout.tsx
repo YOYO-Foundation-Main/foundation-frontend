@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   FiGrid, FiHeart, FiFlag, FiCalendar,
   FiFileText, FiUsers, FiLogOut, FiChevronDown,
-  FiBarChart2, FiDollarSign, FiMenu, FiX,
+  FiPackage, FiDollarSign, FiMenu, FiX,
 } from "react-icons/fi";
 import { useAdminStore } from "@/features/admin/store/admin.store";
 
@@ -23,7 +23,7 @@ const NAV = [
   { label: "Donations", href: "/admin/donations", icon: FiDollarSign },
   { label: "Blogs", href: "/admin/blogs", icon: FiFileText },
   { label: "Users", href: "/admin/users", icon: FiUsers },
-  { label: "Financials", href: "/admin/financials", icon: FiBarChart2 },
+  { label: "Products", href: "/admin/products", icon: FiPackage },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
