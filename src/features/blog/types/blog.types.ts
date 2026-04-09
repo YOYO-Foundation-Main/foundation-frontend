@@ -15,3 +15,4 @@ export interface BlogResponse {
   limit: number;
   data: Blog[];
 }
+
