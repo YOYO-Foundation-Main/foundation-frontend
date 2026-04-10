@@ -1,304 +1,607 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import { FiX, FiUpload } from "react-icons/fi";
-import { userCreateCampaign, isUserAuthenticated, getUserToken } from "@/features/campaigns/api/userCampaign.api";
+import { useState, useEffect, useRef } from "react";
+import { FiX, FiUpload, FiTrash2, FiCheck, FiChevronRight, FiPlus, FiMinus } from "react-icons/fi";
+import {
+  startCampaignDraft,
+  updateCampaignDraftDetails,
+  updateCampaignDraftBeneficiary,
+  addCampaignProducts,
+  submitCampaignDraft,
+} from "@/features/campaigns/api/userCampaign.api";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 
-interface CreateCampaignUserModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface Props { isOpen: boolean; onClose: () => void; }
+interface CauseOption { id: number; name: string; }
+interface Product { id: number; name: string; price: number; description: string; image: string | null; }
+interface CartItem { product: Product; quantity: number; }
+
+const STEPS = [
+  { id: 1, label: "Your Info" },
+  { id: 2, label: "Campaign" },
+  { id: 3, label: "Beneficiary" },
+  { id: 4, label: "Products" },
+  { id: 5, label: "Review" },
+];
+
+function isValidUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  try { new URL(url); return true; } catch { return false; }
 }
 
-interface CauseOption {
-  id: number;
-  name: string;
-}
-
-export default function CreateCampaignUserModal({ isOpen, onClose }: CreateCampaignUserModalProps) {
+export default function CreateCampaignUserModal({ isOpen, onClose }: Props) {
   const { user } = useAuthStore();
+  const [step, setStep] = useState(1);
+  const [draftId, setDraftId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [toast, setToast] = useState({ msg: "", type: "" });
-  const [causes, setCauses] = useState<CauseOption[]>([]);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    location: "",
-    goalAmount: "",
-    causeId: "",
-    startDate: "",
-    endDate: "",
+  // Data
+  const [causes, setCauses] = useState<CauseOption[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  // Step 1
+  const [step1, setStep1] = useState({ name: "", email: "", mobile: "", causeId: "" });
+
+  // Step 2
+  const [step2, setStep2] = useState({ title: "", description: "" });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Step 3
+  const [step3, setStep3] = useState({
+    beneficiaryName: "", beneficiaryRelation: "",
+    beneficiaryMobile: "", beneficiaryCity: "", beneficiaryState: "",
   });
 
-  // Debug: Check token when modal opens
+  // Step 4 — cart
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState("");
+
+  // Pre-fill user info
   useEffect(() => {
-    if (isOpen) {
-      const token = getUserToken();
-      console.log("Modal opened - User from store:", user);
-      console.log("Modal opened - Token from localStorage:", token ? "Exists" : "Missing");
-      console.log("Is authenticated:", isUserAuthenticated());
+    if (isOpen && user) {
+      setStep1((p) => ({ ...p, name: user.name || "", email: user.email || "" }));
     }
   }, [isOpen, user]);
 
   // Load causes
   useEffect(() => {
     if (!isOpen) return;
-    const loadCauses = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cause`);
-        const data = await response.json();
-        const list = Array.isArray(data) ? data : data?.data || [];
-        setCauses(list);
-      } catch (err) {
-        console.error("Failed to load causes:", err);
-      }
-    };
-    loadCauses();
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cause`)
+      .then((r) => r.json())
+      .then((d) => setCauses(Array.isArray(d) ? d : d?.data || []))
+      .catch(() => {});
   }, [isOpen]);
+
+  // Load products when reaching step 4
+  useEffect(() => {
+    if (step !== 4 || products.length > 0) return;
+    const load = async () => {
+      try {
+        setLoadingProducts(true);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products`);
+        const data = await res.json();
+        // Response: { success: true, Products: [...] }
+        setProducts(data?.Products || data?.products || []);
+      } catch { /* no products ok */ }
+      finally { setLoadingProducts(false); }
+    };
+    load();
+  }, [step]);
 
   const showToast = (msg: string, type: "success" | "error") => {
     setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "" }), 3000);
+    setTimeout(() => setToast({ msg: "", type: "" }), 3500);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+  const reset = () => {
+    setStep(1); setDraftId(null); setSubmitted(false);
+    setStep1({ name: "", email: "", mobile: "", causeId: "" });
+    setStep2({ title: "", description: "" });
+    setStep3({ beneficiaryName: "", beneficiaryRelation: "", beneficiaryMobile: "", beneficiaryCity: "", beneficiaryState: "" });
+    setCart([]); setSelectedProductId("");
+    setImageFile(null); setImagePreview(null);
+  };
+
+  const handleClose = () => { reset(); onClose(); };
+
+  // ── Cart helpers ──────────────────────────────────────────────────────────
+  const cartTotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+
+  const addToCart = () => {
+    if (!selectedProductId) return;
+    const product = products.find((p) => p.id === Number(selectedProductId));
+    if (!product) return;
+    const existing = cart.find((i) => i.product.id === product.id);
+    if (existing) {
+      setCart(cart.map((i) => i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i));
+    } else {
+      setCart([...cart, { product, quantity: 1 }]);
+    }
+    setSelectedProductId("");
+  };
+
+  const updateQty = (productId: number, delta: number) => {
+    setCart(cart
+      .map((i) => i.product.id === productId ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i)
+      .filter((i) => i.quantity > 0)
+    );
+  };
+
+  const removeFromCart = (productId: number) => {
+    setCart(cart.filter((i) => i.product.id !== productId));
+  };
+
+  // ── Step handlers ─────────────────────────────────────────────────────────
+  const handleStep1 = async () => {
+    if (!step1.name) { showToast("Name is required", "error"); return; }
+    if (!step1.email) { showToast("Email is required", "error"); return; }
+    if (!step1.mobile || step1.mobile.length < 10) { showToast("Valid 10-digit mobile required", "error"); return; }
+    if (!step1.causeId) { showToast("Please select a cause", "error"); return; }
+    try {
+      setLoading(true);
+      const result = await startCampaignDraft({
+        name: step1.name, email: step1.email,
+        mobile: step1.mobile, causeId: Number(step1.causeId),
+      });
+      const id = result?.id || result?.draftId;
+      if (!id) throw new Error("No draft ID returned");
+      setDraftId(id);
+      setStep(2);
+    } catch (err: any) {
+      showToast(err.message || "Failed to start draft", "error");
+    } finally { setLoading(false); }
+  };
+
+  const handleStep2 = async () => {
+    if (!step2.title) { showToast("Title is required", "error"); return; }
+    if (!draftId) { showToast("Draft ID missing, please restart", "error"); return; }
+    try {
+      setLoading(true);
+      const fd = new FormData();
+      fd.append("title", step2.title);
+      fd.append("description", step2.description);
+      if (imageFile) fd.append("image", imageFile);
+      await updateCampaignDraftDetails(draftId, fd);
+      setStep(3);
+    } catch (err: any) {
+      showToast(err.message || "Failed to save campaign details", "error");
+    } finally { setLoading(false); }
+  };
+
+  const handleStep3 = async () => {
+    if (!step3.beneficiaryName) { showToast("Beneficiary name is required", "error"); return; }
+    if (!step3.beneficiaryRelation) { showToast("Relation is required", "error"); return; }
+    if (!step3.beneficiaryMobile) { showToast("Beneficiary mobile is required", "error"); return; }
+    if (!draftId) return;
+    try {
+      setLoading(true);
+      await updateCampaignDraftBeneficiary(draftId, step3);
+      setStep(4);
+    } catch (err: any) {
+      showToast(err.message || "Failed to save beneficiary", "error");
+    } finally { setLoading(false); }
+  };
+
+  const handleStep4 = async () => {
+    if (cart.length === 0) { showToast("Please add at least one product", "error"); return; }
+    if (!draftId) return;
+    try {
+      setLoading(true);
+      await addCampaignProducts(
+        draftId,
+        cart.map((i) => ({ productId: i.product.id, quantity: i.quantity }))
+      );
+      setStep(5);
+    } catch (err: any) {
+      showToast(err.message || "Failed to add products", "error");
+    } finally { setLoading(false); }
   };
 
   const handleSubmit = async () => {
-    // Check authentication
-    const token = getUserToken();
-    console.log("Submit - Token exists:", !!token);
-    console.log("Submit - User from store:", user);
-    
-    if (!token || !user) {
-      showToast("Please login to create a campaign", "error");
-      return; // ✅ Just show error, don't auto-close modal
-    }
-
-    // Validation
-    if (!form.title) { showToast("Title is required", "error"); return; }
-    if (!form.causeId) { showToast("Please select a cause", "error"); return; }
-    if (!form.goalAmount) { showToast("Goal amount is required", "error"); return; }
-    if (!form.startDate) { showToast("Start date is required", "error"); return; }
-
+    if (!draftId) return;
     try {
       setLoading(true);
-
-      const formData = new FormData();
-      formData.append("title", form.title);
-      formData.append("description", form.description);
-      formData.append("location", form.location);
-      formData.append("goalAmount", form.goalAmount);
-      formData.append("causeId", form.causeId);
-      formData.append("startDate", form.startDate);
-      if (form.endDate) formData.append("endDate", form.endDate);
-      if (imageFile) formData.append("image", imageFile);
-
-      await userCreateCampaign(formData);
-
-      showToast("✅ Campaign submitted for admin approval!", "success");
-      // ✅ Only close on SUCCESS, not on error
-      setTimeout(() => {
-        resetForm();
-        onClose();
-      }, 2000);
+      await submitCampaignDraft(draftId);
+      setSubmitted(true);
     } catch (err: any) {
-      console.error("Create campaign error:", err);
-      showToast(err.message || "Failed to create campaign", "error");
-      // ✅ Don't close modal on error
-    } finally {
-      setLoading(false);
-    }
+      showToast(err.message || "Failed to submit campaign", "error");
+    } finally { setLoading(false); }
   };
 
-  const resetForm = () => {
-    setForm({
-      title: "",
-      description: "",
-      location: "",
-      goalAmount: "",
-      causeId: "",
-      startDate: "",
-      endDate: "",
-    });
-    setImageFile(null);
-    setImagePreview(null);
+  const handleNext = () => {
+    if (step === 1) handleStep1();
+    else if (step === 2) handleStep2();
+    else if (step === 3) handleStep3();
+    else if (step === 4) handleStep4();
   };
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
-          <div>
-            <h2 className="text-lg font-bold text-gray-800">Create Campaign</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Your campaign will be reviewed by admin</p>
+  const selectedCause = causes.find((c) => c.id === Number(step1.causeId));
+
+  // ── Success screen ─────────────────────────────────────────────────────────
+  if (submitted) {
+    return (
+      <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl w-full max-w-md p-8 text-center shadow-2xl">
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+            <FiCheck size={28} className="text-green-500" />
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition"
-          >
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Campaign Submitted!</h2>
+          <p className="text-gray-500 text-sm mb-2 leading-relaxed">
+            Your campaign is under admin review. You'll be notified once it goes live.
+          </p>
+          {cart.length > 0 && (
+            <p className="text-xs text-gray-400 mb-6">
+              Products requested: {cart.length} item{cart.length > 1 ? "s" : ""} · Total ₹{cartTotal.toLocaleString("en-US")}
+            </p>
+          )}
+          <button onClick={handleClose}
+            className="w-full bg-[#D2252B] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-red-700 transition">
+            Done
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+          <div>
+            <h2 className="text-base font-bold text-gray-800">Start a Campaign</h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Step {step} of {STEPS.length} — {STEPS[step - 1].label}
+            </p>
+          </div>
+          <button onClick={handleClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
             <FiX size={18} />
           </button>
         </div>
 
-        {/* Toast - Show error but don't close modal */}
+        {/* Step indicators */}
+        <div className="flex items-center px-6 py-3 bg-gray-50 border-b border-gray-100 shrink-0">
+          {STEPS.map((s, i) => (
+            <div key={s.id} className="flex items-center flex-1 last:flex-none">
+              <div className="flex items-center gap-1.5">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition ${
+                  step > s.id ? "bg-green-500 text-white"
+                  : step === s.id ? "bg-[#D2252B] text-white"
+                  : "bg-gray-200 text-gray-400"
+                }`}>
+                  {step > s.id ? <FiCheck size={10} /> : s.id}
+                </div>
+                <span className={`text-[10px] font-medium hidden sm:block whitespace-nowrap ${
+                  step === s.id ? "text-gray-800" : "text-gray-400"
+                }`}>{s.label}</span>
+              </div>
+              {i < STEPS.length - 1 && (
+                <div className={`flex-1 h-0.5 mx-1.5 rounded ${step > s.id ? "bg-green-400" : "bg-gray-200"}`} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Toast */}
         {toast.msg && (
-          <div className={`mx-6 mt-4 px-4 py-2 rounded-xl text-sm text-center font-medium ${
+          <div className={`mx-6 mt-3 px-4 py-2 rounded-xl text-sm text-center font-medium shrink-0 ${
             toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
-          }`}>
-            {toast.msg}
-          </div>
+          }`}>{toast.msg}</div>
         )}
 
-        <div className="p-6 space-y-5">
-          {/* Title */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-              Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g., Clean Water for Everyone"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#D2252B] transition"
-            />
-          </div>
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto">
 
-          {/* Cause */}
-          <div>
-            <label className="block   text-xs font-semibold text-gray-600 mb-1.5">
-              Cause <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={form.causeId}
-              onChange={(e) => setForm({ ...form, causeId: e.target.value })}
-              className="w-full text-black border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#D2252B] transition"
-            >
-              <option value="">Select a cause</option>
-              {causes.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Location</label>
-            <input
-              type="text"
-              placeholder="e.g., Mumbai, India"
-              value={form.location}
-              onChange={(e) => setForm({ ...form, location: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#D2252B] transition"
-            />
-          </div>
-
-          {/* Goal Amount */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-              Goal Amount (₹) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              placeholder="e.g., 50000"
-              value={form.goalAmount}
-              onChange={(e) => setForm({ ...form, goalAmount: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#D2252B] transition"
-            />
-          </div>
-
-          {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-                Start Date <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                value={form.startDate}
-                onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#D2252B] transition"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1.5">End Date</label>
-              <input
-                type="date"
-                value={form.endDate}
-                onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#D2252B] transition"
-              />
-              <p className="text-[10px] text-gray-400 mt-1">Optional</p>
-            </div>
-          </div>
-
-          {/* Image Upload */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Cover Image</label>
-            <div className="flex items-center gap-4">
-              <div className="w-24 h-20 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                {imagePreview ? (
-                  <img src={imagePreview} alt="preview" className="w-full h-full object-cover" />
-                ) : (
-                  <FiUpload size={20} className="text-gray-400" />
-                )}
+          {/* ── STEP 1: Your Info ── */}
+          {step === 1 && (
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Full Name <span className="text-red-500">*</span></label>
+                <input type="text" placeholder="Your full name" value={step1.name}
+                  onChange={(e) => setStep1({ ...step1, name: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
               </div>
               <div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="text-sm text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#D2252B] file:text-white hover:file:bg-[#b91c22] cursor-pointer"
-                />
-                <p className="text-[10px] text-gray-400 mt-1">Recommended: 1200 × 600px</p>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email <span className="text-red-500">*</span></label>
+                <input type="email" placeholder="your@email.com" value={step1.email}
+                  onChange={(e) => setStep1({ ...step1, email: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Mobile <span className="text-red-500">*</span></label>
+                <input type="tel" placeholder="10-digit mobile number" maxLength={10} value={step1.mobile}
+                  onChange={(e) => setStep1({ ...step1, mobile: e.target.value.replace(/\D/g, "") })}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Cause <span className="text-red-500">*</span></label>
+                <select value={step1.causeId} onChange={(e) => setStep1({ ...step1, causeId: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] text-gray-700 transition">
+                  <option value="">Select a cause</option>
+                  {causes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Description */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Description</label>
-            <textarea
-              rows={5}
-              placeholder="Tell your story... Why this campaign? How will funds be used?"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#D2252B] resize-none transition"
-            />
-          </div>
+          {/* ── STEP 2: Campaign Details ── */}
+          {step === 2 && (
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Campaign Title <span className="text-red-500">*</span></label>
+                <input type="text" placeholder="e.g. Help children get food support" value={step2.title}
+                  onChange={(e) => setStep2({ ...step2, title: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Description</label>
+                <textarea rows={4} placeholder="Tell your story. Why this campaign? How will it help?" value={step2.description}
+                  onChange={(e) => setStep2({ ...step2, description: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] resize-none transition" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-2">Cover Image</label>
+                <div className="flex items-center gap-4">
+                  <div onClick={() => fileRef.current?.click()}
+                    className="w-20 h-16 rounded-xl overflow-hidden bg-gray-100 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition border-2 border-dashed border-gray-200 shrink-0">
+                    {imagePreview
+                      ? <img src={imagePreview} alt="preview" className="w-full h-full object-cover" />
+                      : <><FiUpload size={16} className="text-gray-400" /><span className="text-[9px] text-gray-400">Upload</span></>
+                    }
+                  </div>
+                  <div>
+                    <button onClick={() => fileRef.current?.click()}
+                      className="px-3 py-1.5 bg-[#D2252B] text-white text-xs font-semibold rounded-lg hover:bg-red-700 transition">
+                      {imagePreview ? "Change" : "Upload Image"}
+                    </button>
+                    {imageFile && (
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <span className="text-xs text-gray-500 truncate max-w-[120px]">{imageFile.name}</span>
+                        <button onClick={() => { setImageFile(null); setImagePreview(null); }}>
+                          <FiTrash2 size={11} className="text-red-400" />
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-[10px] text-gray-400 mt-0.5">JPG/PNG recommended</p>
+                    <input ref={fileRef} type="file" accept="image/*" className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); }
+                      }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 3: Beneficiary ── */}
+          {step === 3 && (
+            <div className="p-6 space-y-4">
+              <p className="text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
+                Who will directly benefit from this campaign?
+              </p>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Beneficiary Name <span className="text-red-500">*</span></label>
+                <input type="text" placeholder="e.g. Ramesh Patel" value={step3.beneficiaryName}
+                  onChange={(e) => setStep3({ ...step3, beneficiaryName: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Relation / Role <span className="text-red-500">*</span></label>
+                <input type="text" placeholder="e.g. NGO Head, Patient, Student" value={step3.beneficiaryRelation}
+                  onChange={(e) => setStep3({ ...step3, beneficiaryRelation: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Mobile <span className="text-red-500">*</span></label>
+                <input type="tel" placeholder="10-digit mobile" maxLength={10} value={step3.beneficiaryMobile}
+                  onChange={(e) => setStep3({ ...step3, beneficiaryMobile: e.target.value.replace(/\D/g, "") })}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">City</label>
+                  <input type="text" placeholder="e.g. Ahmedabad" value={step3.beneficiaryCity}
+                    onChange={(e) => setStep3({ ...step3, beneficiaryCity: e.target.value })}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">State</label>
+                  <input type="text" placeholder="e.g. Gujarat" value={step3.beneficiaryState}
+                    onChange={(e) => setStep3({ ...step3, beneficiaryState: e.target.value })}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 4: Products ── */}
+          {step === 4 && (
+            <div className="p-6 space-y-4">
+              <p className="text-xs text-gray-500">Select products needed for this campaign and set quantities.</p>
+
+              {/* Product dropdown + Add */}
+              <div className="flex gap-2">
+                <select value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)}
+                  className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] text-gray-700 transition">
+                  <option value="">
+                    {loadingProducts ? "Loading products..." : "Select a product"}
+                  </option>
+                  {products
+                    .filter((p) => !cart.find((c) => c.product.id === p.id))
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} — ₹{p.price.toLocaleString("en-US")}
+                      </option>
+                    ))
+                  }
+                </select>
+                <button onClick={addToCart} disabled={!selectedProductId}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shrink-0 ${
+                    selectedProductId ? "bg-[#D2252B] text-white hover:bg-red-700" : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  }`}>
+                  <FiPlus size={14} /> Add
+                </button>
+              </div>
+
+              {/* Cart items */}
+              {cart.length === 0 ? (
+                <div className="bg-gray-50 rounded-xl p-6 text-center text-sm text-gray-400 border-2 border-dashed border-gray-200">
+                  No products added yet. Select from the dropdown above.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {cart.map((item) => (
+                    <div key={item.product.id}
+                      className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 border border-gray-100">
+
+                      {/* Product image */}
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 shrink-0">
+                        {isValidUrl(item.product.image)
+                          ? <img src={item.product.image!} alt={item.product.name} className="w-full h-full object-cover" />
+                          : <div className="w-full h-full bg-gray-300" />
+                        }
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{item.product.name}</p>
+                        <p className="text-xs text-gray-400">₹{item.product.price.toLocaleString("en-US")} each</p>
+                      </div>
+
+                      {/* Quantity controls */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button onClick={() => updateQty(item.product.id, -1)}
+                          className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+                          <FiMinus size={12} />
+                        </button>
+                        <span className="w-8 text-center text-sm font-bold text-gray-800">{item.quantity}</span>
+                        <button onClick={() => updateQty(item.product.id, 1)}
+                          className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+                          <FiPlus size={12} />
+                        </button>
+                      </div>
+
+                      {/* Line total */}
+                      <div className="text-right shrink-0 w-20">
+                        <p className="text-sm font-bold text-gray-800">
+                          ₹{(item.product.price * item.quantity).toLocaleString("en-US")}
+                        </p>
+                        <button onClick={() => removeFromCart(item.product.id)}
+                          className="text-[10px] text-red-400 hover:text-red-600 transition">Remove</button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Total */}
+                  <div className="flex items-center justify-between bg-[#D2252B]/5 border border-[#D2252B]/20 rounded-xl px-4 py-3 mt-2">
+                    <span className="text-sm font-semibold text-gray-700">
+                      Total ({cart.reduce((s, i) => s + i.quantity, 0)} items)
+                    </span>
+                    <span className="text-base font-bold text-[#D2252B]">
+                      ₹{cartTotal.toLocaleString("en-US")}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── STEP 5: Review ── */}
+          {step === 5 && (
+            <div className="p-6 space-y-3">
+              <p className="text-xs text-gray-400">Review everything before submitting.</p>
+
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">Your Info</p>
+                <div className="grid grid-cols-2 gap-y-1 text-sm">
+                  <span className="text-gray-500">Name</span><span className="font-medium text-gray-800">{step1.name}</span>
+                  <span className="text-gray-500">Email</span><span className="font-medium text-gray-800 truncate">{step1.email}</span>
+                  <span className="text-gray-500">Mobile</span><span className="font-medium text-gray-800">{step1.mobile}</span>
+                  <span className="text-gray-500">Cause</span><span className="font-medium text-gray-800">{selectedCause?.name || "—"}</span>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">Campaign</p>
+                <div className="space-y-1 text-sm">
+                  <div className="flex gap-2"><span className="text-gray-500 shrink-0">Title</span><span className="font-medium text-gray-800">{step2.title}</span></div>
+                  {step2.description && <div className="flex gap-2"><span className="text-gray-500 shrink-0">Desc</span><span className="text-gray-700 line-clamp-2">{step2.description}</span></div>}
+                  {imageFile && <div className="flex gap-2"><span className="text-gray-500 shrink-0">Image</span><span className="font-medium text-gray-800 truncate">{imageFile.name}</span></div>}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">Beneficiary</p>
+                <div className="grid grid-cols-2 gap-y-1 text-sm">
+                  <span className="text-gray-500">Name</span><span className="font-medium text-gray-800">{step3.beneficiaryName}</span>
+                  <span className="text-gray-500">Role</span><span className="font-medium text-gray-800">{step3.beneficiaryRelation}</span>
+                  <span className="text-gray-500">Mobile</span><span className="font-medium text-gray-800">{step3.beneficiaryMobile}</span>
+                  <span className="text-gray-500">Location</span><span className="font-medium text-gray-800">{[step3.beneficiaryCity, step3.beneficiaryState].filter(Boolean).join(", ") || "—"}</span>
+                </div>
+              </div>
+
+              {cart.length > 0 && (
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">
+                    Products ({cart.length} item{cart.length > 1 ? "s" : ""})
+                  </p>
+                  <div className="space-y-1">
+                    {cart.map((item) => (
+                      <div key={item.product.id} className="flex justify-between text-sm">
+                        <span className="text-gray-600">{item.product.name} × {item.quantity}</span>
+                        <span className="font-medium text-gray-800">₹{(item.product.price * item.quantity).toLocaleString("en-US")}</span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between text-sm font-bold text-[#D2252B] pt-1 border-t border-gray-200 mt-1">
+                      <span>Total</span>
+                      <span>₹{cartTotal.toLocaleString("en-US")}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-xs text-yellow-700">
+                📋 Your campaign will be reviewed by our admin team before going live.
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-          <button
-            onClick={onClose}
-            className="px-5 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium transition"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className={`px-6 py-2 rounded-xl text-sm font-semibold transition ${
-              loading
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-[#D2252B] hover:bg-[#b91c22] text-white"
-            }`}
-          >
-            {loading ? "Submitting..." : "Submit for Review"}
-          </button>
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50 shrink-0">
+          {step > 1 ? (
+            <button onClick={() => setStep(step - 1)} disabled={loading}
+              className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium border border-gray-200 rounded-xl hover:bg-white transition">
+              ← Back
+            </button>
+          ) : (
+            <button onClick={handleClose} className="px-4 py-2 text-sm text-gray-500 font-medium transition">Cancel</button>
+          )}
+
+          {step < 5 ? (
+            <button onClick={handleNext} disabled={loading}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition ${
+                loading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#D2252B] hover:bg-red-700 text-white"
+              }`}>
+              {loading ? "Please wait..." : "Continue"}
+              {!loading && <FiChevronRight size={15} />}
+            </button>
+          ) : (
+            <button onClick={handleSubmit} disabled={loading}
+              className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition ${
+                loading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#D2252B] hover:bg-red-700 text-white"
+              }`}>
+              {loading ? "Submitting..." : "🚀 Submit Campaign"}
+            </button>
+          )}
         </div>
       </div>
     </div>
