@@ -5,12 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 
+// ✅ IMPORTANT: prevent build-time fetching
+export const dynamic = "force-dynamic";
+
 export default async function BlogDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>; // ✅ Next.js 15
+  params: { id: string }; // ✅ FIXED (removed Promise)
 }) {
-  const { id } = await params;
+  const { id } = params;
 
   let blog: Blog | null = null;
   let related: Blog[] = [];
@@ -33,12 +36,12 @@ export default async function BlogDetailPage({
     );
   }
 
-  // Fetch related blogs (exclude current)
+  // Fetch related blogs
   try {
     const res = await getBlogs();
-    related = res.data.filter((b) => b.id !== blog!.id).slice(0, 3);
+    related = res.data.filter((b) => b.id !== blog.id).slice(0, 3);
   } catch {
-    // no related blogs is fine
+    // ignore errors
   }
 
   return (
@@ -80,19 +83,23 @@ export default async function BlogDetailPage({
             <FaArrowLeft size={12} /> Back to Blog
           </Link>
           <div className="flex items-center gap-4 text-sm text-gray-400">
-            {blog.author && <span>By <span className="font-medium text-gray-600">{blog.author}</span></span>}
+            {blog.author && (
+              <span>
+                By <span className="font-medium text-gray-600">{blog.author}</span>
+              </span>
+            )}
             <span>{new Date(blog.createdAt).toDateString()}</span>
           </div>
         </div>
 
-        {/* Article content */}
+        {/* Article */}
         <div className="bg-white rounded-2xl shadow-sm p-8 md:p-12">
           <div className="prose prose-gray max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
             {blog.content}
           </div>
         </div>
 
-        {/* Tags / Category */}
+        {/* Category */}
         {blog.category && (
           <div className="mt-6 flex items-center gap-2">
             <span className="text-sm text-gray-500">Category:</span>
@@ -125,4 +132,4 @@ export default async function BlogDetailPage({
       )}
     </div>
   );
-}           
+}
