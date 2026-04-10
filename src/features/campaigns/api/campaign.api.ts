@@ -1,6 +1,6 @@
 import { Campaign, CampaignResponse} from "../types/campaign.types"
 
-const BASE_URL = process.env.Next_public_API_BASE_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 
 export const getCampaigns = async (): Promise<CampaignResponse> => {
