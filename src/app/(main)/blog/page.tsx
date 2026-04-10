@@ -2,6 +2,9 @@ import BlogCard from "@/components/ui/BlogCard";
 import { getBlogs } from "@/features/blog/api/blog.api";
 import { Blog } from "@/features/blog/types/blog.types";
 
+// ✅ IMPORTANT: prevent build-time fetching
+export const dynamic = "force-dynamic";
+
 export default async function BlogPage() {
   let blogs: Blog[] = [];
 
