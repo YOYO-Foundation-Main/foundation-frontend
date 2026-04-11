@@ -191,10 +191,14 @@ export default function Navbar() {
                           <FiPlus size={15} />
                           Create Campaign
                         </button>
-                        <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
-                          <FiUser size={15} />
-                          My Profile
-                        </button>
+                        <Link
+  href="/profile"
+  onClick={() => setProfileOpen(false)}
+  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition"
+>
+  <FiUser size={15} />
+  My Profile
+</Link>
                         <button
                           onClick={() => { logout(); setProfileOpen(false); }}
                           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition font-medium"

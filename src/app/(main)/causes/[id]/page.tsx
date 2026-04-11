@@ -37,7 +37,7 @@ export default async function CauseDetailsPage({
     <div className="bg-[#F5F5F5]">
 
       {/* HERO */}
-      <div className="text-center py-16 border-b border-gray-200">
+      <div className="text-center py-16 border-b border-gray-200 mt-15">
         <p className="text-sm text-gray-500 mb-4">Home &gt; Causes</p>
         <h1 className="text-4xl font-bold text-black mb-4">{cause.name}</h1>
         <p className="text-gray-500 max-w-xl mx-auto text-sm">{cause.description}</p>
@@ -50,7 +50,7 @@ export default async function CauseDetailsPage({
           {/* LEFT */}
           <div className="md:col-span-2">
 
-            <h2 className="text-2xl font-semibold mb-6">{cause.name}</h2>
+            <h2 className="text-2xl text-black font-semibold mb-6">{cause.name}</h2>
 
             <Image
               src={safeImage}
