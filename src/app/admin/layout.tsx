@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   FiGrid, FiHeart, FiFlag, FiCalendar,
   FiFileText, FiUsers, FiLogOut, FiChevronDown,
-  FiPackage, FiDollarSign, FiMenu, FiX,
+  FiPackage , FiDollarSign, FiMenu, FiX, FiShield,
 } from "react-icons/fi";
 import { useAdminStore } from "@/features/admin/store/admin.store";
 
@@ -24,6 +24,7 @@ const NAV = [
   { label: "Blogs", href: "/admin/blogs", icon: FiFileText },
   { label: "Users", href: "/admin/users", icon: FiUsers },
   { label: "Products", href: "/admin/products", icon: FiPackage },
+  { label: "KYC", href: "/admin/kyc", icon: FiShield },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

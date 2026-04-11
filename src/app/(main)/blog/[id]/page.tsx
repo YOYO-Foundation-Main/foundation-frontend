@@ -4,16 +4,15 @@ import BlogCard from "@/components/ui/BlogCard";
 import Image from "next/image";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
-
-// ✅ IMPORTANT: prevent build-time fetching
+ 
 export const dynamic = "force-dynamic";
 
 export default async function BlogDetailPage({
   params,
 }: {
-  params: { id: string }; // ✅ FIXED (removed Promise)
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
 
   let blog: Blog | null = null;
   let related: Blog[] = [];
@@ -25,7 +24,7 @@ export default async function BlogDetailPage({
       <div className="bg-[#F5F5F5] pt-[72px] min-h-screen flex items-center justify-center">
         <p className="text-gray-500">Failed to load blog post.</p>
       </div>
-    );
+    ); 
   }
 
   if (!blog) {

@@ -284,3 +284,53 @@ export const adminDeleteProduct = async (id: number) => {
   if (!res.ok) throw new Error("Failed to delete product");
   return res.json();
 };
+
+
+
+// ================= KYC (paste these at the bottom of admin.api.ts) =================
+
+// GET /api/kyc/admin — all user/campaigner KYC submissions
+export const adminGetUserKyc = async () => {
+  const res = await fetch(`${BASE_URL}/api/kyc/admin`, {
+    headers: authHeaders(),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to fetch user KYC");
+  return res.json();
+};
+
+// PUT /api/kyc/admin/:id — approve or reject a user KYC
+// body: { status: "APPROVED" | "REJECTED", remarks?: string }
+export const adminUpdateUserKyc = async (id: number, status: string, remarks?: string) => {
+  const res = await fetch(`${BASE_URL}/api/kyc/admin/${id}`, {
+    method: "PUT",
+    headers: authHeaders(),
+    body: JSON.stringify({ status, ...(remarks ? { remarks } : {}) }),
+  });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Failed to update KYC");
+  return result;
+};
+
+// GET /api/campaign-kyc/admin — all campaign/beneficiary KYC submissions
+export const adminGetCampaignKyc = async () => {
+  const res = await fetch(`${BASE_URL}/api/campaign-kyc/admin`, {
+    headers: authHeaders(),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to fetch campaign KYC");
+  return res.json();
+};
+
+// PUT /api/campaign-kyc/admin/:id — approve or reject a campaign KYC
+// body: { status: "APPROVED" | "REJECTED", remarks?: string }
+export const adminUpdateCampaignKyc = async (id: number, status: string, remarks?: string) => {
+  const res = await fetch(`${BASE_URL}/api/campaign-kyc/admin/${id}`, {
+    method: "PUT",
+    headers: authHeaders(),
+    body: JSON.stringify({ status, ...(remarks ? { remarks } : {}) }),
+  });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Failed to update campaign KYC");
+  return result;
+};
