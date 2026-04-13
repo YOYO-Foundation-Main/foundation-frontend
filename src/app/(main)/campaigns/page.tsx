@@ -6,7 +6,7 @@ import EventsSection from "@/components/campaigns/EventsSection";
 import GallerySection from "@/components/campaigns/GallerySection";
 import ImpactVideoSection from "@/components/campaigns/ImpactVideoSection";
 import BlogSection from "@/components/common/BlogSection";
-
+export const dynamic = 'force-dynamic';
 export default function CampaignsPage() {
   return (
 <div className="bg-[#F5F5F5]">
