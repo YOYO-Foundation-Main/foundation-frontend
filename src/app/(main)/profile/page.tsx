@@ -1,16 +1,21 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FiUser, FiHeart, FiArrowLeft, FiPhone, FiMail, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
+import {
+  FiUser, FiHeart, FiArrowLeft, FiPhone, FiMail,
+  FiCheckCircle, FiClock, FiAlertCircle, FiCamera,
+} from "react-icons/fi";
 import { HiOutlineCurrencyRupee } from "react-icons/hi2";
 import { MdCampaign } from "react-icons/md";
-import { getMyProfile, getMyFundraisers } from "@/features/auth/api/user.api";
+import { getMyProfile, getMyFundraisers, uploadProfileImage } from "@/features/auth/api/user.api";
 import { useAuthStore } from "@/features/auth/store/auth.store";
-// import KYCModal from "@/components/profile/KYCModal";
 import KYCModal from "./KYCModal";
 
-interface UserProfile { id: number; name: string; email: string; mobile: string; }
+interface UserProfile {
+  id: number; name: string; email: string; mobile: string;
+  profileImage?: string | null;
+}
 interface UserStats { totalDonated: number; totalDonations: number; livesImpacted: number; profileCompletion: number; }
 interface FundraiserCampaign { id: number; title: string; description: string; image: string | null; goalAmount: number; raisedAmount: number; progress: number; status: string; createdAt: string; }
 interface FundraiserSummary { totalCampaigns: number; totalRaised: number; totalGoal: number; }
@@ -62,6 +67,11 @@ export default function ProfilePage() {
   const [mounted, setMounted] = useState(false);
   const [showKyc, setShowKyc] = useState(false);
 
+  // Profile image upload
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoToast, setPhotoToast] = useState({ msg: "", type: "" });
+  const photoRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => { setMounted(true); }, []);
 
   const loadData = async () => {
@@ -89,6 +99,27 @@ export default function ProfilePage() {
     loadData();
   }, [mounted]);
 
+  // ── Profile image upload handler ──────────────────────────────────────────
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingPhoto(true);
+      const result = await uploadProfileImage(file);
+      // Update profile with new image
+      setProfile((prev) => prev ? { ...prev, profileImage: result?.data?.profileImage } : prev);
+      setPhotoToast({ msg: "✅ Profile photo updated!", type: "success" });
+    } catch (err: any) {
+      setPhotoToast({ msg: err.message || "Failed to upload photo", type: "error" });
+    } finally {
+      setUploadingPhoto(false);
+      setTimeout(() => setPhotoToast({ msg: "", type: "" }), 3000);
+      // Reset file input
+      if (photoRef.current) photoRef.current.value = "";
+    }
+  };
+
   if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-[#F5F5F5] pt-[72px] flex items-center justify-center">
@@ -104,26 +135,28 @@ export default function ProfilePage() {
   const displayName = profile?.name || user?.name || "User";
   const displayEmail = profile?.email || user?.email || "";
   const displayMobile = profile?.mobile || "";
-
-  // Campaign options for KYC modal (beneficiary KYC)
+  const profileImageUrl = profile?.profileImage;
   const campaignOptions = campaigns.map((c) => ({ id: c.id, title: c.title }));
 
   return (
     <>
-      {/* ✅ KYC Modal */}
       <KYCModal
         isOpen={showKyc}
         onClose={() => setShowKyc(false)}
         campaigns={campaignOptions}
-        onSuccess={() => {
-          setShowKyc(false);
-          loadData(); // refresh profile to show updated KYC status
-        }}
+        onSuccess={() => { setShowKyc(false); loadData(); }}
       />
 
-      <div className="min-h-screen bg-[#F5F5F5] pt-[72px]">
+      {/* Photo upload toast */}
+      {photoToast.msg && (
+        <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-xl text-sm font-medium shadow-lg ${
+          photoToast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+        }`}>
+          {photoToast.msg}
+        </div>
+      )}
 
-        {/* Header */}
+      <div className="min-h-screen bg-[#F5F5F5] pt-[72px]">
         <div className="bg-white border-b border-gray-100">
           <div className="max-w-4xl mx-auto px-6 py-8">
 
@@ -132,9 +165,47 @@ export default function ProfilePage() {
             </Link>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              <div className="w-20 h-20 rounded-full bg-[#D2252B] flex items-center justify-center text-white text-3xl font-bold shadow-lg shrink-0">
-                {firstLetter}
+
+              {/* ── Clickable Avatar ── */}
+              <div className="relative shrink-0 group">
+                <div
+                  onClick={() => !uploadingPhoto && photoRef.current?.click()}
+                  className="w-20 h-20 rounded-full overflow-hidden bg-[#D2252B] flex items-center justify-center text-white text-3xl font-bold shadow-lg cursor-pointer"
+                >
+                  {isValidUrl(profileImageUrl) ? (
+                    <img src={profileImageUrl!} alt={displayName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{firstLetter}</span>
+                  )}
+
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                    {uploadingPhoto ? (
+                      <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    ) : (
+                      <FiCamera size={20} className="text-white" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Small camera badge */}
+                <div
+                  onClick={() => !uploadingPhoto && photoRef.current?.click()}
+                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border-2 border-gray-100 shadow flex items-center justify-center cursor-pointer hover:bg-gray-50 transition"
+                >
+                  <FiCamera size={13} className="text-gray-600" />
+                </div>
+
+                {/* Hidden file input */}
+                <input
+                  ref={photoRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoChange}
+                />
               </div>
+
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-3 mb-1">
                   <h1 className="text-2xl font-bold text-gray-900">{displayName}</h1>
@@ -144,6 +215,9 @@ export default function ProfilePage() {
                   {displayEmail && <div className="flex items-center gap-1.5"><FiMail size={13} /> {displayEmail}</div>}
                   {displayMobile && <div className="flex items-center gap-1.5"><FiPhone size={13} /> {displayMobile}</div>}
                 </div>
+                <p className="text-[11px] text-gray-400 mt-2">
+                  Click the avatar to update your profile photo
+                </p>
                 {stats && (
                   <div className="mt-3 max-w-xs">
                     <div className="flex justify-between text-xs text-gray-400 mb-1">
@@ -158,13 +232,14 @@ export default function ProfilePage() {
               </div>
             </div>
 
+            {/* Stats */}
             {stats && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8">
                 {[
-                  { label: "Total Donated", value: `₹${stats.totalDonated.toLocaleString("en-US")}`, color: "text-green-500", icon: <HiOutlineCurrencyRupee size={18} /> },
-                  { label: "Total Donations", value: stats.totalDonations, color: "text-pink-500", icon: <FiHeart size={16} /> },
-                  { label: "Lives Impacted", value: stats.livesImpacted, color: "text-blue-500", icon: <FiUser size={16} /> },
-                  { label: "My Campaigns", value: summary?.totalCampaigns ?? 0, color: "text-purple-500", icon: <MdCampaign size={18} /> },
+                  { label: "Total Donated",  value: `₹${stats.totalDonated.toLocaleString("en-US")}`, color: "text-green-500",  icon: <HiOutlineCurrencyRupee size={18} /> },
+                  { label: "Total Donations", value: stats.totalDonations, color: "text-pink-500",   icon: <FiHeart size={16} /> },
+                  { label: "Lives Impacted",  value: stats.livesImpacted,  color: "text-blue-500",   icon: <FiUser size={16} /> },
+                  { label: "My Campaigns",    value: summary?.totalCampaigns ?? 0, color: "text-purple-500", icon: <MdCampaign size={18} /> },
                 ].map(({ label, value, color, icon }) => (
                   <div key={label} className="bg-gray-50 rounded-xl p-4 border border-gray-100 text-center">
                     <div className={`flex justify-center mb-1 ${color}`}>{icon}</div>
@@ -222,7 +297,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* KYC Banner — shown when NOT verified */}
               {(kycStatus === "NOT_SUBMITTED" || kycStatus === "REJECTED") && (
                 <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5 flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
@@ -238,18 +312,14 @@ export default function ProfilePage() {
                         : "Submit your identity documents to unlock full campaign features and increase donor trust."
                       }
                     </p>
-                    {/* ✅ This button opens the KYCModal */}
-                    <button
-                      onClick={() => setShowKyc(true)}
-                      className="mt-3 px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-lg transition"
-                    >
+                    <button onClick={() => setShowKyc(true)}
+                      className="mt-3 px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-lg transition">
                       {kycStatus === "REJECTED" ? "Resubmit KYC" : "Submit KYC"}
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* KYC Pending info */}
               {kycStatus === "PENDING" && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
@@ -257,7 +327,7 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-yellow-700 mb-1">KYC Under Review</p>
-                    <p className="text-xs text-yellow-600">Your documents have been submitted and are being reviewed. This usually takes 24–48 hours.</p>
+                    <p className="text-xs text-yellow-600">Your documents are being reviewed. This usually takes 24–48 hours.</p>
                   </div>
                 </div>
               )}
@@ -271,8 +341,8 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-3 gap-4">
                   {[
                     { label: "Total Campaigns", value: summary.totalCampaigns },
-                    { label: "Total Raised", value: `₹${summary.totalRaised.toLocaleString("en-US")}` },
-                    { label: "Total Goal", value: `₹${summary.totalGoal.toLocaleString("en-US")}` },
+                    { label: "Total Raised",    value: `₹${summary.totalRaised.toLocaleString("en-US")}` },
+                    { label: "Total Goal",      value: `₹${summary.totalGoal.toLocaleString("en-US")}` },
                   ].map(({ label, value }) => (
                     <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
                       <p className="text-xl font-bold text-gray-800">{value}</p>
@@ -307,9 +377,8 @@ export default function ProfilePage() {
                             <h3 className="text-sm font-bold text-gray-800 line-clamp-1">{c.title}</h3>
                             <div className="flex items-center gap-2 shrink-0">
                               <StatusBadge status={c.status} />
-                              {/* Campaign KYC button */}
                               <button
-                                onClick={() => { setCampaigns(campaigns); setShowKyc(true); setTab("fundraisers"); }}
+                                onClick={() => setShowKyc(true)}
                                 className="text-[10px] text-orange-500 hover:text-orange-700 border border-orange-200 bg-orange-50 px-2 py-0.5 rounded-full transition font-medium"
                               >
                                 KYC

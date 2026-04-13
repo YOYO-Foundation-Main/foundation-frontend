@@ -1,8 +1,5 @@
-// src/features/auth/api/user.api.ts
-
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-// Helper to get token from Zustand store
 const getUserToken = (): string | null => {
   try {
     const stored = localStorage.getItem("auth-storage");
@@ -15,110 +12,72 @@ const getUserToken = (): string | null => {
   }
 };
 
-// Helper for authenticated fetch requests
 const authFetch = async (url: string, options: RequestInit = {}) => {
   const token = getUserToken();
-  
-  if (!token) {
-    throw new Error("No authentication token found");
-  }
+  if (!token) throw new Error("No authentication token found");
 
-  const response = await fetch(url, {
+  const isFormData = options.body instanceof FormData;
+
+  return fetch(url, {
     ...options,
     headers: {
-      ...options.headers,
-      "Authorization": `Bearer ${token}`,
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...(options.headers || {}),
+      Authorization: `Bearer ${token}`,
     },
   });
-
-  return response;
 };
 
 // GET /api/user/my-profile
 export const getMyProfile = async () => {
-  try {
-    const res = await authFetch(`${BASE_URL}/api/user/my-profile`, {
-      cache: "no-store",
-    });
-    
-    const result = await res.json();
-    
-    if (!res.ok) {
-      throw new Error(result.message || "Failed to fetch profile");
-    }
-    
-    return result;
-  } catch (error: any) {
-    console.error("❌ getMyProfile error:", error.message);
-    throw error;
-  }
+  const res = await authFetch(`${BASE_URL}/api/user/my-profile`, { cache: "no-store" });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Failed to fetch profile");
+  return result;
 };
 
 // GET /api/user/my-fundraiser
 export const getMyFundraisers = async () => {
-  try {
-    const res = await authFetch(`${BASE_URL}/api/user/my-fundraiser`, {
-      cache: "no-store",
-    });
-    
-    const result = await res.json();
-    
-    if (!res.ok) {
-      throw new Error(result.message || "Failed to fetch fundraisers");
-    }
-    
-    return result;
-  } catch (error: any) {
-    console.error("❌ getMyFundraisers error:", error.message);
-    throw error;
-  }
+  const res = await authFetch(`${BASE_URL}/api/user/my-fundraiser`, { cache: "no-store" });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Failed to fetch fundraisers");
+  return result;
 };
 
-// ── KYC: Upload user/campaigner document ─────────────────────────────────────
+// POST /api/user/upload-profile-image
+// FormData: { image: File }
+// Returns: { success, message, data: { id, name, email, mobile, profileImage } }
+export const uploadProfileImage = async (file: File) => {
+  const fd = new FormData();
+
+  // 🔥 FIXED KEY
+  fd.append("file", file);
+
+  const res = await authFetch(`${BASE_URL}/api/user/upload-profile-image`, {
+    method: "POST",
+    body: fd,
+  });
+
+  const result = await res.json();
+  console.log("📡 [PROFILE IMAGE]:", res.status, result);
+
+  if (!res.ok) throw new Error(result.message || "Failed to upload profile image");
+
+  return result;
+};
+
 // POST /api/kyc/uploading
-// FormData: { documentType, document, type: "CAMPAIGNER" }
 export const uploadUserKyc = async (data: FormData) => {
-  try {
-    const res = await authFetch(`${BASE_URL}/api/kyc/uploading`, {
-      method: "POST",
-      body: data,
-      // Don't set Content-Type - let browser set it with boundary for FormData
-    });
-    
-    const result = await res.json();
-    console.log("📡 [USER KYC]:", res.status, result);
-    
-    if (!res.ok) {
-      throw new Error(result.message || "Failed to upload KYC");
-    }
-    
-    return result;
-  } catch (error: any) {
-    console.error("❌ uploadUserKyc error:", error.message);
-    throw error;
-  }
+  const res = await authFetch(`${BASE_URL}/api/kyc/uploading`, { method: "POST", body: data });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Failed to upload KYC");
+  return result;
 };
 
-// ── KYC: Upload beneficiary document for a campaign ──────────────────────────
 // POST /api/campaign-kyc/:campaignId
-// FormData: { document, documentType, type: "BENEFICIARY" }
 export const uploadCampaignKyc = async (campaignId: number, data: FormData) => {
-  try {
-    const res = await authFetch(`${BASE_URL}/api/campaign-kyc/${campaignId}`, {
-      method: "POST",
-      body: data,
-    });
-    
-    const result = await res.json();
-    console.log("📡 [CAMPAIGN KYC]:", res.status, result);
-    
-    if (!res.ok) {
-      throw new Error(result.message || "Failed to upload campaign KYC");
-    }
-    
-    return result;
-  } catch (error: any) {
-    console.error("❌ uploadCampaignKyc error:", error.message);
-    throw error;
-  }
-};  
+  const res = await authFetch(`${BASE_URL}/api/campaign-kyc/${campaignId}`, { method: "POST", body: data });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Failed to upload campaign KYC");
+  return result;
+};
