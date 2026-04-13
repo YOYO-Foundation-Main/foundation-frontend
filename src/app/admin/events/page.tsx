@@ -8,6 +8,7 @@ import {
 import CreateEventModal from "@/app/admin/CreateEventModal";
 import EditEventModal from "@/app/admin/EditEventModal";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
+export const dynamic = "force-dynamic";
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<any[]>([]);

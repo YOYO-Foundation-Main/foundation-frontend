@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import { getCampaigns } from "@/features/campaigns/api/campaign.api";
 import { Campaign } from "@/features/campaigns/types/campaign.types";
