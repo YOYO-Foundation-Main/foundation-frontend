@@ -5,12 +5,16 @@ type User = {
   id: number | null;
   name: string;
   email: string;
+  profileImage?: string | null;
 };
 
 type AuthState = {
   user: User | null;
   token: string | null;
+
+  // actions
   setUser: (user: User, token: string) => void;
+  updateUser: (data: Partial<User>) => void; // ✅ NEW (important)
   logout: () => void;
 };
 
@@ -20,9 +24,9 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
 
-      // ✅ Save user + token in Zustand persist (auto saves to localStorage as "auth-storage")
+      // ✅ Set full user (login / initial load)
       setUser: (user, token) => {
-        console.log("🧠 setUser called:", user, token?.slice(0, 20));
+        console.log("🧠 setUser:", user);
 
         // Save cookie for middleware
         if (typeof document !== "undefined") {
@@ -32,16 +36,21 @@ export const useAuthStore = create<AuthState>()(
         set({ user, token });
       },
 
-      // ✅ On logout — clear everything
-      logout: () => {
-        console.log("🚪 logout called");
+      // ✅ Update only part of user (PROFILE IMAGE FIX 🔥)
+      updateUser: (data) => {
+        set((state) => ({
+          user: state.user ? { ...state.user, ...data } : state.user,
+        }));
+      },
 
-        // Remove cookie
+      // ✅ Logout
+      logout: () => {
+        console.log("🚪 logout");
+
         if (typeof document !== "undefined") {
           document.cookie = "token=; path=/; max-age=0";
         }
 
-        // Remove old standalone token key if it exists
         if (typeof localStorage !== "undefined") {
           localStorage.removeItem("token");
         }
@@ -50,7 +59,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "auth-storage", // ← key in localStorage
+      name: "auth-storage",
       partialize: (state) => ({
         user: state.user,
         token: state.token,
