@@ -423,96 +423,165 @@ export default function CreateCampaignUserModal({ isOpen, onClose }: Props) {
           )}
 
           {/* ── STEP 4: Products ── */}
-          {step === 4 && (
-            <div className="p-6 space-y-4">
-              <p className="text-xs text-gray-500">Select products needed for this campaign and set quantities.</p>
+          {/* ── STEP 4: Products ── */}
+{step === 4 && (
+  <div className="p-6 space-y-4">
+    <p className="text-xs text-gray-500">Select products needed for this campaign and set quantities.</p>
 
-              {/* Product dropdown + Add */}
-              <div className="flex gap-2">
-                <select value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)}
-                  className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] text-gray-700 transition">
-                  <option value="">
-                    {loadingProducts ? "Loading products..." : "Select a product"}
-                  </option>
-                  {products
-                    .filter((p) => !cart.find((c) => c.product.id === p.id))
-                    .map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} — ₹{p.price.toLocaleString("en-US")}
-                      </option>
-                    ))
+    {/* Product selection grid with images */}
+    <div className="space-y-3">
+      <label className="block text-xs font-semibold text-gray-600 mb-1.5">Available Products</label>
+      
+      {loadingProducts ? (
+        <div className="text-center py-8 text-gray-400">Loading products...</div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto p-1">
+          {products
+            .filter((p) => !cart.find((c) => c.product.id === p.id))
+            .map((product) => (
+              <div
+                key={product.id}
+                onClick={() => {
+                  setSelectedProductId(String(product.id));
+                  // Auto-add to cart when clicked
+                  const existing = cart.find((i) => i.product.id === product.id);
+                  if (existing) {
+                    setCart(cart.map((i) => 
+                      i.product.id === product.id 
+                        ? { ...i, quantity: i.quantity + 1 } 
+                        : i
+                    ));
+                  } else {
+                    setCart([...cart, { product, quantity: 1 }]);
                   }
-                </select>
-                <button onClick={addToCart} disabled={!selectedProductId}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shrink-0 ${
-                    selectedProductId ? "bg-[#D2252B] text-white hover:bg-red-700" : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  }`}>
-                  <FiPlus size={14} /> Add
+                  setSelectedProductId("");
+                }}
+                className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200 cursor-pointer hover:border-[#D2252B] hover:bg-red-50 transition group"
+              >
+                {/* Product Image */}
+                <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 shrink-0">
+                  {isValidUrl(product.image) ? (
+                    <img 
+                      src={product.image!} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
+                      <span className="text-[10px] text-gray-500">No img</span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Product Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-800 truncate">{product.name}</p>
+                  <p className="text-xs font-bold text-[#D2252B]">₹{product.price.toLocaleString("en-US")}</p>
+                </div>
+                
+                {/* Add button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const existing = cart.find((i) => i.product.id === product.id);
+                    if (existing) {
+                      setCart(cart.map((i) => 
+                        i.product.id === product.id 
+                          ? { ...i, quantity: i.quantity + 1 } 
+                          : i
+                      ));
+                    } else {
+                      setCart([...cart, { product, quantity: 1 }]);
+                    }
+                  }}
+                  className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-[#D2252B] hover:text-white hover:border-[#D2252B] transition shrink-0"
+                >
+                  <FiPlus size={14} />
                 </button>
               </div>
+            ))}
+        </div>
+      )}
+      
+      {!loadingProducts && products.filter((p) => !cart.find((c) => c.product.id === p.id)).length === 0 && (
+        <div className="text-center py-6 text-gray-400 text-sm bg-gray-50 rounded-xl border border-dashed">
+          {cart.length > 0 ? "All products added to cart ✓" : "No products available"}
+        </div>
+      )}
+    </div>
 
-              {/* Cart items */}
-              {cart.length === 0 ? (
-                <div className="bg-gray-50 rounded-xl p-6 text-center text-sm text-gray-400 border-2 border-dashed border-gray-200">
-                  No products added yet. Select from the dropdown above.
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {cart.map((item) => (
-                    <div key={item.product.id}
-                      className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 border border-gray-100">
+    {/* Cart items */}
+    {cart.length === 0 ? (
+      <div className="bg-gray-50 rounded-xl p-6 text-center text-sm text-gray-400 border-2 border-dashed border-gray-200">
+        No products added yet. Click on any product above to add.
+      </div>
+    ) : (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-semibold text-gray-600">Your Cart ({cart.length} items)</label>
+          <button
+            onClick={() => setCart([])}
+            className="text-[10px] text-red-400 hover:text-red-600 transition"
+          >
+            Clear all
+          </button>
+        </div>
+        
+        {cart.map((item) => (
+          <div key={item.product.id}
+            className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 border border-gray-100">
 
-                      {/* Product image */}
-                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 shrink-0">
-                        {isValidUrl(item.product.image)
-                          ? <img src={item.product.image!} alt={item.product.name} className="w-full h-full object-cover" />
-                          : <div className="w-full h-full bg-gray-300" />
-                        }
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-800 truncate">{item.product.name}</p>
-                        <p className="text-xs text-gray-400">₹{item.product.price.toLocaleString("en-US")} each</p>
-                      </div>
-
-                      {/* Quantity controls */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={() => updateQty(item.product.id, -1)}
-                          className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
-                          <FiMinus size={12} />
-                        </button>
-                        <span className="w-8 text-center text-sm font-bold text-gray-800">{item.quantity}</span>
-                        <button onClick={() => updateQty(item.product.id, 1)}
-                          className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
-                          <FiPlus size={12} />
-                        </button>
-                      </div>
-
-                      {/* Line total */}
-                      <div className="text-right shrink-0 w-20">
-                        <p className="text-sm font-bold text-gray-800">
-                          ₹{(item.product.price * item.quantity).toLocaleString("en-US")}
-                        </p>
-                        <button onClick={() => removeFromCart(item.product.id)}
-                          className="text-[10px] text-red-400 hover:text-red-600 transition">Remove</button>
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Total */}
-                  <div className="flex items-center justify-between bg-[#D2252B]/5 border border-[#D2252B]/20 rounded-xl px-4 py-3 mt-2">
-                    <span className="text-sm font-semibold text-gray-700">
-                      Total ({cart.reduce((s, i) => s + i.quantity, 0)} items)
-                    </span>
-                    <span className="text-base font-bold text-[#D2252B]">
-                      ₹{cartTotal.toLocaleString("en-US")}
-                    </span>
-                  </div>
-                </div>
-              )}
+            {/* Product image */}
+            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 shrink-0">
+              {isValidUrl(item.product.image)
+                ? <img src={item.product.image!} alt={item.product.name} className="w-full h-full object-cover" />
+                : <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400" />
+              }
             </div>
-          )}
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-800 truncate">{item.product.name}</p>
+              <p className="text-xs text-gray-400">₹{item.product.price.toLocaleString("en-US")} each</p>
+            </div>
+
+            {/* Quantity controls */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button onClick={() => updateQty(item.product.id, -1)}
+                className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+                <FiMinus size={12} />
+              </button>
+              <span className="w-8 text-center text-sm font-bold text-gray-800">{item.quantity}</span>
+              <button onClick={() => updateQty(item.product.id, 1)}
+                className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+                <FiPlus size={12} />
+              </button>
+            </div>
+
+            {/* Line total */}
+            <div className="text-right shrink-0 w-20">
+              <p className="text-sm font-bold text-gray-800">
+                ₹{(item.product.price * item.quantity).toLocaleString("en-US")}
+              </p>
+              <button onClick={() => removeFromCart(item.product.id)}
+                className="text-[10px] text-red-400 hover:text-red-600 transition">Remove</button>
+            </div>
+          </div>
+        ))}
+
+        {/* Total */}
+        <div className="flex items-center justify-between bg-[#D2252B]/5 border border-[#D2252B]/20 rounded-xl px-4 py-3 mt-2">
+          <span className="text-sm font-semibold text-gray-700">
+            Total ({cart.reduce((s, i) => s + i.quantity, 0)} items)
+          </span>
+          <span className="text-base font-bold text-[#D2252B]">
+            ₹{cartTotal.toLocaleString("en-US")}
+          </span>
+        </div>
+      </div>
+    )}
+  </div>
+)}
 
           {/* ── STEP 5: Review ── */}
           {step === 5 && (
