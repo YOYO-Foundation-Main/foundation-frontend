@@ -12,16 +12,17 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
+/* ❌ REMOVE this dark mode override - it's causing issues */
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #F5F5F5; /* ✅ Match your app's background color */
+  color: #171717;
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -40,7 +41,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* ✅ INPUT FIX (VERY IMPORTANT) */
+/* ✅ INPUT FIX - Don't force ALL inputs, just use a class */
 .input {
   @apply w-full border border-gray-300 rounded-md px-4 py-3 text-sm 
   bg-white text-black placeholder-gray-500 
@@ -48,7 +49,8 @@ html {
   focus:border-[#D2252B] transition;
 }
 
-/* ✅ REMOVE BLUR / FADE ISSUE */
+/* ✅ REMOVE the global overrides - they're breaking your design */
+/* DELETE these:
 input,
 textarea {
   opacity: 1 !important;
@@ -57,9 +59,9 @@ textarea {
   background-color: #fff !important;
 }
 
-/* ✅ PLACEHOLDER FIX */
 input::placeholder,
 textarea::placeholder {
   color: #9ca3af;
   opacity: 1;
 }
+*/

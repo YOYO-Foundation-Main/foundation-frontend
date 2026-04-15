@@ -1,8 +1,8 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { FiX, FiUpload, FiTrash2 } from "react-icons/fi";
-import { adminUpdateCampaign, adminGetCauses } from "@/features/admin/api/admin.api";
-import { Campaign } from "@/features/campaigns/types/campaign.types";
+import { FiX, FiUpload, FiTrash2, FiPlus, FiMinus, FiPackage } from "react-icons/fi";
+import { adminUpdateCampaign, adminGetCauses, adminGetProducts } from "@/features/admin/api/admin.api";
+import { Campaign, CampaignProduct } from "@/features/campaigns/types/campaign.types";
 
 interface Props {
   isOpen: boolean;
@@ -12,14 +12,30 @@ interface Props {
 }
 
 interface CauseOption { id: number; name: string; }
+interface ProductOption { id: number; name: string; price: number; image: string | null; }
+
+interface CartItem {
+  id?: number;
+  productId: number;
+  name: string;
+  price: number;
+  image: string | null;
+  quantity: number;
+}
 
 export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess }: Props) {
   const [causes, setCauses] = useState<CauseOption[]>([]);
+  const [products, setProducts] = useState<ProductOption[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [toast, setToast] = useState({ msg: "", type: "" });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Products state
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState("");
 
   const [form, setForm] = useState({
     title: "",
@@ -45,6 +61,21 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
     });
     setImagePreview(campaign.image && campaign.image.startsWith("http") ? campaign.image : null);
     setImageFile(null);
+
+    // Load existing products into cart
+    if (campaign.campaignProducts && campaign.campaignProducts.length > 0) {
+      const existingProducts = campaign.campaignProducts.map((p: CampaignProduct) => ({
+        id: p.id,
+        productId: p.productId,
+        name: p.name,
+        price: p.price,
+        image: p.image,
+        quantity: p.quantity,
+      }));
+      setCart(existingProducts);
+    } else {
+      setCart([]);
+    }
   }, [campaign]);
 
   // Load causes
@@ -59,6 +90,20 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
     load();
   }, [isOpen]);
 
+  // Load products when modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+    const loadProducts = async () => {
+      try {
+        setLoadingProducts(true);
+        const data = await adminGetProducts();
+        setProducts(data?.Products || data?.products || []);
+      } catch (err) { console.error("Failed to load products:", err); }
+      finally { setLoadingProducts(false); }
+    };
+    loadProducts();
+  }, [isOpen]);
+
   const showToast = (msg: string, type: "success" | "error") => {
     setToast({ msg, type });
     setTimeout(() => setToast({ msg: "", type: "" }), 3000);
@@ -69,6 +114,44 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
     if (!file) return;
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
+  };
+
+  // ── Cart Helpers ──────────────────────────────────────────────────────────
+  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const addToCart = () => {
+    if (!selectedProductId) return;
+    const product = products.find((p) => p.id === Number(selectedProductId));
+    if (!product) return;
+    const existing = cart.find((i) => i.productId === product.id);
+    if (existing) {
+      setCart(cart.map((i) => i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i));
+    } else {
+      setCart([...cart, {
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        quantity: 1,
+      }]);
+    }
+    setSelectedProductId("");
+  };
+
+  const updateQty = (productId: number, delta: number) => {
+    setCart(cart
+      .map((i) => i.productId === productId ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i)
+      .filter((i) => i.quantity > 0)
+    );
+  };
+
+  const removeFromCart = (productId: number) => {
+    setCart(cart.filter((i) => i.productId !== productId));
+  };
+
+  const isValidUrl = (url: string | null | undefined): boolean => {
+    if (!url) return false;
+    try { new URL(url); return true; } catch { return false; }
   };
 
   const handleSubmit = async () => {
@@ -87,6 +170,13 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
       if (form.endDate) formData.append("endDate", form.endDate);
       if (imageFile) formData.append("image", imageFile);
 
+      // Add products to formData
+      formData.append("products", JSON.stringify(cart.map((p) => ({
+        productId: p.productId,
+        quantity: p.quantity,
+        ...(p.id && { id: p.id }) // Include existing product ID for updates
+      }))));
+
       await adminUpdateCampaign(campaign.id, formData);
       showToast("✅ Campaign updated!", "success");
       setTimeout(() => { onSuccess(); onClose(); }, 1000);
@@ -103,11 +193,10 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
 
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
           <div>
             <h2 className="text-lg font-bold text-gray-800">Edit Campaign</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Update campaign details</p>
+            <p className="text-xs text-gray-400 mt-0.5">Update campaign details and products</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
             <FiX size={18} />
@@ -130,7 +219,6 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
             </div>
             <div className="flex-1 space-y-4">
 
-              {/* Image */}
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-2">Cover Image</label>
                 <div className="flex items-center gap-4">
@@ -213,6 +301,96 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
 
           <div className="border-t border-gray-100" />
 
+          {/* Products Section */}
+          <div className="flex gap-8">
+            <div className="w-48 shrink-0">
+              <div className="flex items-center gap-2">
+                <FiPackage size={16} className="text-gray-500" />
+                <h3 className="text-sm font-bold text-gray-800">Products</h3>
+              </div>
+              <p className="text-xs text-gray-400 mt-1 leading-relaxed">Manage products needed for this campaign.</p>
+            </div>
+            <div className="flex-1 space-y-4">
+
+              {/* Add Product */}
+              <div className="flex gap-2">
+                <select value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)}
+                  className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-400 text-gray-700 transition">
+                  <option value="">
+                    {loadingProducts ? "Loading products..." : "Select a product to add"}
+                  </option>
+                  {products
+                    .filter((p) => !cart.find((c) => c.productId === p.id))
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} — ₹{p.price.toLocaleString("en-US")}
+                      </option>
+                    ))
+                  }
+                </select>
+                <button onClick={addToCart} disabled={!selectedProductId}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shrink-0 ${
+                    selectedProductId ? "bg-[#334E79] text-white hover:bg-[#2a3e60]" : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  }`}>
+                  <FiPlus size={14} /> Add
+                </button>
+              </div>
+
+              {/* Cart Items */}
+              {cart.length === 0 ? (
+                <div className="bg-gray-50 rounded-xl p-6 text-center text-sm text-gray-400 border-2 border-dashed border-gray-200">
+                  No products added. Select from the dropdown above.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {cart.map((item) => (
+                    <div key={item.productId} className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-200 shrink-0">
+                        {isValidUrl(item.image)
+                          ? <img src={item.image!} alt={item.name} className="w-full h-full object-cover" />
+                          : <div className="w-full h-full bg-gray-300 flex items-center justify-center text-[8px] text-gray-400">No img</div>
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{item.name}</p>
+                        <p className="text-xs text-gray-400">₹{item.price.toLocaleString("en-US")} each</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button onClick={() => updateQty(item.productId, -1)}
+                          className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+                          <FiMinus size={12} />
+                        </button>
+                        <span className="w-8 text-center text-sm font-bold text-gray-800">{item.quantity}</span>
+                        <button onClick={() => updateQty(item.productId, 1)}
+                          className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+                          <FiPlus size={12} />
+                        </button>
+                      </div>
+                      <div className="text-right shrink-0 w-20">
+                        <p className="text-sm font-bold text-gray-800">
+                          ₹{(item.price * item.quantity).toLocaleString("en-US")}
+                        </p>
+                        <button onClick={() => removeFromCart(item.productId)}
+                          className="text-[10px] text-red-400 hover:text-red-600 transition">Remove</button>
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="flex items-center justify-between bg-[#334E79]/5 border border-[#334E79]/20 rounded-xl px-4 py-3 mt-2">
+                    <span className="text-sm font-semibold text-gray-700">
+                      Total ({cart.reduce((s, i) => s + i.quantity, 0)} items)
+                    </span>
+                    <span className="text-base font-bold text-[#334E79]">
+                      ₹{cartTotal.toLocaleString("en-US")}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-100" />
+
           {/* Description */}
           <div className="flex gap-8">
             <div className="w-48 shrink-0">
@@ -227,7 +405,6 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl sticky bottom-0">
           <button onClick={onClose} className="px-5 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium transition">Cancel</button>
           <button onClick={handleSubmit} disabled={loading}

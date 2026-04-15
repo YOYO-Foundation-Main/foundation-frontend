@@ -68,7 +68,7 @@ export default function Navbar() {
           {/* ── LOGO ── */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <Image
-              src="/assets/mainlogo.png"
+              src="/assets/newlogo.png"
               alt="YOYO Foundation"
               width={32}
               height={32}

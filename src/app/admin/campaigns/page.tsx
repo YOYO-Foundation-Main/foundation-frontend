@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FiSearch, FiX, FiClock, FiShare2, FiMapPin, FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiSearch, FiX, FiClock, FiShare2, FiMapPin, FiPlus, FiEdit2, FiTrash2, FiPackage } from "react-icons/fi";
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
-import { adminGetCampaigns, adminDeleteCampaign, adminUpdateCampaign, adminUpdateCampaignStatus  } from "@/features/admin/api/admin.api";
+import { adminGetCampaigns, adminDeleteCampaign, adminUpdateCampaign, adminUpdateCampaignStatus } from "@/features/admin/api/admin.api";
 import { Campaign } from "@/features/campaigns/types/campaign.types";
 import CreateCampaignModal from "../CreateCampaignModal";
 import EditCampaignModal from "../EditCampaignModal";
@@ -20,6 +20,7 @@ function getProgress(raised: number, goal: number): number {
 }
 
 function getDaysLeft(endDate: string): number {
+  if (!endDate) return 0;
   return Math.max(0, Math.ceil(
     (new Date(endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   ));
@@ -73,41 +74,25 @@ export default function AdminCampaignsPage() {
 
   useEffect(() => { fetchCampaigns(); }, []);
 
-  // ── Status Toggle ─────────────────────────────────────────────────────────
   const handleStatusToggle = async (campaign: Campaign) => {
-  const newStatus =
-    campaign.status?.toUpperCase() === "APPROVED" ? "PENDING" : "APPROVED";
-
-  try {
-    setStatusLoading(campaign.id);
-
-    await adminUpdateCampaignStatus(campaign.id, newStatus);
-
-    // update UI
-    setCampaigns((prev) =>
-      prev.map((c) =>
-        c.id === campaign.id ? { ...c, status: newStatus } : c
-      )
-    );
-
-    if (selected?.id === campaign.id) {
-      setSelected({ ...campaign, status: newStatus });
+    const newStatus = campaign.status?.toUpperCase() === "APPROVED" ? "PENDING" : "APPROVED";
+    try {
+      setStatusLoading(campaign.id);
+      await adminUpdateCampaignStatus(campaign.id, newStatus);
+      setCampaigns((prev) =>
+        prev.map((c) => c.id === campaign.id ? { ...c, status: newStatus } : c)
+      );
+      if (selected?.id === campaign.id) {
+        setSelected({ ...campaign, status: newStatus });
+      }
+      showToast(`✅ Status changed to ${newStatus === "APPROVED" ? "Active" : "Pending"}`, "success");
+    } catch (err: any) {
+      showToast(err.message || "Failed to update status", "error");
+    } finally {
+      setStatusLoading(null);
     }
+  };
 
-    showToast(
-      `✅ Status changed to ${
-        newStatus === "APPROVED" ? "Active" : "Pending"
-      }`,
-      "success"
-    );
-  } catch (err: any) {
-    showToast(err.message || "Failed to update status", "error");
-  } finally {
-    setStatusLoading(null);
-  }
-};
-
-  // ── Delete ────────────────────────────────────────────────────────────────
   const handleDelete = async () => {
     if (!selected) return;
     await adminDeleteCampaign(selected.id);
@@ -118,19 +103,19 @@ export default function AdminCampaignsPage() {
   };
 
   const counts = {
-    All:       campaigns.length,
-    Active:    campaigns.filter((c) => c.status?.toUpperCase() === "APPROVED").length,
-    Pending:   campaigns.filter((c) => c.status?.toUpperCase() === "PENDING").length,
-    Draft:     campaigns.filter((c) => c.status?.toUpperCase() === "DRAFT").length,
+    All: campaigns.length,
+    Active: campaigns.filter((c) => c.status?.toUpperCase() === "APPROVED").length,
+    Pending: campaigns.filter((c) => c.status?.toUpperCase() === "PENDING").length,
+    Draft: campaigns.filter((c) => c.status?.toUpperCase() === "DRAFT").length,
     Completed: campaigns.filter((c) => c.status?.toUpperCase() === "COMPLETED").length,
   };
 
   const filtered = campaigns.filter((c) => {
     const tabMatch =
       activeTab === "All" ||
-      (activeTab === "Active"    && c.status?.toUpperCase() === "APPROVED") ||
-      (activeTab === "Pending"   && c.status?.toUpperCase() === "PENDING") ||
-      (activeTab === "Draft"     && c.status?.toUpperCase() === "DRAFT") ||
+      (activeTab === "Active" && c.status?.toUpperCase() === "APPROVED") ||
+      (activeTab === "Pending" && c.status?.toUpperCase() === "PENDING") ||
+      (activeTab === "Draft" && c.status?.toUpperCase() === "DRAFT") ||
       (activeTab === "Completed" && c.status?.toUpperCase() === "COMPLETED");
     const searchMatch =
       c.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -139,9 +124,14 @@ export default function AdminCampaignsPage() {
     return tabMatch && searchMatch;
   });
 
+  // Calculate total products value for a campaign
+  const getTotalProductsValue = (campaign: Campaign) => {
+    if (!campaign.campaignProducts) return 0;
+    return campaign.campaignProducts.reduce((sum, p) => sum + (p.totalAmount || p.price * p.quantity), 0);
+  };
+
   return (
     <>
-      {/* Modals */}
       <CreateCampaignModal isOpen={showCreate} onClose={() => setShowCreate(false)} onSuccess={fetchCampaigns} />
       <EditCampaignModal isOpen={showEdit} campaign={selected} onClose={() => setShowEdit(false)} onSuccess={fetchCampaigns} />
       <DeleteConfirmModal
@@ -151,7 +141,6 @@ export default function AdminCampaignsPage() {
         onConfirm={handleDelete}
       />
 
-      {/* Global toast */}
       {toast.msg && (
         <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-xl text-sm font-medium shadow-lg ${
           toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
@@ -164,8 +153,6 @@ export default function AdminCampaignsPage() {
 
         {/* ── LEFT ── */}
         <div className="flex-1 min-w-0">
-
-          {/* Header */}
           <div className="flex items-center justify-between mb-5">
             <div>
               <h1 className="text-xl font-bold text-gray-800">Campaigns</h1>
@@ -179,7 +166,6 @@ export default function AdminCampaignsPage() {
             </button>
           </div>
 
-          {/* Tabs + Search */}
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 flex-wrap">
               {(["All", "Active", "Pending", "Draft", "Completed"] as const).map((tab) => (
@@ -209,7 +195,6 @@ export default function AdminCampaignsPage() {
             </button>
           </div>
 
-          {/* List */}
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             {loading && <div className="p-8 text-center text-sm text-gray-400">Loading campaigns...</div>}
             {!loading && filtered.length === 0 && <div className="p-8 text-center text-sm text-gray-400">No campaigns found</div>}
@@ -219,6 +204,7 @@ export default function AdminCampaignsPage() {
               const daysLeft = getDaysLeft(c.endDate);
               const { label, color } = mapStatus(c.status);
               const isSelected = selected?.id === c.id;
+              const productCount = c.campaignProducts?.length || 0;
 
               return (
                 <div key={c.id} onClick={() => setSelected(c)}
@@ -238,8 +224,13 @@ export default function AdminCampaignsPage() {
                       {c.cause?.name || "General"}
                     </span>
                     <p className="text-sm font-semibold text-gray-800 truncate mt-1">{c.title}</p>
-                    <div className="flex items-center gap-1 text-[11px] text-gray-400 mt-0.5">
+                    <div className="flex items-center gap-2 text-[11px] text-gray-400 mt-0.5">
                       <FiMapPin size={10} /> {c.location}
+                      {productCount > 0 && (
+                        <span className="flex items-center gap-1">
+                          <FiPackage size={9} /> {productCount} products
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -263,7 +254,6 @@ export default function AdminCampaignsPage() {
                     </div>
                   </div>
 
-                  {/* Row action buttons */}
                   <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => { setSelected(c); setShowEdit(true); }}
@@ -285,7 +275,6 @@ export default function AdminCampaignsPage() {
             })}
           </div>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <span>Show</span>
@@ -305,11 +294,11 @@ export default function AdminCampaignsPage() {
           </div>
         </div>
 
-        {/* ── RIGHT: Detail Panel ── */}
+        {/* ── RIGHT: Detail Panel with Products ── */}
         {selected && (
-          <div className="w-[340px] shrink-0 bg-white rounded-xl border border-gray-200 overflow-y-auto max-h-[calc(100vh-140px)] sticky top-0">
+          <div className="w-[380px] shrink-0 bg-white rounded-xl border border-gray-200 overflow-y-auto max-h-[calc(100vh-140px)] sticky top-0">
 
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <span className={`text-[10px] px-2.5 py-1 rounded-full font-medium ${mapStatus(selected.status).color}`}>
                 ● {mapStatus(selected.status).label}
               </span>
@@ -345,8 +334,8 @@ export default function AdminCampaignsPage() {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: "Days Left", value: getDaysLeft(selected.endDate) },
-                  { label: "Location",  value: selected.location || "—" },
-                  { label: "Status",    value: mapStatus(selected.status).label },
+                  { label: "Location", value: selected.location || "—" },
+                  { label: "Products", value: selected.campaignProducts?.length || 0 },
                 ].map(({ label, value }) => (
                   <div key={label} className="bg-gray-50 rounded-xl p-3 text-center">
                     <p className="text-sm font-bold text-gray-800 truncate">{value}</p>
@@ -354,6 +343,40 @@ export default function AdminCampaignsPage() {
                   </div>
                 ))}
               </div>
+
+              {/* ── PRODUCTS SECTION ── */}
+              {selected.campaignProducts && selected.campaignProducts.length > 0 && (
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-semibold text-gray-600 flex items-center gap-1.5">
+                      <FiPackage size={12} /> Products Needed ({selected.campaignProducts.length})
+                    </p>
+                    <p className="text-xs font-bold text-[#D2252B]">
+                      Total: ₹{getTotalProductsValue(selected).toLocaleString("en-US")}
+                    </p>
+                  </div>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {selected.campaignProducts.map((product) => (
+                      <div key={product.id} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-gray-100">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                          {isValidUrl(product.image)
+                            ? <img src={product.image!} alt={product.name} className="w-full h-full object-cover" />
+                            : <div className="w-full h-full bg-gray-200 flex items-center justify-center text-[8px] text-gray-400">No img</div>
+                          }
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-gray-800 truncate">{product.name}</p>
+                          <p className="text-[10px] text-gray-400">₹{product.price.toLocaleString("en-US")} each</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs font-bold text-gray-800">×{product.quantity}</p>
+                          <p className="text-[10px] text-[#D2252B] font-semibold">₹{product.totalAmount?.toLocaleString("en-US") || (product.price * product.quantity).toLocaleString("en-US")}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="bg-gray-50 rounded-xl p-3">
                 <p className="text-xs text-gray-400 mb-2">Cause:</p>
@@ -377,21 +400,18 @@ export default function AdminCampaignsPage() {
                 <div className="bg-gray-50 rounded-xl p-3">
                   <p className="text-[10px] text-gray-400">Start Date</p>
                   <p className="text-xs font-semibold text-gray-700 mt-0.5">
-                    {new Date(selected.startDate).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
+                    {selected.startDate ? new Date(selected.startDate).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : "Not set"}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-xl p-3">
                   <p className="text-[10px] text-gray-400">End Date</p>
                   <p className="text-xs font-semibold text-gray-700 mt-0.5">
-                    {new Date(selected.endDate).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
+                    {selected.endDate ? new Date(selected.endDate).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : "Not set"}
                   </p>
                 </div>
               </div>
 
-              {/* ── Action Buttons ── */}
               <div className="space-y-2 pt-2">
-
-                {/* Status Toggle */}
                 <button
                   onClick={() => handleStatusToggle(selected)}
                   disabled={statusLoading === selected.id}
