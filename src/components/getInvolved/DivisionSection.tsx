@@ -11,7 +11,7 @@ export default function DivisionSection() {
       title: "Technology",
       description: "Support the maintenance of digital platforms.",
       jobs: "4 Jobs Available",
-      active: true,
+      // active: true,
     },
     {
       title: "Program",
