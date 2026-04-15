@@ -1,6 +1,7 @@
 import BlogSection from "@/components/common/BlogSection";
 import EventGrid from "@/components/events/EventGrid";
 import { FiSearch } from "react-icons/fi";
+export const dynamic = "force-dynamic";
 
 export default function EventsPage() {
   return (
