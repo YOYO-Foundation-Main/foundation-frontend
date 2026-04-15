@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import EventCard from "./EventCard";
 import { getEvents } from "@/features/events/api/event.api";
 import { Event } from "@/features/events/types/event.types";
@@ -12,22 +15,38 @@ const formatShortDate = (dateStr: string) => {
   return `${d.toLocaleString("en-US", { month: "short" }).toUpperCase()} ${d.getDate()} • ${d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
 };
 
-export default async function EventGrid() {
-  let events: Event[] = [];
+export default function EventGrid() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    events = await getEvents();
-    console.log("✅ Events loaded:", events.length);
-  } catch (err) {
-    console.error("❌ EventGrid error:", err);
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const data = await getEvents();
+        console.log("✅ Events loaded:", data.length);
+        setEvents(data);
+      } catch (err) {
+        console.error("❌ EventGrid error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-16 text-center">
+        <p className="text-gray-500">Loading events...</p>
+      </section>
+    );
   }
 
   if (!events.length) {
     return (
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-8 text-center">
-          <p className="text-gray-500">No events available at the moment.</p>
-        </div>
+      <section className="py-16 text-center">
+        <p className="text-gray-500">No events available at the moment.</p>
       </section>
     );
   }
@@ -38,7 +57,6 @@ export default async function EventGrid() {
     <section className="py-10">
       <div className="max-w-7xl mx-auto px-8 space-y-6">
 
-        {/* Featured first event — full width */}
         <EventCard
           id={first.id}
           title={first.title}
@@ -50,7 +68,6 @@ export default async function EventGrid() {
           featured={true}
         />
 
-        {/* Rest — 3 column grid */}
         {rest.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {rest.map((event) => (
@@ -68,11 +85,9 @@ export default async function EventGrid() {
           </div>
         )}
 
-        {/* Load more button */}
         <div className="text-center pt-4">
           <button className="flex items-center gap-2 mx-auto text-sm font-semibold text-gray-600 hover:text-gray-900 transition">
             Load More Events
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
           </button>
         </div>
       </div>
