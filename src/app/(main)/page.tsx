@@ -9,6 +9,7 @@ import StatsSection from "@/components/common/StatsSection";
 import TestimonialSection from "@/components/common/TestimonialSection";
 import TestimonialsSection from "@/components/common/TestimonialsSlider";
 import TransformSection from "@/components/common/TransformSection";
+export const dynamic = "force-dynamic";
 
 
 export default function HomePage() {
