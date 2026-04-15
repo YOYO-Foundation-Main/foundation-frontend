@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 
 const amounts = [500, 1000, 2000, 5000, 10000, 50000];
@@ -10,118 +9,92 @@ export default function Hero() {
   const [customAmount, setCustomAmount] = useState("");
 
   return (
-    <section
-      className="relative min-h-screen flex items-center text-white"
-      style={{
-        backgroundImage: "url('/assets/herobg.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-black/70" />
+    <section className="relative min-h-screen flex items-center text-white overflow-hidden"
+      style={{ backgroundImage: "url('/assets/herobg.jpg')", backgroundSize: "cover", backgroundPosition: "center" }}>
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-8 w-full flex flex-col md:flex-row justify-between items-center gap-10 py-28 md:py-20">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-24 sm:py-28 lg:py-20 flex flex-col lg:flex-row justify-between items-center gap-10 lg:gap-16">
 
-        {/* LEFT SIDE */}
-        <div className="w-full md:max-w-xl text-center md:text-left">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight">
+        {/* LEFT */}
+        <div className="w-full lg:max-w-2xl text-center lg:text-left">
+          <p className="text-[#D2252B] text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase mb-4">
+            Making a Difference Together
+          </p>
+
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-8xl font-black leading-[1.05] tracking-tight">
             Give Hope,
             <br />
-            Save Lives
+            <span className="text-[#D2252B]">Save Lives</span>
           </h1>
 
-          <p className="mt-5 text-gray-300 text-sm leading-relaxed max-w-md mx-auto md:mx-0">
-            Libero mauris sed sed proin. Blandit aliquet ipsum faucibus
-            dictum natoque arcu. Potenti ante sed in amet massa aliquet.
+          <p className="mt-6 text-gray-300 text-base sm:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0">
+            Join thousands of donors transforming lives across the globe. Every
+            rupee you give creates lasting change.
           </p>
 
           {/* Stats */}
-          <div className="flex gap-10 mt-8 justify-center md:justify-start">
+          <div className="flex gap-8 sm:gap-12 mt-10 justify-center lg:justify-start">
             <div>
-              <p className="text-[#D2252B] text-xl md:text-2xl font-semibold">
-                ₹1 284 528
-              </p>
-              <p className="text-sm text-gray-300">Donation</p>
+              <p className="text-[#D2252B] text-2xl sm:text-3xl font-black">₹12,84,528</p>
+              <p className="text-sm text-gray-400 mt-0.5">Total Donated</p>
             </div>
-
+            <div className="w-px bg-white/10" />
             <div>
-              <p className="text-[#D2252B] text-xl md:text-2xl font-semibold">
-                12 460
-              </p>
-              <p className="text-sm text-gray-300">People Helped</p>
+              <p className="text-[#D2252B] text-2xl sm:text-3xl font-black">12,460</p>
+              <p className="text-sm text-gray-400 mt-0.5">People Helped</p>
             </div>
           </div>
         </div>
 
-        {/* RIGHT SIDE CARD */}
-        <div className="bg-white text-black rounded-xl p-6 w-full max-w-[360px] shadow-2xl border border-gray-200 shrink-0">
-          <h3 className="text-lg font-semibold mb-5 text-center">
-            Donation Amount
-          </h3>
+        {/* RIGHT — Donation card */}
+        <div className="w-full max-w-[400px] lg:max-w-[380px] shrink-0">
+          <div className="bg-white text-black rounded-2xl p-6 sm:p-7 shadow-2xl border border-gray-100">
+            <h3 className="text-lg font-bold text-gray-900 mb-5 text-center">Make a Donation</h3>
 
-          {/* Toggle */}
-          <div className="flex mb-5 border border-[#D2252B] rounded-md overflow-hidden">
-            <button
-              onClick={() => setType("one-time")}
-              className={`flex-1 py-2 text-sm font-medium transition ${
-                type === "one-time"
-                  ? "bg-[#D2252B] text-white"
-                  : "text-gray-500 bg-white"
-              }`}
-            >
-              One-time
+            {/* Toggle */}
+            <div className="flex mb-5 bg-gray-100 rounded-xl p-1">
+              {(["one-time", "weekly"] as const).map((t) => (
+                <button key={t} onClick={() => setType(t)}
+                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
+                    type === t ? "bg-[#D2252B] text-white shadow-sm" : "text-gray-500"
+                  }`}>
+                  {t === "one-time" ? "One-time" : "Weekly"}
+                </button>
+              ))}
+            </div>
+
+            {/* Amount grid */}
+            <div className="grid grid-cols-3 gap-2.5 mb-4">
+              {amounts.map((amt) => (
+                <button key={amt} onClick={() => { setSelectedAmount(amt); setCustomAmount(""); }}
+                  className={`py-2.5 text-sm rounded-xl border-2 font-semibold transition-all ${
+                    selectedAmount === amt
+                      ? "bg-[#D2252B] text-white border-[#D2252B]"
+                      : "bg-white text-gray-700 border-gray-200 hover:border-[#D2252B] hover:text-[#D2252B]"
+                  }`}>
+                  ₹{amt >= 1000 ? `${amt / 1000}k` : amt}
+                </button>
+              ))}
+            </div>
+
+            {/* Custom */}
+            <div className="relative mb-5">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">₹</span>
+              <input type="number" placeholder="Custom amount"
+                value={customAmount}
+                onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(null); }}
+                className="w-full border-2 border-gray-200 focus:border-[#D2252B] rounded-xl pl-8 pr-4 py-2.5 text-sm outline-none transition placeholder:text-gray-400" />
+            </div>
+
+            <button className="w-full bg-[#D2252B] hover:bg-[#b91f24] text-white py-3 rounded-xl font-bold text-sm transition shadow-lg shadow-red-200">
+              DONATE NOW
             </button>
 
-            <button
-              onClick={() => setType("weekly")}
-              className={`flex-1 py-2 text-sm font-medium transition ${
-                type === "weekly"
-                  ? "bg-[#D2252B] text-white"
-                  : "text-gray-500 bg-white"
-              }`}
-            >
-              Weekly
-            </button>
+            <p className="text-center text-xs text-gray-400 mt-3">🔒 Secure & encrypted payment</p>
           </div>
-
-          {/* Amount Grid */}
-          <div className="grid grid-cols-3 gap-3 mb-5">
-            {amounts.map((amt) => (
-              <button
-                key={amt}
-                onClick={() => {
-                  setSelectedAmount(amt);
-                  setCustomAmount("");
-                }}
-                className={`py-2 text-sm rounded-md border transition ${
-                  selectedAmount === amt
-                    ? "bg-[#D2252B] text-white border-[#D2252B]"
-                    : "bg-white text-gray-600 border-gray-300 hover:border-[#D2252B]"
-                }`}
-              >
-                {amt} Ks
-              </button>
-            ))}
-          </div>
-
-          {/* Custom Input */}
-          <input
-            type="number"
-            placeholder="Custom Amount"
-            value={customAmount}
-            onChange={(e) => {
-              setCustomAmount(e.target.value);
-              setSelectedAmount(null);
-            }}
-            className="w-full border border-[#D2252B] rounded-md p-2 mb-5 text-sm outline-none focus:ring-2 focus:ring-[#D2252B]"
-          />
-
-          {/* CTA */}
-          <button className="w-full bg-[#D2252B] hover:bg-[#b91f24] text-white py-2 rounded-md font-semibold transition">
-            DONATE NOW
-          </button>
         </div>
       </div>
     </section>

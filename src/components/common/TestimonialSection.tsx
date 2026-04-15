@@ -3,64 +3,49 @@ import { FaPlay } from "react-icons/fa";
 
 export default function TestimonialSection() {
   return (
-    <section className="bg-[#f5f5f5] py-20">
-      <div className="max-w-7xl mx-auto px-8 grid md:grid-cols-2 gap-12 items-center">
-        
-        {/* LEFT CONTENT */}
-        <div>
-          {/* Quote icon */}
-          <div className="text-[#D2252B] text-5xl mb-4">“</div>
+    <section className="bg-[#f5f5f5] py-16 sm:py-20 lg:py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {/* Heading */}
-          <h2 className="text-3xl md:text-4xl font-bold text-[#111] leading-snug mb-6">
-            Together, we can change <br /> lives for the better
+        {/* LEFT */}
+        <div>
+          <div className="text-[#D2252B] text-6xl font-serif leading-none mb-4 select-none">"</div>
+
+          <h2 className="text-3xl sm:text-4xl lg:text-4xl font-bold text-gray-900 leading-snug mb-6">
+            Together, we can change <br className="hidden sm:block" /> lives for the better
           </h2>
 
-          {/* Description */}
-          <p className="text-gray-600 text-sm leading-relaxed mb-6 max-w-md">
-            Sollicitudin vitae diam senectus molestie cras in gravida egestas ac.
-            Tortor condimentum suspendisse duis et velit donec turpis interdum elit.
-            Tincidunt ultrices eu vitae ut velit purus urna in.
+          <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-md">
+            Every small act of generosity ripples outward. Thanks to donors like
+            you, families across the world have clean water, education, and hope.
           </p>
 
-          {/* Author */}
-          <div>
-            <p className="font-semibold text-black">George Henry</p>
-            <p className="text-gray-500 text-sm">Donor</p>
-          </div>
-          <div>
-            <p className="font-semibold text-black">George Henry</p>
-            <p className="text-gray-500 text-sm">Donor</p>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 rounded-full bg-[#D2252B] flex items-center justify-center text-white font-bold text-lg">
+              G
+            </div>
+            <div>
+              <p className="font-bold text-gray-900">George Henry</p>
+              <p className="text-sm text-gray-500">Monthly Donor since 2022</p>
+            </div>
           </div>
 
-          {/* Dots */}
-          <div className="flex gap-2 mt-6">
-            <span className="w-3 h-3 bg-[#D2252B] rounded-full" />
-            <span className="w-3 h-3 bg-gray-300 rounded-full" />
-            <span className="w-3 h-3 bg-gray-300 rounded-full" />
+          <div className="flex gap-2">
+            <span className="w-8 h-2 bg-[#D2252B] rounded-full" />
+            <span className="w-2 h-2 bg-gray-300 rounded-full" />
+            <span className="w-2 h-2 bg-gray-300 rounded-full" />
           </div>
         </div>
 
-        {/* RIGHT IMAGE / VIDEO */}
-        <div className="relative">
-          <div className="rounded-2xl overflow-hidden">
-            <Image
-              src="/assets/tr.jpg"
-              alt="testimonial"
-              width={500}
-              height={400}
-              className="w-full h-auto object-cover"
-            />
-          </div>
-
-          {/* Play Button (UI only for now) */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <button className="w-16 h-16 bg-[#D2252B] rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition">
-              <FaPlay className="text-white ml-1" />
+        {/* RIGHT */}
+        <div className="relative rounded-2xl overflow-hidden shadow-lg">
+          <Image src="/assets/tr.jpg" alt="testimonial" width={600} height={450}
+            className="w-full h-auto object-cover" />
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+            <button className="w-16 h-16 sm:w-20 sm:h-20 bg-[#D2252B] rounded-full flex items-center justify-center shadow-2xl hover:scale-105 transition">
+              <FaPlay className="text-white ml-1 text-lg sm:text-xl" />
             </button>
           </div>
         </div>
-
       </div>
     </section>
   );

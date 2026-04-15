@@ -1,72 +1,48 @@
 "use client";
-
 import { useState } from "react";
 
-const tabs = [
-  "Central Africa",
-  "Eastern Europe",
-  "Southeast Asia",
-  "Central America",
-];
+const tabs = ["Central Africa", "Eastern Europe", "Southeast Asia", "Central America"];
 
 export default function ProjectsRegionSection() {
-  const [activeTab, setActiveTab] = useState("Central Africa");
+  const [active, setActive] = useState("Central Africa");
 
   return (
-    <section className="bg-[#f5f5f5] py-16">
-      <div className="max-w-7xl mx-auto px-8 text-center">
-        
-        {/* Heading */}
-        <h2 className="text-3xl font-semibold text-black">
-          Projects by Region
-        </h2>
-
-        <p className="text-gray-500 text-sm mt-3 max-w-2xl mx-auto">
-          Adipiscing in vitae nec posuere eget fringilla a morbi. Ultricies lacus
-          turpis proin tempor faucibus ullamcorper massa tristique est.
+    <section className="bg-white py-16 sm:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 text-center">
+        <p className="text-[#D2252B] text-xs font-bold tracking-[0.2em] uppercase mb-3">Global Reach</p>
+        <h2 className="text-3xl sm:text-4xl font-bold text-black">Projects by Region</h2>
+        <p className="text-gray-500 text-base mt-4 max-w-xl mx-auto leading-relaxed">
+          We operate across continents, bringing change to the communities that need it most.
         </p>
 
-        {/* Tabs */}
-        <div className="flex justify-center gap-8 mt-6 text-sm font-medium">
+        {/* Tabs — scroll on mobile */}
+        <div className="flex justify-start sm:justify-center gap-2 mt-8 overflow-x-auto pb-1 scrollbar-hide">
           {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-2 border-b-2 transition ${
-                activeTab === tab
-                  ? "text-[#D2252B] border-[#D2252B]"
-                  : "text-black border-transparent hover:text-[#D2252B]"
-              }`}
-            >
+            <button key={tab} onClick={() => setActive(tab)}
+              className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap ${
+                active === tab
+                  ? "bg-[#D2252B] text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}>
               {tab}
             </button>
           ))}
         </div>
 
-        {/* Map */}
-        <div className="relative mt-10">
-          <img
-            src="/assets/world-map.jpg"
-            alt="world map"
-            className="w-full"
-          />
-
-          {/* RED MARKERS (Active Region) */}
-          {activeTab === "Central Africa" && (
+        <div className="relative mt-10 rounded-2xl overflow-hidden">
+          <img src="/assets/world-map.jpg" alt="world map" className="w-full h-auto" />
+          {active === "Central Africa" && (
             <>
-              <div className="absolute top-[48%] left-[48%] w-5 h-5 bg-[#D2252B] rounded-full shadow-md" />
-              <div className="absolute top-[55%] left-[52%] w-5 h-5 bg-[#D2252B] rounded-full shadow-md" />
-              <div className="absolute top-[60%] left-[50%] w-5 h-5 bg-[#D2252B] rounded-full shadow-md" />
+              <div className="absolute top-[48%] left-[48%] w-4 h-4 sm:w-5 sm:h-5 bg-[#D2252B] rounded-full shadow-lg animate-pulse" />
+              <div className="absolute top-[55%] left-[52%] w-4 h-4 sm:w-5 sm:h-5 bg-[#D2252B] rounded-full shadow-lg animate-pulse" />
+              <div className="absolute top-[60%] left-[50%] w-4 h-4 sm:w-5 sm:h-5 bg-[#D2252B] rounded-full shadow-lg animate-pulse" />
             </>
           )}
-
-          {/* BLACK MARKERS (Other Regions) */}
-          <div className="absolute top-[40%] left-[30%] w-5 h-5 bg-black rounded-full" />
-          <div className="absolute top-[50%] left-[28%] w-5 h-5 bg-black rounded-full" />
-          <div className="absolute top-[35%] left-[60%] w-5 h-5 bg-black rounded-full" />
-          <div className="absolute top-[45%] left-[65%] w-5 h-5 bg-black rounded-full" />
+          <div className="absolute top-[40%] left-[30%] w-3 h-3 sm:w-4 sm:h-4 bg-black rounded-full opacity-50" />
+          <div className="absolute top-[50%] left-[28%] w-3 h-3 sm:w-4 sm:h-4 bg-black rounded-full opacity-50" />
+          <div className="absolute top-[35%] left-[60%] w-3 h-3 sm:w-4 sm:h-4 bg-black rounded-full opacity-50" />
+          <div className="absolute top-[45%] left-[65%] w-3 h-3 sm:w-4 sm:h-4 bg-black rounded-full opacity-50" />
         </div>
-
       </div>
     </section>
   );
