@@ -19,11 +19,22 @@ function getProgress(raised: number, goal: number): number {
   return Math.min(Math.round((raised / goal) * 100), 100);
 }
 
-function getDaysLeft(endDate: string): number {
+// ✅ FIXED: Handle null endDate
+function getDaysLeft(endDate: string | null): number {
   if (!endDate) return 0;
   return Math.max(0, Math.ceil(
     (new Date(endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   ));
+}
+
+// ✅ Helper to format date safely
+function formatDate(date: string | null): string {
+  if (!date) return "Not set";
+  return new Date(date).toLocaleDateString("en-US", { 
+    day: "numeric", 
+    month: "short", 
+    year: "numeric" 
+  });
 }
 
 function mapStatus(status: string): { label: string; color: string } {
@@ -250,7 +261,7 @@ export default function AdminCampaignsPage() {
                     <span className={`text-[10px] px-2.5 py-1 rounded-full font-medium ${color}`}>● {label}</span>
                     <div className="flex items-center justify-end gap-1 mt-1.5 text-[10px] text-gray-400">
                       <FiClock size={10} />
-                      {daysLeft > 0 ? `${daysLeft} days left` : "Ended"}
+                      {c.endDate ? `${daysLeft} days left` : "No end date"}
                     </div>
                   </div>
 
@@ -396,17 +407,18 @@ export default function AdminCampaignsPage() {
                 <p className="text-xs text-gray-500 leading-relaxed">{selected.description}</p>
               </div>
 
+              {/* ✅ FIXED: Using formatDate helper for null safety */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-xl p-3">
                   <p className="text-[10px] text-gray-400">Start Date</p>
                   <p className="text-xs font-semibold text-gray-700 mt-0.5">
-                    {selected.startDate ? new Date(selected.startDate).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : "Not set"}
+                    {formatDate(selected.startDate)}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-xl p-3">
                   <p className="text-[10px] text-gray-400">End Date</p>
                   <p className="text-xs font-semibold text-gray-700 mt-0.5">
-                    {selected.endDate ? new Date(selected.endDate).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : "Not set"}
+                    {formatDate(selected.endDate)}
                   </p>
                 </div>
               </div>
