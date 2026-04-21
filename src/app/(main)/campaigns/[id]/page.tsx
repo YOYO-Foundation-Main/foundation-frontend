@@ -77,17 +77,17 @@ export default function CampaignDetailPage() {
   };
 
   const selectedProductDetails = Object.entries(selectedProducts).map(
-  ([id, qty]) => {
-    const product = products.find(p => p.id === Number(id));
-    return {
-      campaignProductId: product?.id,
-      name: product?.name,
-      image: product?.image,
-      price: product?.price,
-      quantity: qty,
-    };
-  }
-);
+    ([id, qty]) => {
+      const product = products.find(p => p.id === Number(id));
+      return {
+        campaignProductId: product?.id,
+        name: product?.name,
+        image: product?.image,
+        price: product?.price,
+        quantity: qty,
+      };
+    }
+  );
   return (
     <div className="bg-[#F7F7F7] min-h-screen py-10">
 
@@ -104,8 +104,8 @@ export default function CampaignDetailPage() {
           <div className="w-full h-[300px] relative rounded-2xl overflow-hidden shadow">
             <Image
               src={
-                isValidUrl(campaign.image)
-                  ? campaign.image!
+                campaign.image && isValidUrl(campaign.image)
+                  ? campaign.image
                   : "/assets/placeholder.png"
               }
               alt="campaign"
@@ -378,7 +378,7 @@ export default function CampaignDetailPage() {
                       "donationData",
                       JSON.stringify({
                         campaignId: campaign.id,
-                         selectedProductDetails,
+                        selectedProductDetails,
                         donationAmount,
                         mode,
                       })

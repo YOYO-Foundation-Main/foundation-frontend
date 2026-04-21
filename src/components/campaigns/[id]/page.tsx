@@ -89,11 +89,12 @@ export default function CampaignDetailPage() {
           </Link>
 
           {/* IMAGE */}
+          {/* IMAGE */}
           <div className="w-full h-[300px] relative rounded-2xl overflow-hidden shadow">
             <Image
               src={
-                isValidUrl(campaign.image)
-                  ? campaign.image!
+                campaign.image && isValidUrl(campaign.image)
+                  ? campaign.image
                   : "/assets/placeholder.png"
               }
               alt="campaign"
@@ -146,8 +147,8 @@ export default function CampaignDetailPage() {
             <button
               onClick={() => setMode("products")}
               className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${mode === "products"
-                  ? "bg-[#FF4D2D] text-white"
-                  : "text-gray-500"
+                ? "bg-[#FF4D2D] text-white"
+                : "text-gray-500"
                 }`}
             >
               Donate Products
@@ -156,8 +157,8 @@ export default function CampaignDetailPage() {
             <button
               onClick={() => setMode("money")}
               className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${mode === "money"
-                  ? "bg-[#FF4D2D] text-white"
-                  : "text-gray-500"
+                ? "bg-[#FF4D2D] text-white"
+                : "text-gray-500"
                 }`}
             >
               Donate Money
@@ -202,7 +203,7 @@ export default function CampaignDetailPage() {
                       <p className="text-xs text-gray-500 mb-1">
                         {p.quantity} Qty needed
                       </p>
-{/* 
+                      {/* 
                       {/* PROGRESS BAR */}
                       {/* { <div className="w-full h-[4px] bg-gray-200 rounded-full mb-2">
                         <div className="h-[4px] bg-[#FF4D2D] rounded-full w-[20%]" />
@@ -286,8 +287,8 @@ export default function CampaignDetailPage() {
                     key={amt}
                     onClick={() => setDonationAmount(amt)}
                     className={`py-2 rounded-lg border text-sm ${donationAmount === amt
-                        ? "border-[#FF4D2D] text-[#FF4D2D]"
-                        : "text-gray-500"
+                      ? "border-[#FF4D2D] text-[#FF4D2D]"
+                      : "text-gray-500"
                       }`}
                   >
                     ₹{amt}
