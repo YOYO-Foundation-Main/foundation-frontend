@@ -7,11 +7,12 @@ import { Product } from "@/features/admin/types/product.types";
 import CreateProductModal from "@/components/admin/CreateProductModal";
 import EditProductModal from "@/components/admin/EditProductModal";
 import DeleteConfirmModal from "../DeleteConfirmModal";
+import { isValidUrl } from "@/utils/url";
 
-function isValidUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  try { new URL(url); return true; } catch { return false; }
-}
+// function isValidUrl(url: string | null | undefined): boolean {
+//   if (!url) return false;
+//   try { new URL(url); return true; } catch { return false; }
+// }
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,7 +141,7 @@ export default function AdminProductsPage() {
                 {/* Image */}
                 <div className="relative h-44 bg-gray-100 overflow-hidden">
                   {validImage
-                    ? <img src={product.image!} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                    ? <img src={product.image || "/assets/placeholder.png"} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                     : <div className="w-full h-full flex items-center justify-center"><span className="text-xs text-gray-400">No Image</span></div>
                   }
                   {/* Hover action overlay */}

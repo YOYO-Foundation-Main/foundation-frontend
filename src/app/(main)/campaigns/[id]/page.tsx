@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { isValidUrl } from "@/utils/url";
 import Link from "next/link";
 import { getCampaignById } from "@/features/campaigns/api/campaign.api";
 import { Campaign, CampaignProduct } from "@/features/campaigns/types/campaign.types";
@@ -10,16 +11,6 @@ import { FiArrowLeft, FiMapPin, FiCalendar } from "react-icons/fi";
 
 function fmt(n: number) {
   return n.toLocaleString("en-US");
-}
-
-function isValidUrl(url?: string) {
-  if (!url) return false;
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 function getProgress(raised: number, goal: number) {
@@ -195,8 +186,8 @@ export default function CampaignDetailPage() {
                       <div className="w-full h-24 relative mb-3">
                         <Image
                           src={
-                            isValidUrl(p.image)
-                              ? p.image!
+                            p.image && isValidUrl(p.image)
+                              ? p.image
                               : "/assets/placeholder.png"
                           }
                           alt={p.name}
@@ -363,10 +354,10 @@ export default function CampaignDetailPage() {
                 <button
                   onClick={() => {
                     // ✅ prevent empty donation
-                    if (mode === "products" && Object.keys(selectedProducts).length === 0) {
-                      alert("Please select at least one product");
-                      return;
-                    }
+                    // if (mode === "products" && Object.keys(selectedProducts).length === 0) {
+                    //   alert("Please select at least one product");
+                    //   return;
+                    // }
 
                     if (mode === "money" && donationAmount <= 0) {
                       alert("Please enter donation amount");
@@ -391,12 +382,7 @@ export default function CampaignDetailPage() {
                 >
                   DONATE NOW (
                   ₹
-                  {mode === "products"
-                    ? Object.entries(selectedProducts).reduce((sum, [id, qty]) => {
-                      const product = products.find((p) => p.id === Number(id));
-                      return product ? sum + product.price * (qty as number) : sum;
-                    }, 0)
-                    : donationAmount}
+                 {donationAmount}
                   )
                 </button>
               </div>

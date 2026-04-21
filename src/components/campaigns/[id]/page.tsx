@@ -7,20 +7,21 @@ import Link from "next/link";
 import { getCampaignById } from "@/features/campaigns/api/campaign.api";
 import { Campaign, CampaignProduct } from "@/features/campaigns/types/campaign.types";
 import { FiArrowLeft, FiMapPin, FiCalendar } from "react-icons/fi";
+import { isValidUrl } from "@/utils/url";
 
 function fmt(n: number) {
   return n.toLocaleString("en-US");
 }
 
-function isValidUrl(url?: string) {
-  if (!url) return false;
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-}
+// function isValidUrl(url?: string) {
+//   if (!url) return false;
+//   try {
+//     new URL(url);
+//     return true;
+//   } catch {
+//     return false;
+//   }
+// }
 
 function getProgress(raised: number, goal: number) {
   if (!goal) return 0;
@@ -88,8 +89,7 @@ export default function CampaignDetailPage() {
             <FiArrowLeft /> Back
           </Link>
 
-          {/* IMAGE */}
-          {/* IMAGE */}
+          \          {/* IMAGE */}
           <div className="w-full h-[300px] relative rounded-2xl overflow-hidden shadow">
             <Image
               src={
@@ -184,8 +184,8 @@ export default function CampaignDetailPage() {
                       <div className="w-full h-24 relative mb-3">
                         <Image
                           src={
-                            isValidUrl(p.image)
-                              ? p.image!
+                            p.image && isValidUrl(p.image)
+                              ? p.image
                               : "/assets/placeholder.png"
                           }
                           alt={p.name}

@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { isValidUrl } from "@/utils/url";
 
 interface Props {
   id: string;
@@ -9,10 +10,10 @@ interface Props {
   description: string;
 }
 
-function isValidUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  try { new URL(url); return true; } catch { return false; }
-}
+// function isValidUrl(url: string | null | undefined): boolean {
+//   if (!url) return false;
+//   try { new URL(url); return true; } catch { return false; }
+// }
 
 export default function CauseCard({ id, name, image, description }: Props) {
   const router = useRouter();

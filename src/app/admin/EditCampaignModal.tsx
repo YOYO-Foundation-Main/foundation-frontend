@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { FiX, FiUpload, FiTrash2, FiPlus, FiMinus, FiPackage } from "react-icons/fi";
 import { adminUpdateCampaign, adminGetCauses, adminGetProducts } from "@/features/admin/api/admin.api";
 import { Campaign, CampaignProduct } from "@/features/campaigns/types/campaign.types";
+import { isValidUrl } from "@/utils/url";
 
 interface Props {
   isOpen: boolean;
@@ -147,11 +148,6 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
 
   const removeFromCart = (productId: number) => {
     setCart(cart.filter((i) => i.productId !== productId));
-  };
-
-  const isValidUrl = (url: string | null | undefined): boolean => {
-    if (!url) return false;
-    try { new URL(url); return true; } catch { return false; }
   };
 
   const handleSubmit = async () => {
@@ -347,7 +343,7 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
                     <div key={item.productId} className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 border border-gray-100">
                       <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-200 shrink-0">
                         {isValidUrl(item.image)
-                          ? <img src={item.image!} alt={item.name} className="w-full h-full object-cover" />
+                          ? <img src={item.image || "/assets/placeholder.png"} alt={item.name} className="w-full h-full object-cover" />
                           : <div className="w-full h-full bg-gray-300 flex items-center justify-center text-[8px] text-gray-400">No img</div>
                         }
                       </div>

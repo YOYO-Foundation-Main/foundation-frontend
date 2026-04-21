@@ -7,12 +7,10 @@ import { Campaign } from "@/features/campaigns/types/campaign.types";
 import CreateCampaignModal from "../CreateCampaignModal";
 import EditCampaignModal from "../EditCampaignModal";
 import DeleteConfirmModal from "../DeleteConfirmModal";
+import { isValidUrl } from "@/utils/url";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function isValidUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  try { new URL(url); return true; } catch { return false; }
-}
+
 
 function getProgress(raised: number, goal: number): number {
   if (!goal) return 0;
@@ -225,7 +223,7 @@ export default function AdminCampaignsPage() {
                 >
                   <div className="w-16 h-12 rounded-xl overflow-hidden shrink-0 bg-gray-100 flex items-center justify-center">
                     {isValidUrl(c.image)
-                      ? <img src={c.image!} alt={c.title} className="w-full h-full object-cover" />
+                      ? <img src={c.image || "/assets/placeholder.png"} alt={c.title} className="w-full h-full object-cover" />
                       : <span className="text-[10px] text-gray-400">No Image</span>
                     }
                   </div>
@@ -323,7 +321,7 @@ export default function AdminCampaignsPage() {
 
               <div className="w-full h-44 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
                 {isValidUrl(selected.image)
-                  ? <img src={selected.image!} alt={selected.title} className="w-full h-full object-cover" />
+                  ? <img src={selected.image || "/assets/placeholder.png"} alt={selected.title} className="w-full h-full object-cover" />
                   : <span className="text-sm text-gray-400">No Image</span>
                 }
               </div>
@@ -371,7 +369,7 @@ export default function AdminCampaignsPage() {
                       <div key={product.id} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-gray-100">
                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
                           {isValidUrl(product.image)
-                            ? <img src={product.image!} alt={product.name} className="w-full h-full object-cover" />
+                            ? <img src={product.image || "/assets/placeholder.png"} alt={product.name} className="w-full h-full object-cover" />
                             : <div className="w-full h-full bg-gray-200 flex items-center justify-center text-[8px] text-gray-400">No img</div>
                           }
                         </div>

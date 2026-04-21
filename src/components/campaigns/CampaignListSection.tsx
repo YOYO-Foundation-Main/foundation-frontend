@@ -3,11 +3,12 @@ import Link from "next/link";
 import { getCampaigns } from "@/features/campaigns/api/campaign.api";
 import { Campaign } from "@/features/campaigns/types/campaign.types";
 import { FiMapPin, FiClock, FiArrowRight } from "react-icons/fi";
+import { isValidUrl } from "@/utils/url";
 
-function isValidUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  try { new URL(url); return true; } catch { return false; }
-}
+// function isValidUrl(url: string | null | undefined): boolean {
+//   if (!url) return false;
+//   try { new URL(url); return true; } catch { return false; }
+// }
 
 function getProgress(raised: number, goal: number): number {
   if (!goal) return 0;
@@ -63,7 +64,7 @@ export default async function CampaignListSection() {
                   {/* Image */}
                   <div className="relative h-48 sm:h-52 overflow-hidden bg-gray-100">
                     {validImage ? (
-                      <Image src={item.image!} alt={item.title} fill
+                      <Image src={item.image || "/assets/placeholder.png"} alt={item.title} fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200">

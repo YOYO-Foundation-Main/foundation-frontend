@@ -11,6 +11,7 @@ import { MdCampaign } from "react-icons/md";
 import { getMyProfile, getMyFundraisers, uploadProfileImage } from "@/features/auth/api/user.api";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import KYCModal from "./KYCModal";
+import { isValidUrl } from "@/utils/url";
 
 interface UserProfile {
   id: number; name: string; email: string; mobile: string;
@@ -20,10 +21,10 @@ interface UserStats { totalDonated: number; totalDonations: number; livesImpacte
 interface FundraiserCampaign { id: number; title: string; description: string; image: string | null; goalAmount: number; raisedAmount: number; progress: number; status: string; createdAt: string; }
 interface FundraiserSummary { totalCampaigns: number; totalRaised: number; totalGoal: number; }
 
-function isValidUrl(url: string | null | undefined) {
-  if (!url) return false;
-  try { new URL(url); return true; } catch { return false; }
-}
+// function isValidUrl(url: string | null | undefined) {
+//   if (!url) return false;
+//   try { new URL(url); return true; } catch { return false; }
+// }
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {

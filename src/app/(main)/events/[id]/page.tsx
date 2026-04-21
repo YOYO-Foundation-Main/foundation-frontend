@@ -4,11 +4,10 @@ import EventCard from "@/components/events/EventCard";
 import Image from "next/image";
 import Link from "next/link";
 import { FiCalendar, FiMapPin, FiArrowLeft, FiShare2, FiHeart } from "react-icons/fi";
+import { isValidUrl } from "@/utils/url";
 
-function isValidUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  try { new URL(url); return true; } catch { return false; }
-}
+
+
 
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString("en-US", {
@@ -62,8 +61,13 @@ export default async function EventDetailPage({
       {/* ── HERO with image ── */}
       <div className="relative h-[360px] bg-gray-900 overflow-hidden">
         {validImage ? (
-          <Image src={event.image!} alt={event.title} fill className="object-cover opacity-60" priority />
-        ) : (
+          <Image
+            src={event.image || "/assets/placeholder.png"}
+            alt={event.title}
+            fill
+            className="object-cover opacity-60"
+            priority
+          />) : (
           <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -184,9 +188,8 @@ export default async function EventDetailPage({
               ].map((ticket) => (
                 <label key={ticket.label} className="flex items-center justify-between p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-[#D2252B] transition">
                   <div className="flex items-center gap-3">
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      ticket.selected ? "border-[#D2252B]" : "border-gray-300"
-                    }`}>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${ticket.selected ? "border-[#D2252B]" : "border-gray-300"
+                      }`}>
                       {ticket.selected && <div className="w-2 h-2 rounded-full bg-[#D2252B]" />}
                     </div>
                     <span className="text-sm font-medium text-gray-700">{ticket.label}</span>

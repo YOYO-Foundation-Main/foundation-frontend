@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { FiX, FiUpload, FiTrash2 } from "react-icons/fi";
 import { adminUpdateBlog } from "@/features/admin/api/admin.api";
 import { Blog } from "@/features/blog/types/blog.types";
+import { isValidUrl } from "@/utils/url";
 
 interface Props {
   isOpen: boolean;
@@ -11,10 +12,10 @@ interface Props {
   onSuccess: () => void;
 }
 
-function isValidUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  try { new URL(url); return true; } catch { return false; }
-}
+// function isValidUrl(url: string | null | undefined): boolean {
+//   if (!url) return false;
+//   try { new URL(url); return true; } catch { return false; }
+// }
 
 export default function EditBlogModal({ isOpen, blog, onClose, onSuccess }: Props) {
   const [loading, setLoading] = useState(false);

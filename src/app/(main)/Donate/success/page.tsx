@@ -1,11 +1,13 @@
 "use client";
+
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getDonationById, downloadInvoice} from "@/features/donations/api/donation.api";
+import { getDonationById, downloadInvoice } from "@/features/donations/api/donation.api";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function SuccessPage() {
+/* ================= INNER COMPONENT ================= */
+function SuccessContent() {
   const params = useSearchParams();
   const donationId = params.get("donationId");
 
@@ -43,6 +45,7 @@ export default function SuccessPage() {
       alert("Failed to download invoice");
     }
   };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
@@ -60,14 +63,12 @@ export default function SuccessPage() {
 
       <div className="bg-white/80 backdrop-blur-lg shadow-2xl rounded-3xl p-8 max-w-2xl w-full animate-fadeIn">
 
-        {/* ✅ SUCCESS ICON */}
         <div className="flex justify-center mb-6">
           <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center animate-bounce">
             <span className="text-4xl text-green-600">✔</span>
           </div>
         </div>
 
-        {/* ✅ HEADER */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-green-700">
             Donation Successful
@@ -77,7 +78,6 @@ export default function SuccessPage() {
           </p>
         </div>
 
-        {/* ✅ CAMPAIGN */}
         <div className="flex items-center gap-4 bg-gray-50 rounded-xl p-4 mb-6">
           <div className="w-20 h-20 relative rounded-lg overflow-hidden">
             <Image
@@ -98,7 +98,6 @@ export default function SuccessPage() {
           </div>
         </div>
 
-        {/* ✅ AMOUNT */}
         <div className="flex justify-between items-center text-lg font-semibold mb-6 border-b pb-3">
           <span>Total Paid</span>
           <span className="text-green-600 text-2xl">
@@ -106,7 +105,6 @@ export default function SuccessPage() {
           </span>
         </div>
 
-        {/* ✅ PRODUCTS */}
         {donation.donationItems?.length > 0 && (
           <div className="mb-6">
             <h3 className="font-semibold mb-3 text-gray-700">
@@ -149,7 +147,6 @@ export default function SuccessPage() {
           </div>
         )}
 
-        {/* ✅ PAYMENT INFO */}
         <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-sm mb-6">
           <p>
             <span className="font-semibold">Payment ID:</span>{" "}
@@ -161,7 +158,6 @@ export default function SuccessPage() {
           </p>
         </div>
 
-        {/* ✅ ACTIONS */}
         <div className="flex gap-3">
           <Link href="/campaigns" className="w-full">
             <button className="w-full bg-[#D2252B] hover:bg-[#b91c1c] transition text-white py-3 rounded-xl font-semibold">
@@ -184,7 +180,6 @@ export default function SuccessPage() {
         </div>
       </div>
 
-      {/* ✨ subtle animation */}
       <style jsx>{`
         .animate-fadeIn {
           animation: fadeIn 0.6s ease-in-out;
@@ -202,5 +197,14 @@ export default function SuccessPage() {
       `}</style>
 
     </div>
+  );
+}
+
+/* ================= MAIN EXPORT ================= */
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div className="p-10 text-center">Loading...</div>}>
+      <SuccessContent />
+    </Suspense>
   );
 }

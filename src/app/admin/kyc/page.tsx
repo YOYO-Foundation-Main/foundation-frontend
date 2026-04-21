@@ -7,6 +7,7 @@ import {
   adminGetCampaignKyc,
   adminUpdateCampaignKyc,
 } from "@/features/admin/api/admin.api";
+import { isValidUrl } from "@/utils/url";
 
 interface UserKyc {
   id: number;
@@ -36,10 +37,10 @@ interface CampaignKyc {
 }
 
 
-function isValidUrl(url: string | null | undefined) {
-  if (!url) return false;
-  try { new URL(url); return true; } catch { return false; }
-}
+// function isValidUrl(url: string | null | undefined) {
+//   if (!url) return false;
+//   try { new URL(url); return true; } catch { return false; }
+// }
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {

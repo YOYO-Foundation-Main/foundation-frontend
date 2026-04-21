@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FiMapPin, FiCalendar } from "react-icons/fi";
+import { isValidUrl } from "@/utils/url";
 
 interface Props {
   id: number;
@@ -13,10 +14,10 @@ interface Props {
   featured?: boolean; // big featured card (first event)
 }
 
-function isValidUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  try { new URL(url); return true; } catch { return false; }
-}
+// function isValidUrl(url: string | null | undefined): boolean {
+//   if (!url) return false;
+//   try { new URL(url); return true; } catch { return false; }
+// }
 
 export default function EventCard({
   id, title, date, location, image, description, cause, featured = false,
