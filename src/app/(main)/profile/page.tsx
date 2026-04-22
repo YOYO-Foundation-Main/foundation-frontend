@@ -431,7 +431,7 @@
 // new profile page
 
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -520,7 +520,7 @@ function KycBadge({ status }: { status: string }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter();
   const { user } = useAuthStore();
   const searchParams = useSearchParams();
@@ -964,3 +964,12 @@ export default function ProfilePage() {
   );
 }
 
+
+/* ================= MAIN EXPORT ================= */
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className="p-10 text-center">Loading...</div>}>
+      <ProfileContent />
+    </Suspense>
+  );
+}
