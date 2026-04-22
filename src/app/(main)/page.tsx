@@ -1,5 +1,6 @@
 import BlogSection from "@/components/common/BlogSection";
 import CausesSection from "@/components/common/CausesSection";
+import CampaignSection from "@/app/(main)/campaigns/page"
 import FeaturesSection from "@/components/common/FeaturesSection";
 import GallerySection from "@/components/common/GallerySection";
 import Hero from "@/components/common/Hero";
@@ -18,12 +19,13 @@ export default function HomePage() {
       <Hero />
       <TransformSection />
       <FeaturesSection />
-      <CausesSection/>
-      <ProjectsRegionSection />
+       <CampaignSection/>
+      {/* <CausesSection/> */}
+      {/* <ProjectsRegionSection /> */}
       <GallerySection />
       <StatsSection />
       <TestimonialSection />
-      <BlogSection />
+      {/* <BlogSection /> */}
       <TestimonialsSection/>
       <PartnersSection  />
       
