@@ -187,6 +187,40 @@ export const adminDeleteEvent = async (id: number) => {
   return res.json();
 };
 
+//-------------------DONATIONS--------------
+
+export const getDonations = async (params: any) => {
+  const query = new URLSearchParams(params).toString();
+
+  const res = await fetch(`${BASE_URL}/api/admin/donations?${query}`, {
+    headers: authHeaders(), // ✅ FIXED
+    cache: "no-store",
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to fetch donations");
+  }
+
+  return result;
+};
+
+export const getDonationStats = async () => {
+  const res = await fetch(`${BASE_URL}/api/admin/donations/stats`, {
+    headers: authHeaders(), // ✅ FIXED
+    cache: "no-store",
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to fetch stats");
+  }
+
+  return result;
+};
+
 // ================= BLOGS =================
 export const adminGetBlogs = async () => {
   const res = await fetch(`${BASE_URL}/api/blog`, { headers: authHeaders() });

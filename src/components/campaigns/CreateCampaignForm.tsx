@@ -10,8 +10,8 @@ import {
 } from "@/features/campaigns/api/userCampaign.api";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { isValidUrl } from "@/utils/url";
-
-interface Props { isOpen: boolean; onClose: () => void; }
+import { useRouter } from "next/navigation";
+// interface Props { isOpen: boolean; onClose: () => void; }
 interface CauseOption { id: number; name: string; }
 interface Product { id: number; name: string; price: number; description: string; image: string | null; }
 interface CartItem { product: Product; quantity: number; }
@@ -29,8 +29,9 @@ const STEPS = [
 //   try { new URL(url); return true; } catch { return false; }
 // }
 
-export default function CreateCampaignUserModal({ isOpen, onClose }: Props) {
+export default function CreateCampaignForm() {
   const { user } = useAuthStore();
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [draftId, setDraftId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -63,19 +64,25 @@ export default function CreateCampaignUserModal({ isOpen, onClose }: Props) {
 
   // Pre-fill user info
   useEffect(() => {
-    if (isOpen && user) {
+    if (user) {
       setStep1((p) => ({ ...p, name: user.name || "", email: user.email || "" }));
     }
-  }, [isOpen, user]);
+  }, [user]);
 
   // Load causes
   useEffect(() => {
-    if (!isOpen) return;
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cause`)
-      .then((r) => r.json())
-      .then((d) => setCauses(Array.isArray(d) ? d : d?.data || []))
-      .catch(() => { });
-  }, [isOpen]);
+    const loadCauses = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cause`);
+        const data = await res.json();
+        setCauses(Array.isArray(data) ? data : data?.data || []);
+      } catch (err) {
+        console.error("Failed to load causes", err);
+      }
+    };
+
+    loadCauses();
+  }, []);
 
   // Load products when reaching step 4
   useEffect(() => {
@@ -107,8 +114,10 @@ export default function CreateCampaignUserModal({ isOpen, onClose }: Props) {
     setImageFile(null); setImagePreview(null);
   };
 
-  const handleClose = () => { reset(); onClose(); };
-
+  const handleClose = () => {
+    reset(); // optional
+    router.push("/");
+  };
   // ── Cart helpers ──────────────────────────────────────────────────────────
   const cartTotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
@@ -220,14 +229,14 @@ export default function CreateCampaignUserModal({ isOpen, onClose }: Props) {
     else if (step === 4) handleStep4();
   };
 
-  if (!isOpen) return null;
+
 
   const selectedCause = causes.find((c) => c.id === Number(step1.causeId));
 
   // ── Success screen ─────────────────────────────────────────────────────────
   if (submitted) {
     return (
-      <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl w-full max-w-md p-8 text-center shadow-2xl">
           <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
             <FiCheck size={28} className="text-green-500" />
@@ -251,7 +260,7 @@ export default function CreateCampaignUserModal({ isOpen, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
 
         {/* Header */}
@@ -273,8 +282,8 @@ export default function CreateCampaignUserModal({ isOpen, onClose }: Props) {
             <div key={s.id} className="flex items-center flex-1 last:flex-none">
               <div className="flex items-center gap-1.5">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition ${step > s.id ? "bg-green-500 text-white"
-                    : step === s.id ? "bg-[#D2252B] text-white"
-                      : "bg-gray-200 text-gray-400"
+                  : step === s.id ? "bg-[#D2252B] text-white"
+                    : "bg-gray-200 text-gray-400"
                   }`}>
                   {step > s.id ? <FiCheck size={10} /> : s.id}
                 </div>
@@ -531,7 +540,7 @@ export default function CreateCampaignUserModal({ isOpen, onClose }: Props) {
                       {/* Product image */}
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 shrink-0">
                         {isValidUrl(item.product.image)
-                          ? <img src={item.product.image ||"/assets/placeholder.png"} alt={item.product.name} className="w-full h-full object-cover" />
+                          ? <img src={item.product.image || "/assets/placeholder.png"} alt={item.product.name} className="w-full h-full object-cover" />
                           : <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400" />
                         }
                       </div>
