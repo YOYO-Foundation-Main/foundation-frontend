@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   FiGrid, FiHeart, FiFlag, FiCalendar,
   FiFileText, FiUsers, FiLogOut, FiChevronDown,
-  FiPackage , FiDollarSign, FiMenu, FiX, FiShield,
+  FiPackage, FiDollarSign, FiMenu, FiX, FiShield,
 } from "react-icons/fi";
 import { useAdminStore } from "@/features/admin/store/admin.store";
 
@@ -20,7 +20,15 @@ const NAV = [
     ],
   },
   { label: "Events", href: "/admin/events", icon: FiCalendar },
-  { label: "Donations", href: "/admin/donations", icon: FiDollarSign },
+
+  {
+    label: "Donations", icon: FiDollarSign,
+    children: [
+      { label: "Donations", href: "/admin/donations", icon: FiDollarSign },
+      { label: "Top Donors", href: "/admin/top-donors", icon: FiUsers },
+    ],
+  },
+
   { label: "Blogs", href: "/admin/blogs", icon: FiFileText },
   { label: "Users", href: "/admin/users", icon: FiUsers },
   { label: "Products", href: "/admin/products", icon: FiPackage },
@@ -76,9 +84,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div key={item.label}>
                 <button
                   onClick={() => setOpenGroup(isOpen ? null : item.label)}
-                  className={`w-full flex items-center justify-between px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition ${
-                    isGroupActive ? "bg-blue-50 text-blue-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
-                  }`}
+                  className={`w-full flex items-center justify-between px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition ${isGroupActive ? "bg-blue-50 text-blue-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                    }`}
                 >
                   <div className="flex items-center gap-2 sm:gap-3">
                     <item.icon size={14} />
@@ -92,11 +99,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       <Link
                         key={child.href}
                         href={child.href}
-                        className={`block px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition ${
-                          pathname === child.href
+                        className={`block px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition ${pathname === child.href
                             ? "bg-blue-50 text-blue-600 font-medium"
                             : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
-                        }`}
+                          }`}
                       >
                         {child.label}
                       </Link>
@@ -112,11 +118,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link
               key={item.href}
               href={item.href!}
-              className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition ${
-                isActive
+              className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition ${isActive
                   ? "bg-blue-50 text-blue-600"
                   : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
-              }`}
+                }`}
             >
               <item.icon size={14} />
               {item.label}
@@ -157,16 +162,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-50 lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
       {/* Mobile Sidebar Drawer */}
-      <aside className={`lg:hidden fixed top-0 left-0 h-full w-[260px] bg-white border-r border-gray-100 z-50 shadow-xl transition-transform duration-300 overflow-y-auto ${
-        mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-      }`}>
+      <aside className={`lg:hidden fixed top-0 left-0 h-full w-[260px] bg-white border-r border-gray-100 z-50 shadow-xl transition-transform duration-300 overflow-y-auto ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}>
         <div className="flex justify-end p-3 border-b border-gray-100">
           <button onClick={() => setMobileMenuOpen(false)} className="p-1">
             <FiX size={20} className="text-gray-500" />
@@ -182,7 +186,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
           <div className="flex items-center gap-3">
             {/* Mobile menu button */}
-            <button 
+            <button
               onClick={() => setMobileMenuOpen(true)}
               className="lg:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg transition"
             >
@@ -200,8 +204,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Search */}
             <div className="hidden md:flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1.5 text-sm text-gray-400 w-48">
               <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
               </svg>
               Search anything
             </div>
@@ -209,8 +213,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Mobile search icon */}
             <button className="md:hidden p-2 text-gray-400 hover:bg-gray-100 rounded-lg">
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
               </svg>
             </button>
 

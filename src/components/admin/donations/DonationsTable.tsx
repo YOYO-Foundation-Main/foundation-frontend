@@ -95,6 +95,7 @@ export default function DonationsTable({ data, loading }: any) {
     // ── Helpers ────────────────────────────────────────────────────
     const totalAmount = data.reduce((sum: number, d: any) => sum + (d.amount || 0), 0);
     const completedCount = data.filter((d: any) => d.status === "completed" || d.status === "success").length;
+    const router = useRouter();
 
     // ── Table ──────────────────────────────────────────────────────
     return (
@@ -174,13 +175,16 @@ export default function DonationsTable({ data, loading }: any) {
                             const initials = d.donorName
                                 ? d.donorName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
                                 : "?";
-                            const router = useRouter();
+                            console.log("USER ID:", d.userId);
                             return (
                                 <tr
-                                    key={d.id}
-                                    onClick={() =>
-                                        router.push(`/admin/donations/${encodeURIComponent(d.donorEmail)}`)
-                                    }
+                                    onClick={() => {
+                                        if (!d.userId) {
+                                            console.error("UserId missing!", d);
+                                            return;
+                                        }
+                                        router.push(`/admin/donations/${d.userId}`);
+                                    }}
                                     className="hover:bg-gray-50/60 transition-colors duration-150 group cursor-pointer"
                                 >
                                     {/* Donor */}

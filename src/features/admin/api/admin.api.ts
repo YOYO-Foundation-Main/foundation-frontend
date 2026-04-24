@@ -221,6 +221,40 @@ export const getDonationStats = async () => {
   return result;
 };
 
+// 🔹 Donor Donations
+export const getDonorDonations = async (userId: number) => {
+  const res = await fetch(`${BASE_URL}/api/admin/donor/${userId}/donations`, {
+    headers: authHeaders(),
+    cache: "no-store",
+  });
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message);
+  return result;
+};
+
+// 🔹 Top Donors
+export const getTopDonors = async () => {
+  const res = await fetch(`${BASE_URL}/api/admin/top-donors`, {
+    headers: authHeaders(),
+  });
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message);
+  return result;
+};
+
+// 🔹 Campaign Analytics
+export const getCampaignAnalytics = async (id: number) => {
+  const res = await fetch(`${BASE_URL}/api/admin/campaign/${id}/analytics`, {
+    headers: authHeaders(),
+  });
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message);
+  return result;
+};
+
 // ================= BLOGS =================
 export const adminGetBlogs = async () => {
   const res = await fetch(`${BASE_URL}/api/blog`, { headers: authHeaders() });
