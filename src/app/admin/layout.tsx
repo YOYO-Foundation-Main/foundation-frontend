@@ -10,29 +10,45 @@ import {
 import { useAdminStore } from "@/features/admin/store/admin.store";
 
 const NAV = [
+  // ───── OVERVIEW ─────
   { label: "Dashboard", href: "/admin/dashboard", icon: FiGrid },
-  { label: "Causes", href: "/admin/causes", icon: FiHeart },
+
+  // ───── CORE ─────
   {
-    label: "Campaigns", icon: FiFlag,
+    label: "Campaigns",
+    icon: FiFlag,
     children: [
+      { label: "All Campaigns", href: "/admin/campaigns" },
       { label: "Analytics", href: "/admin/campaigns/analytics" },
-      { label: "Campaigns", href: "/admin/campaigns" },
     ],
   },
+
+  { label: "Causes", href: "/admin/causes", icon: FiHeart },
+
+  {
+    label: "Donations",
+    icon: FiDollarSign,
+    children: [
+      { label: "All Donations", href: "/admin/donations" },
+      { label: "Top Donors", href: "/admin/top-donors" },
+    ],
+  },
+
+  { label: "Products", href: "/admin/products", icon: FiPackage },
+
+  // ───── USERS & TRUST ─────
+  { label: "Users", href: "/admin/users", icon: FiUsers },
+  { label: "KYC Verification", href: "/admin/kyc", icon: FiShield },
+
+  // ───── CONTENT ─────
+  { label: "Blogs", href: "/admin/blogs", icon: FiFileText },
   { label: "Events", href: "/admin/events", icon: FiCalendar },
 
-  {
-    label: "Donations", icon: FiDollarSign,
-    children: [
-      { label: "Donations", href: "/admin/donations", icon: FiDollarSign },
-      { label: "Top Donors", href: "/admin/top-donors", icon: FiUsers },
-    ],
-  },
+  // ───── SUPPORT ─────
+  { label: "Contact Queries", href: "/admin/contacts",  icon: FiCalendar },
 
-  { label: "Blogs", href: "/admin/blogs", icon: FiFileText },
-  { label: "Users", href: "/admin/users", icon: FiUsers },
-  { label: "Products", href: "/admin/products", icon: FiPackage },
-  { label: "KYC", href: "/admin/kyc", icon: FiShield },
+  // ───── GLOBAL ANALYTICS (optional upgrade) ─────
+  // { label: "Analytics", href: "/admin/analytics", icon: FiBarChart2 },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -100,8 +116,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         key={child.href}
                         href={child.href}
                         className={`block px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition ${pathname === child.href
-                            ? "bg-blue-50 text-blue-600 font-medium"
-                            : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                          ? "bg-blue-50 text-blue-600 font-medium"
+                          : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
                           }`}
                       >
                         {child.label}
@@ -119,8 +135,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               key={item.href}
               href={item.href!}
               className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition ${isActive
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                ? "bg-blue-50 text-blue-600"
+                : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
                 }`}
             >
               <item.icon size={14} />

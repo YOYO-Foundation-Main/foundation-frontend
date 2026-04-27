@@ -402,3 +402,14 @@ export const adminUpdateCampaignKyc = async (id: number, status: string, remarks
   if (!res.ok) throw new Error(result.message || "Failed to update campaign KYC");
   return result;
 };
+
+//contact query api 
+export const getContactQueries = async () => {
+  const res = await fetch(`${BASE_URL}/api/contact`, {
+    headers: authHeaders(),
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch contact queries");
+
+  return res.json();
+};

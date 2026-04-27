@@ -418,12 +418,12 @@ import CreateCampaignUserModal from "@/components/campaigns/CreateCampaignForm";
 // ─── Nav links ────────────────────────────────────────────────────────────────
 
 const NAV_LINKS = [
-  { label: "Home",         href: "/" },
-  { label: "About Us",     href: "/about" },
-  { label: "Campaigns",    href: "/campaigns" },
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about" },
+  { label: "Campaigns", href: "/campaigns" },
   { label: "Get Involved", href: "/get-involved" },
-  { label: "Volunteers",   href: "/volunteer" },
-  { label: "Events",       href: "/events" },
+  { label: "Volunteers", href: "/volunteer" },
+  { label: "Events", href: "/events" },
 ];
 
 // ─── Avatar helper ────────────────────────────────────────────────────────────
@@ -446,17 +446,17 @@ function Avatar({
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Navbar() {
-  const { isOpen, openLogin, openSignup, closeModal } = useAuthModal();
+  const { isOpen, mode, openLogin, openSignup, closeModal } = useAuthModal();
   const { user, logout } = useAuthStore();
   const pathname = usePathname();
   const router = useRouter();
 
-  const [menuOpen, setMenuOpen]           = useState(false);
-  const [profileOpen, setProfileOpen]     = useState(false);
-  const [scrolled, setScrolled]           = useState(false);
-  const [showCreateModal, setShowCreate]  = useState(false);
-  const [mounted, setMounted]             = useState(false);
-  const [showLogoutModal, setShowLogout]  = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  // const [showCreateModal, setShowCreate] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [showLogoutModal, setShowLogout] = useState(false);
 
   const profileRef = useRef<HTMLDivElement>(null);
   const firstLetter = user?.name?.charAt(0)?.toUpperCase() || "U";
@@ -501,11 +501,10 @@ export default function Navbar() {
   return (
     <>
       {/* ══════════════════════ HEADER ══════════════════════ */}
-      <header className={`w-full fixed top-0 left-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-black/95 backdrop-blur-md shadow-[0_2px_24px_0_rgba(0,0,0,0.4)]"
-          : "bg-black"
-      }`}>
+      <header className={`w-full fixed top-0 left-0 z-50 transition-all duration-300 ${scrolled
+        ? "bg-black/95 backdrop-blur-md shadow-[0_2px_24px_0_rgba(0,0,0,0.4)]"
+        : "bg-black"
+        }`}>
         <div className="max-w-7xl mx-auto h-[72px] flex items-center justify-between px-4 sm:px-6 lg:px-10 text-white">
 
           {/* ── Logo ── */}
@@ -532,17 +531,15 @@ export default function Navbar() {
                 <Link
                   key={href}
                   href={href}
-                  className={`relative px-3.5 py-2 text-[13px] font-medium tracking-wide transition-colors duration-200 rounded-lg group ${
-                    isActive ? "text-white" : "text-gray-400 hover:text-white"
-                  }`}
+                  className={`relative px-3.5 py-2 text-[13px] font-medium tracking-wide transition-colors duration-200 rounded-lg group ${isActive ? "text-white" : "text-gray-400 hover:text-white"
+                    }`}
                 >
                   {label}
                   {/* Active underline */}
-                  <span className={`absolute bottom-0 left-3.5 right-3.5 h-[2px] bg-[#D2252B] rounded-full transition-all duration-300 ${
-                    isActive
-                      ? "opacity-100 scale-x-100"
-                      : "opacity-0 scale-x-0 group-hover:opacity-50 group-hover:scale-x-100"
-                  }`} />
+                  <span className={`absolute bottom-0 left-3.5 right-3.5 h-[2px] bg-[#D2252B] rounded-full transition-all duration-300 ${isActive
+                    ? "opacity-100 scale-x-100"
+                    : "opacity-0 scale-x-0 group-hover:opacity-50 group-hover:scale-x-100"
+                    }`} />
                 </Link>
               );
             })}
@@ -583,11 +580,10 @@ export default function Navbar() {
                 <div ref={profileRef} className="relative hidden md:block">
                   <button
                     onClick={() => setProfileOpen(!profileOpen)}
-                    className={`flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 rounded-full border transition-all duration-200 ${
-                      profileOpen
-                        ? "border-white/30 bg-white/10"
-                        : "border-white/10 hover:border-white/30 bg-white/5 hover:bg-white/10"
-                    }`}
+                    className={`flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 rounded-full border transition-all duration-200 ${profileOpen
+                      ? "border-white/30 bg-white/10"
+                      : "border-white/10 hover:border-white/30 bg-white/5 hover:bg-white/10"
+                      }`}
                   >
                     <Avatar src={user?.profileImage} fallback={firstLetter} size="sm" />
                     <span className="text-[13px] font-medium text-gray-200 max-w-[110px] truncate hidden lg:block">
@@ -615,7 +611,7 @@ export default function Navbar() {
                       </div>
 
                       {/* Menu items */}
-                      
+
                       <div className="py-1.5">
                         <button
                           onClick={() => { router.push("/startcampaign"); setProfileOpen(false); }}
@@ -680,9 +676,8 @@ export default function Navbar() {
       </header>
 
       {/* ══════════════════════ MOBILE DRAWER ══════════════════════ */}
-      <div className={`fixed inset-0 z-[60] xl:hidden transition-all duration-300 ${
-        menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-      }`}>
+      <div className={`fixed inset-0 z-[60] xl:hidden transition-all duration-300 ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}>
         {/* Backdrop */}
         <div
           className="absolute inset-0 bg-black/70 backdrop-blur-sm"
@@ -690,9 +685,8 @@ export default function Navbar() {
         />
 
         {/* Drawer panel */}
-        <div className={`absolute right-0 top-0 h-full w-[290px] sm:w-[320px] bg-[#0c0c0c] border-l border-white/10 flex flex-col transition-transform duration-300 ease-out ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}>
+        <div className={`absolute right-0 top-0 h-full w-[290px] sm:w-[320px] bg-[#0c0c0c] border-l border-white/10 flex flex-col transition-transform duration-300 ease-out ${menuOpen ? "translate-x-0" : "translate-x-full"
+          }`}>
 
           {/* Drawer header */}
           <div className="flex items-center justify-between px-5 h-[72px] border-b border-white/10 shrink-0">
@@ -737,11 +731,10 @@ export default function Navbar() {
                     key={href}
                     href={href}
                     onClick={() => setMenuOpen(false)}
-                    className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                      isActive
-                        ? "bg-[#D2252B]/15 text-white border border-[#D2252B]/25"
-                        : "text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
+                    className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
+                      ? "bg-[#D2252B]/15 text-white border border-[#D2252B]/25"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                      }`}
                   >
                     {isActive && <span className="w-1 h-4 bg-[#D2252B] rounded-full mr-3" />}
                     {label}
@@ -768,7 +761,10 @@ export default function Navbar() {
             ) : (
               <>
                 <button
-                  onClick={() => { setShowCreate(true); setMenuOpen(false); }}
+                  onClick={() => {
+                    router.push("/startcampaign");
+                    setMenuOpen(false);
+                  }}
                   className="w-full bg-[#D2252B] hover:bg-[#b91c22] py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all"
                 >
                   <FiPlus size={14} /> Create Campaign
@@ -838,8 +834,18 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* <CreateCampaignUserModal isOpen={showCreateModal} onClose={() => setShowCreate(false)} />
-      <AuthModal isOpen={isOpen} onClose={closeModal} /> */}
+      <>
+        {/* <CreateCampaignUserModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreate(false)}
+        /> */}
+
+        <AuthModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          initialStep={mode}
+        />
+      </>
     </>
   );
 }

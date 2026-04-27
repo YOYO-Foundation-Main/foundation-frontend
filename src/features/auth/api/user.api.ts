@@ -44,6 +44,26 @@ export const getMyFundraisers = async () => {
   return result;
 };
 
+// GET /api/donations/my-donations
+export const getMyDonations = async () => {
+  try {
+    const res = await authFetch(
+      `${BASE_URL}/api/donations/my-donations`,
+      { cache: "no-store" }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result?.message || "Failed to fetch donations");
+    }
+
+    return result;
+  } catch (error: any) {
+    throw new Error(error.message || "Something went wrong");
+  }
+};
+
 // POST /api/user/upload-profile-image
 // FormData: { image: File }
 // Returns: { success, message, data: { id, name, email, mobile, profileImage } }
@@ -65,6 +85,10 @@ export const uploadProfileImage = async (file: File) => {
 
   return result;
 };
+
+
+
+
 
 // POST /api/kyc/uploading
 export const uploadUserKyc = async (data: FormData) => {
