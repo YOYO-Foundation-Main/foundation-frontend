@@ -11,7 +11,7 @@ function getAdminToken(): string {
   }
 }
 
-function authHeaders() {  
+function authHeaders() {
   return {
     "Content-Type": "application/json",
     Authorization: `Bearer ${getAdminToken()}`,
@@ -59,31 +59,46 @@ export const adminGetDashboard = async () => {
 };
 
 // ================= CAUSES =================
+
 export const adminGetCauses = async () => {
-  const res = await fetch(`${BASE_URL}/api/cause`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/api/cause/admin`, {
+    headers: authHeaders(),
+  });
+
   if (!res.ok) throw new Error("Failed to fetch causes");
+
   return res.json();
 };
 
 export const adminCreateCause = async (data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/cause`, {
+  const res = await fetch(`${BASE_URL}/api/cause/create`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${getAdminToken()}` },
+    headers: {
+      Authorization: `Bearer ${getAdminToken()}`,
+    },
     body: data,
   });
+
   const result = await res.json();
+
   if (!res.ok) throw new Error(result.message || "Failed to create cause");
+
   return result;
 };
 
 export const adminUpdateCause = async (id: number, data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/cause/${id}`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${getAdminToken()}` },
+    headers: {
+      Authorization: `Bearer ${getAdminToken()}`,
+    },
     body: data,
   });
+
   const result = await res.json();
+
   if (!res.ok) throw new Error(result.message || "Failed to update cause");
+
   return result;
 };
 
@@ -92,8 +107,25 @@ export const adminDeleteCause = async (id: number) => {
     method: "DELETE",
     headers: authHeaders(),
   });
-  if (!res.ok) throw new Error("Failed to delete cause");
-  return res.json();
+
+  const result = await res.json();
+
+  if (!res.ok) throw new Error(result.message || "Failed to delete cause");
+
+  return result;
+};
+
+export const adminToggleCauseStatus = async (id: number) => {
+  const res = await fetch(`${BASE_URL}/api/cause/${id}/toggle`, {
+    method: "PATCH",
+    headers: authHeaders(),
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) throw new Error(result.message || "Failed to toggle status");
+
+  return result;
 };
 
 // ================= CAMPAIGNS =================
