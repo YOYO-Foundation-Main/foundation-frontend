@@ -13,7 +13,7 @@ export default function ContactHero() {
         </div>
 
         {/* Heading */}
-        <h1 className="text-3xl md:text-5xl font-bold text-[#121212] mb-6">
+        <h1 className="text-3xl md:text-6xl font-bold text-[#121212] mb-6">
           Every Act of Kindness Counts
         </h1>
 

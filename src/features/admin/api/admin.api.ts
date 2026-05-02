@@ -326,19 +326,46 @@ export const adminDeleteBlog = async (id: number) => {
 };
 
 // ================= USERS =================
-export const adminGetUsers = async () => {
-  const res = await fetch(`${BASE_URL}/api/users`, { headers: authHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch users");
-  return res.json();
+
+type GetUsersParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: "topDonors" | "engagement" | "recent";
 };
 
-export const adminDeleteUser = async (id: number) => {
-  const res = await fetch(`${BASE_URL}/api/users/${id}`, {
-    method: "DELETE",
+export const adminGetUsers = async (params: GetUsersParams = {}) => {
+  const query = new URLSearchParams();
+
+  if (params.page) query.append("page", String(params.page));
+  if (params.limit) query.append("limit", String(params.limit));
+  if (params.search) query.append("search", params.search);
+  if (params.sortBy) query.append("sortBy", params.sortBy);
+
+  const res = await fetch(
+    `${BASE_URL}/api/admin/users?${query.toString()}`,
+    {
+      headers: authHeaders(),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) throw new Error(result.message || "Failed to fetch users");
+
+  return result;
+};
+
+export const adminGetUserById = async (id: number) => {
+  const res = await fetch(`${BASE_URL}/api/admin/users/${id}`, {
     headers: authHeaders(),
   });
-  if (!res.ok) throw new Error("Failed to delete user");
-  return res.json();
+
+  const result = await res.json();
+
+  if (!res.ok) throw new Error(result.message || "Failed to fetch user");
+
+  return result;
 };
 
 // ================= PRODUCTS =================

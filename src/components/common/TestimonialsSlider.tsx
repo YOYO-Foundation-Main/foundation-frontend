@@ -99,7 +99,7 @@ export default function TestimonialsSection() {
               className={`h-2 rounded-full cursor-pointer transition-all ${
                 i === activeIndex
                   ? "bg-[#D2252B] w-6"
-                  : "bg-gray-300 w-2"
+                  : "bg-gray-400 w-2"
               }`}
             />
           ))}

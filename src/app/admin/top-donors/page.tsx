@@ -1,103 +1,3 @@
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import { getTopDonors } from "@/features/admin/api/admin.api";
-// import { FiTrendingUp, FiUsers, FiCalendar } from "react-icons/fi";
-// import { useRouter } from "next/navigation";
-
-// export default function TopDonorsPage() {
-//   const [donors, setDonors] = useState<any[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const router = useRouter();
-
-//   const fetchTopDonors = async () => {
-//     try {
-//       const res = await getTopDonors();
-//       setDonors(res.data || []);
-//     } catch (err) {
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchTopDonors();
-//   }, []);
-
-//   if (loading) {
-//     return <div className="p-6">Loading top donors...</div>;
-//   }
-
-//   return (
-//     <div className="p-6 space-y-5">
-
-//       {/* Header */}
-//       <div className="flex items-center gap-3">
-//         <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center">
-//           <FiTrendingUp className="text-rose-500" />
-//         </div>
-//         <div>
-//           <h1 className="text-lg font-extrabold">Top Donors</h1>
-//           <p className="text-xs text-gray-400">Leaderboard of highest contributors</p>
-//         </div>
-//       </div>
-
-//       {/* Table */}
-//       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-//         <table className="w-full text-sm">
-//           <thead className="bg-gray-50 text-gray-400 text-xs uppercase">
-//             <tr>
-//               <th className="px-6 py-3 text-left">Donor</th>
-//               <th className="px-4 py-3 text-left">Total Donated</th>
-//               <th className="px-4 py-3 text-left">Donations</th>
-//               <th className="px-4 py-3 text-left">Last Donation</th>
-//             </tr>
-//           </thead>
-
-//           <tbody>
-//             {donors.map((d, i) => (
-//               <tr
-//                 key={d.userId}
-//                 onClick={() => router.push(`/admin/donations/${d.userId}`)}
-//                 className="border-t hover:bg-gray-50 cursor-pointer"
-//               >
-//                 {/* Donor */}
-//                 <td className="px-6 py-4">
-//                   <div>
-//                     <p className="font-semibold text-gray-800">{d.name}</p>
-//                     <p className="text-xs text-gray-400">{d.email}</p>
-//                   </div>
-//                 </td>
-
-//                 {/* Amount */}
-//                 <td className="px-4 py-4 font-bold text-rose-500">
-//                   ₹{d.totalDonated.toLocaleString("en-IN")}
-//                 </td>
-
-//                 {/* Count */}
-//                 <td className="px-4 py-4">
-//                   <span className="flex items-center gap-1 text-gray-600">
-//                     <FiUsers size={12} />
-//                     {d.totalDonations}
-//                   </span>
-//                 </td>
-
-//                 {/* Last Donation */}
-//                 <td className="px-4 py-4 text-xs text-gray-400">
-//                   <span className="flex items-center gap-1">
-//                     <FiCalendar size={12} />
-//                     {new Date(d.lastDonation).toLocaleDateString("en-IN")}
-//                   </span>
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-//     </div>
-//   );
-// }
 
 "use client";
 
@@ -290,7 +190,7 @@ export default function TopDonorsPage() {
             return (
               <div
                 key={d.userId}
-                // onClick={() => router.push(`/admin/donations/${d.userId}`)}
+                onClick={() => router.push(`/admin/donations/${d.userId}`)}
                 className={`relative cursor-pointer group rounded-3xl border bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
                   isFirst
                     ? "shadow-lg shadow-amber-100/80 border-amber-200/60 ring-1 ring-amber-200/40"
