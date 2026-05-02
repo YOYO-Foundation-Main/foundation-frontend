@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { FiSearch, FiX, FiClock, FiShare2, FiMapPin, FiPlus, FiEdit2, FiTrash2, FiPackage } from "react-icons/fi";
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
-import { adminGetCampaigns, adminDeleteCampaign, adminUpdateCampaign, adminUpdateCampaignStatus } from "@/features/admin/api/admin.api";
+import { adminGetCampaigns, adminDeleteCampaign, adminUpdateCampaign, adminUpdateCampaignStatus, adminUpdateFeaturedStatus } from "@/features/admin/api/admin.api";
 import { Campaign } from "@/features/campaigns/types/campaign.types";
 import CreateCampaignModal from "../CreateCampaignModal";
 import EditCampaignModal from "../EditCampaignModal";
@@ -28,21 +28,21 @@ function getDaysLeft(endDate: string | null): number {
 // ✅ Helper to format date safely
 function formatDate(date: string | null): string {
   if (!date) return "Not set";
-  return new Date(date).toLocaleDateString("en-US", { 
-    day: "numeric", 
-    month: "short", 
-    year: "numeric" 
+  return new Date(date).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
   });
 }
 
 function mapStatus(status: string): { label: string; color: string } {
   switch (status?.toUpperCase()) {
-    case "APPROVED":  return { label: "Active",    color: "bg-blue-50 text-blue-600 border border-blue-200" };
-    case "PENDING":   return { label: "Pending",   color: "bg-yellow-50 text-yellow-600 border border-yellow-200" };
-    case "DRAFT":     return { label: "Draft",     color: "bg-gray-100 text-gray-500 border border-gray-200" };
+    case "APPROVED": return { label: "Active", color: "bg-blue-50 text-blue-600 border border-blue-200" };
+    case "PENDING": return { label: "Pending", color: "bg-yellow-50 text-yellow-600 border border-yellow-200" };
+    case "DRAFT": return { label: "Draft", color: "bg-gray-100 text-gray-500 border border-gray-200" };
     case "COMPLETED": return { label: "Completed", color: "bg-green-50 text-green-600 border border-green-200" };
-    case "REJECTED":  return { label: "Rejected",  color: "bg-red-50 text-red-500 border border-red-200" };
-    default:          return { label: status || "Unknown", color: "bg-gray-100 text-gray-500 border border-gray-200" };
+    case "REJECTED": return { label: "Rejected", color: "bg-red-50 text-red-500 border border-red-200" };
+    default: return { label: status || "Unknown", color: "bg-gray-100 text-gray-500 border border-gray-200" };
   }
 }
 
@@ -54,7 +54,12 @@ export default function AdminCampaignsPage() {
   const [activeTab, setActiveTab] = useState("All");
   const [selected, setSelected] = useState<Campaign | null>(null);
   const [perPage, setPerPage] = useState(8);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingCampaign, setPendingCampaign] = useState<Campaign | null>(null);
 
+  const [featuredConfirmOpen, setFeaturedConfirmOpen] = useState(false);
+  const [featuredTarget, setFeaturedTarget] = useState<Campaign | null>(null);
+  const [featuredLoading, setFeaturedLoading] = useState<number | null>(null);
   // Modal states
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -102,6 +107,40 @@ export default function AdminCampaignsPage() {
     }
   };
 
+  const handleFeaturedToggle = async (campaign: Campaign) => {
+    try {
+      setFeaturedLoading(campaign.id);
+
+      await adminUpdateFeaturedStatus(
+        campaign.id,
+        !campaign.isFeatured
+      );
+
+      setCampaigns((prev) =>
+        prev.map((c) =>
+          c.id === campaign.id ? { ...c, isFeatured: !c.isFeatured } : c
+        )
+      );
+
+      if (selected?.id === campaign.id) {
+        setSelected({ ...campaign, isFeatured: !campaign.isFeatured });
+      }
+
+      showToast(
+        campaign.isFeatured
+          ? "Removed from featured"
+          : "Marked as featured",
+        "success"
+      );
+    } catch (err: any) {
+      showToast(err.message || "Failed to update featured", "error");
+    } finally {
+      setFeaturedLoading(null);
+      setFeaturedConfirmOpen(false);
+      setFeaturedTarget(null);
+    }
+  };
+
   const handleDelete = async () => {
     if (!selected) return;
     await adminDeleteCampaign(selected.id);
@@ -117,6 +156,7 @@ export default function AdminCampaignsPage() {
     Pending: campaigns.filter((c) => c.status?.toUpperCase() === "PENDING").length,
     Draft: campaigns.filter((c) => c.status?.toUpperCase() === "DRAFT").length,
     Completed: campaigns.filter((c) => c.status?.toUpperCase() === "COMPLETED").length,
+    Featured: campaigns.filter((c) => c.isFeatured).length,
   };
 
   const filtered = campaigns.filter((c) => {
@@ -125,14 +165,16 @@ export default function AdminCampaignsPage() {
       (activeTab === "Active" && c.status?.toUpperCase() === "APPROVED") ||
       (activeTab === "Pending" && c.status?.toUpperCase() === "PENDING") ||
       (activeTab === "Draft" && c.status?.toUpperCase() === "DRAFT") ||
-      (activeTab === "Completed" && c.status?.toUpperCase() === "COMPLETED");
+      (activeTab === "Completed" && c.status?.toUpperCase() === "COMPLETED") ||
+      (activeTab === "Featured" && c.isFeatured);
+
     const searchMatch =
       c.title.toLowerCase().includes(search.toLowerCase()) ||
       c.cause?.name?.toLowerCase().includes(search.toLowerCase()) ||
       c.location?.toLowerCase().includes(search.toLowerCase());
+
     return tabMatch && searchMatch;
   });
-
   // Calculate total products value for a campaign
   const getTotalProductsValue = (campaign: Campaign) => {
     if (!campaign.campaignProducts) return 0;
@@ -151,9 +193,8 @@ export default function AdminCampaignsPage() {
       />
 
       {toast.msg && (
-        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-xl text-sm font-medium shadow-lg ${
-          toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
-        }`}>
+        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-xl text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+          }`}>
           {toast.msg}
         </div>
       )}
@@ -177,16 +218,14 @@ export default function AdminCampaignsPage() {
 
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 flex-wrap">
-              {(["All", "Active", "Pending", "Draft", "Completed"] as const).map((tab) => (
+              {(["All", "Active", "Pending", "Draft", "Completed", "Featured"] as const).map((tab) => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                    activeTab === tab ? "bg-[#334E79] text-white" : "text-gray-500 hover:text-gray-700"
-                  }`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${activeTab === tab ? "bg-[#334E79] text-white" : "text-gray-500 hover:text-gray-700"
+                    }`}
                 >
                   {tab}
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
-                    activeTab === tab ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
-                  }`}>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${activeTab === tab ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+                    }`}>
                     {counts[tab as keyof typeof counts]}
                   </span>
                 </button>
@@ -217,9 +256,8 @@ export default function AdminCampaignsPage() {
 
               return (
                 <div key={c.id} onClick={() => setSelected(c)}
-                  className={`flex items-center gap-4 px-5 py-4 cursor-pointer transition border-b border-gray-50 last:border-0 ${
-                    isSelected ? "bg-blue-50/60" : "hover:bg-gray-50"
-                  }`}
+                  className={`flex items-center gap-4 px-5 py-4 cursor-pointer transition border-b border-gray-50 last:border-0 ${isSelected ? "bg-blue-50/60" : "hover:bg-gray-50"
+                    }`}
                 >
                   <div className="w-16 h-12 rounded-xl overflow-hidden shrink-0 bg-gray-100 flex items-center justify-center">
                     {isValidUrl(c.image)
@@ -241,6 +279,65 @@ export default function AdminCampaignsPage() {
                         </span>
                       )}
                     </div>
+                  </div>
+
+                  {/* <div className="flex items-center gap-2 mb-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFeaturedTarget(c); // ✅ FIXED
+                        setFeaturedConfirmOpen(true);
+                      }}
+                      className={`relative w-10 h-5 rounded-full transition ${c.isFeatured ? "bg-yellow-400" : "bg-gray-300"
+                        }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition ${c.isFeatured ? "translate-x-5" : ""
+                          }`}
+                      />
+                    </button>
+                  </div> */}
+
+                  <div className="flex items-center gap-3 mb-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFeaturedTarget(c);
+                        setFeaturedConfirmOpen(true);
+                      }}
+                      title={c.isFeatured ? "Remove from featured" : "Mark as featured"}
+                      className={`relative w-13 h-7 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-1 ${c.isFeatured
+                          ? "bg-amber-400 focus:ring-amber-300"
+                          : "bg-slate-200 focus:ring-slate-300"
+                        }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-sm flex items-center justify-center transition-all duration-300 ${c.isFeatured ? "translate-x-6" : "translate-x-0"
+                          }`}
+                      >
+                        {c.isFeatured ? (
+                          <svg className="w-3 h-3 text-amber-400" viewBox="0 0 10 10" fill="currentColor">
+                            <polygon points="5,1 6.2,3.8 9,4.1 7,6.1 7.5,9 5,7.5 2.5,9 3,6.1 1,4.1 3.8,3.8" />
+                          </svg>
+                        ) : (
+                          <svg className="w-3 h-3 text-slate-300" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <circle cx="5" cy="5" r="4" />
+                            <line x1="5" y1="2" x2="5" y2="5" strokeLinecap="round" />
+                          </svg>
+                        )}
+                      </span>
+                    </button>
+
+                    {c.isFeatured ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                        <svg className="w-3 h-3" viewBox="0 0 10 10" fill="currentColor">
+                          <polygon points="5,1 6.2,3.8 9,4.1 7,6.1 7.5,9 5,7.5 2.5,9 3,6.1 1,4.1 3.8,3.8" />
+                        </svg>
+                        Featured
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-400">Not featured</span>
+                    )}
                   </div>
 
                   <div className="w-40 shrink-0 hidden md:block">
@@ -295,9 +392,8 @@ export default function AdminCampaignsPage() {
             </div>
             <div className="flex items-center gap-1">
               {[1, 2, 3].map((p) => (
-                <button key={p} className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs transition ${
-                  p === 1 ? "bg-blue-600 text-white" : "text-gray-500 hover:bg-gray-100"
-                }`}>{p}</button>
+                <button key={p} className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs transition ${p === 1 ? "bg-blue-600 text-white" : "text-gray-500 hover:bg-gray-100"
+                  }`}>{p}</button>
               ))}
             </div>
           </div>
@@ -373,6 +469,8 @@ export default function AdminCampaignsPage() {
                             : <div className="w-full h-full bg-gray-200 flex items-center justify-center text-[8px] text-gray-400">No img</div>
                           }
                         </div>
+
+
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-semibold text-gray-800 truncate">{product.name}</p>
                           <p className="text-[10px] text-gray-400">₹{product.price.toLocaleString("en-US")} each</p>
@@ -423,22 +521,64 @@ export default function AdminCampaignsPage() {
 
               <div className="space-y-2 pt-2">
                 <button
-                  onClick={() => handleStatusToggle(selected)}
+                  onClick={() => {
+                    setPendingCampaign(selected);
+                    setConfirmOpen(true);
+                  }}
                   disabled={statusLoading === selected.id}
-                  className={`w-full py-2.5 rounded-xl text-xs font-semibold transition border ${
-                    selected.status?.toUpperCase() === "APPROVED"
-                      ? "bg-yellow-50 border-yellow-200 text-yellow-600 hover:bg-yellow-100"
-                      : "bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100"
-                  }`}
+                  className={`w-full py-2.5 rounded-xl text-xs font-semibold transition border ${selected.status?.toUpperCase() === "APPROVED"
+                    ? "bg-yellow-50 border-yellow-200 text-yellow-600 hover:bg-yellow-100"
+                    : "bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100"
+                    }`}
                 >
                   {statusLoading === selected.id
                     ? "Updating..."
                     : selected.status?.toUpperCase() === "APPROVED"
-                    ? "⏸ Set to Pending"
-                    : "✅ Set to Active"
+                      ? "⏸ Set to Pending"
+                      : "✅ Set to Active"
                   }
                 </button>
 
+
+                {confirmOpen && pendingCampaign && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-xl">
+
+                      <h2 className="text-lg font-semibold mb-2">
+                        Confirm Status Change
+                      </h2>
+
+                      <p className="text-sm text-gray-600 mb-6">
+                        Are you sure you want to change this campaign status?
+                      </p>
+
+                      <div className="flex justify-end gap-3">
+                        {/* Cancel */}
+                        <button
+                          onClick={() => {
+                            setConfirmOpen(false);
+                            setPendingCampaign(null);
+                          }}
+                          className="px-4 py-2 text-sm border rounded-lg"
+                        >
+                          Cancel
+                        </button>
+
+                        {/* Confirm */}
+                        <button
+                          onClick={async () => {
+                            await handleStatusToggle(pendingCampaign);
+                            setConfirmOpen(false);
+                            setPendingCampaign(null);
+                          }}
+                          className="px-4 py-2 text-sm bg-black text-white rounded-lg"
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowEdit(true)}
@@ -461,6 +601,40 @@ export default function AdminCampaignsPage() {
           </div>
         )}
       </div>
+
+      {featuredConfirmOpen && featuredTarget && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-xl">
+            <h2 className="text-lg font-semibold mb-2">
+              {featuredTarget.isFeatured
+                ? "Remove from Featured?"
+                : "Mark as Featured?"}
+            </h2>
+
+            <p className="text-sm text-gray-500 mb-6">
+              {featuredTarget.isFeatured
+                ? "This campaign will be removed from featured section."
+                : "This campaign will appear in featured section."}
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setFeaturedConfirmOpen(false)}
+                className="px-4 py-2 text-sm rounded-lg border"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => handleFeaturedToggle(featuredTarget)}
+                className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
