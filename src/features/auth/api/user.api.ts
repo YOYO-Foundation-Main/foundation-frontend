@@ -86,10 +86,6 @@ export const uploadProfileImage = async (file: File) => {
   return result;
 };
 
-
-
-
-
 // POST /api/kyc/uploading
 export const uploadUserKyc = async (data: FormData) => {
   const res = await authFetch(`${BASE_URL}/api/kyc/uploading`, { method: "POST", body: data });
@@ -104,4 +100,11 @@ export const uploadCampaignKyc = async (campaignId: number, data: FormData) => {
   const result = await res.json();
   if (!res.ok) throw new Error(result.message || "Failed to upload campaign KYC");
   return result;
+};
+
+//  GET /api/campaigns/featured
+export const getFeaturedCampaigns = async () => {
+  const res = await fetch(`${BASE_URL}/api/campaigns/featured`);
+  const data = await res.json();
+  return data.data;
 };

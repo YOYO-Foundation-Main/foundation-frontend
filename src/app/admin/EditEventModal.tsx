@@ -477,7 +477,7 @@ export default function EditEventModal({
             {loading ? "Saving…" : "Save Changes"}
           </button>
         </div>
-      </div>
+      </div> 
     </div>
   );
 }

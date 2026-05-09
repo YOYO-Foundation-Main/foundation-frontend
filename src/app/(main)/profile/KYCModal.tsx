@@ -99,7 +99,7 @@ export default function KYCModal({ isOpen, onClose, campaigns = [], onSuccess }:
     } finally {
       setLoading(false);
     }
-  };
+  }; 
 
   // ── Step 2: Submit Campaign KYC ────────────────────────────────────────────
   const handleCampaignKyc = async () => {

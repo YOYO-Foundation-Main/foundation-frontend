@@ -6,11 +6,8 @@ import { Blog } from "@/features/blog/types/blog.types";
 import CreateBlogModal from "@/components/admin/CreateBlogModal";
 import EditBlogModal from "@/components/admin/EditBlogModal";
 import DeleteConfirmModal from "../DeleteConfirmModal";
+import { isValidUrl } from "@/utils/url";
 
-function isValidUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  try { new URL(url); return true; } catch { return false; }
-}
 
 export default function AdminBlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);

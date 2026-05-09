@@ -8,7 +8,7 @@ export default function EventsPage() {
     <div className="bg-[#F5F5F5] pt-[72px] min-h-screen">
 
       {/* Hero */}
-      <div className="bg-white px-8 pt-12 pb-8">
+      <div className="bg-white px-8 pt-14 pb-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Upcoming Events</h1>
           <p className="text-gray-500 max-w-lg text-sm leading-relaxed">

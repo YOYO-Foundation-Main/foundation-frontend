@@ -44,7 +44,7 @@ export interface Campaign {
   causeId: number;
   isActive: boolean;
   status: string;
-   isFeatured?: boolean;
+  isFeatured?: boolean;
   createdBy?: number;
   startDate: string | null;
   endDate: string | null;

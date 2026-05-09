@@ -10,6 +10,7 @@ import StatsSection from "@/components/common/StatsSection";
 import TestimonialSection from "@/components/common/TestimonialSection";
 import TestimonialsSection from "@/components/common/TestimonialsSlider";
 import TransformSection from "@/components/common/TransformSection";
+import FeaturedCampBanner from "@/components/common/FeaturedBanner"
 export const dynamic = "force-dynamic";
 
 
@@ -17,6 +18,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <FeaturedCampBanner/>
       <TransformSection />
       <FeaturesSection />
        <CampaignSection/>
