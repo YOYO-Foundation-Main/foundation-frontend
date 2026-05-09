@@ -45,7 +45,7 @@ const NAV = [
   { label: "Events", href: "/admin/events", icon: FiCalendar },
 
   // ───── SUPPORT ─────
-  { label: "Contact Queries", href: "/admin/contacts",  icon: FiCalendar },
+  { label: "Contact Queries", href: "/admin/contacts", icon: FiCalendar },
 
   // ───── GLOBAL ANALYTICS (optional upgrade) ─────
   // { label: "Analytics", href: "/admin/analytics", icon: FiBarChart2 },
@@ -53,11 +53,14 @@ const NAV = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isLoginPage = pathname === "/admin/login";
   const router = useRouter();
   const { admin, logoutAdmin } = useAdminStore();
+
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
 
   useEffect(() => {
     const checkMobile = () => {
@@ -71,6 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+ 
   const handleLogout = () => {
     logoutAdmin();
     router.push("/admin/login");
@@ -82,6 +86,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!admin && !isLoginPage) {
+      router.replace("/admin/login");
+    }
+  }, [admin, isLoginPage, router]);
+
+   if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   const SidebarContent = () => (
     <>
@@ -156,7 +170,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Logout */}
-      <div className="px-2 sm:px-3 pb-4 border-t border-gray-100 pt-3">
+      {/* <div className="px-2 sm:px-3 pb-4 border-t border-gray-100 pt-3">
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm text-gray-500 hover:text-red-500 hover:bg-red-50 transition"
@@ -164,7 +178,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <FiLogOut size={14} />
           Logout
         </button>
-      </div>
+      </div> */}
     </>
   );
 
@@ -211,20 +225,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div>
               <h1 className="text-sm sm:text-base font-bold text-gray-800">Dashboard</h1>
               <p className="text-[10px] sm:text-xs text-gray-400 hidden sm:block">
-                Hello {admin?.email?.split("@")[0]}, Good Morning!
+                Hello {admin?.email?.split("@")[0]},
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Search */}
-            <div className="hidden md:flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1.5 text-sm text-gray-400 w-48">
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-              Search anything
-            </div>
+
 
             {/* Mobile search icon */}
             <button className="md:hidden p-2 text-gray-400 hover:bg-gray-100 rounded-lg">
@@ -238,10 +245,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center text-white text-sm font-bold">
               {firstLetter}
             </div>
-            <div className="hidden sm:block">
+            {/* <div className="hidden sm:block">
               <p className="text-xs font-semibold text-gray-700">{admin?.email?.split("@")[0] || "Admin"}</p>
               <p className="text-[10px] text-gray-400">Admin</p>
+            </div> */}
+            <div className="relative group">
+              <div className="hidden sm:block cursor-pointer">
+                <p className="text-xs font-semibold text-gray-700">
+                  {admin?.email?.split("@")[0] || "Admin"}
+                </p>
+                <p className="text-[10px] text-gray-400">Admin</p>
+              </div>
+
+              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-500 hover:bg-red-50 rounded-xl transition"
+                >
+                  <FiLogOut size={16} />
+                  Logout
+                </button>
+              </div>
             </div>
+
           </div>
         </div>
 
