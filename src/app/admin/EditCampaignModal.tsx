@@ -42,7 +42,7 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
     title: "",
     description: "",
     location: "",
-    goalAmount: "",
+    // goalAmount: "",
     causeId: "",
     startDate: "",
     endDate: "",
@@ -55,7 +55,7 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
       title: campaign.title || "",
       description: campaign.description || "",
       location: campaign.location || "",
-      goalAmount: campaign.goalAmount?.toString() || "",
+      // goalAmount: campaign.goalAmount?.toString() || "",
       causeId: campaign.causeId?.toString() || "",
       startDate: campaign.startDate?.split("T")[0] || "",
       endDate: campaign.endDate?.split("T")[0] || "",
@@ -160,7 +160,7 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
       formData.append("title", form.title);
       formData.append("description", form.description);
       formData.append("location", form.location);
-      formData.append("goalAmount", form.goalAmount);
+      // formData.append("goalAmount", form.goalAmount);
       formData.append("causeId", form.causeId);
       formData.append("startDate", form.startDate);
       if (form.endDate) formData.append("endDate", form.endDate);
@@ -285,10 +285,24 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
               <p className="text-xs text-gray-400 mt-1 leading-relaxed">Update fundraising goals and schedule.</p>
             </div>
             <div className="flex-1 space-y-4">
-              <div>
+              {/* <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1.5">Target Amount (₹) <span className="text-red-500">*</span></label>
                 <input type="number" value={form.goalAmount} onChange={(e) => setForm({ ...form, goalAmount: e.target.value })}
                   className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-400 transition" />
+              </div> */}
+
+              <div className="bg-gray-50 rounded-xl p-4 border">
+                <p className="text-xs text-gray-500 mb-1">
+                  Campaign Goal Amount
+                </p>
+
+                <p className="text-2xl font-bold text-[#334E79]">
+                  ₹{cartTotal.toLocaleString("en-US")}
+                </p>
+
+                <p className="text-xs text-gray-400 mt-1">
+                  Auto calculated from products
+                </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
