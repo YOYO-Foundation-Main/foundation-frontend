@@ -35,7 +35,10 @@ export default function FaqSection() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const toggle = (index: number) => {
-    setActiveIndex(index === activeIndex ? -1 : index);
+    setActiveIndex(index === activeIndex ? -1 : index);  
+    const toggle = (index:1)=>{
+      console.log("this is testing")
+    }
   };
 
   return (

@@ -157,6 +157,31 @@ export const adminUpdateCampaign = async (id: number, data: FormData) => {
   return result;
 };
 
+export const adminAddCampaignProducts = async (data: {
+  campaignId: number;
+  products: {
+    productId: number;
+    quantity: number;
+  }[];
+}) => {
+  const res = await fetch(`${BASE_URL}/api/campaign/products`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAdminToken()}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to add products");
+  }
+
+  return result;
+};
+
 export const adminUpdateCampaignStatus = async (id: number, status: string) => {
   const res = await fetch(`${BASE_URL}/api/campaigns/${id}/status`, {
     method: "PATCH",

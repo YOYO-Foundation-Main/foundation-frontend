@@ -164,9 +164,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="mx-2 sm:mx-3 mb-3 p-3 sm:p-4 bg-[#D7ECF7] rounded-xl text-[#334E79]">
         <p className="text-[10px] sm:text-xs font-bold mb-1">YOYO Foundation<br />Just Got an Upgrade</p>
         <p className="text-[8px] sm:text-[10px] opacity-80 mb-2">Fresh, faster, and better tools for productivity</p>
-        <button className="w-full bg-[#334E79] text-[#FFFFFF] text-[10px] sm:text-xs font-semibold py-1.5 rounded-lg">
+        {/* <button className="w-full bg-[#334E79] text-[#FFFFFF] text-[10px] sm:text-xs font-semibold py-1.5 rounded-lg">
           Try the New Version
-        </button>
+        </button> */}
       </div>
 
       {/* Logout */}

@@ -72,13 +72,43 @@ export default function AdminCampaignsPage() {
     setTimeout(() => setToast({ msg: "", type: "" }), 3000);
   };
 
+  // const fetchCampaigns = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const data = await adminGetCampaigns();
+  //     const list: Campaign[] = data?.campaigns || data || [];
+  //     setCampaigns(list);
+  //     if (list.length > 0 && !selected) setSelected(list[0]);
+  //   } catch (err) {
+  //     console.error("❌ Campaigns fetch error:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
+
       const data = await adminGetCampaigns();
+
       const list: Campaign[] = data?.campaigns || data || [];
+
       setCampaigns(list);
-      if (list.length > 0 && !selected) setSelected(list[0]);
+
+      // ✅ IMPORTANT FIX
+      if (selected) {
+        const updatedSelected = list.find(
+          (c) => c.id === selected.id
+        );
+
+        if (updatedSelected) {
+          setSelected(updatedSelected);
+        }
+      } else if (list.length > 0) {
+        setSelected(list[0]);
+      }
+
     } catch (err) {
       console.error("❌ Campaigns fetch error:", err);
     } finally {
@@ -307,8 +337,8 @@ export default function AdminCampaignsPage() {
                       }}
                       title={c.isFeatured ? "Remove from featured" : "Mark as featured"}
                       className={`relative w-13 h-7 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-1 ${c.isFeatured
-                          ? "bg-amber-400 focus:ring-amber-300"
-                          : "bg-slate-200 focus:ring-slate-300"
+                        ? "bg-amber-400 focus:ring-amber-300"
+                        : "bg-slate-200 focus:ring-slate-300"
                         }`}
                     >
                       <span

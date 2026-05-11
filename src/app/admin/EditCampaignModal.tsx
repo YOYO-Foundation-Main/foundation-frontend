@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { FiX, FiUpload, FiTrash2, FiPlus, FiMinus, FiPackage } from "react-icons/fi";
-import { adminUpdateCampaign, adminGetCauses, adminGetProducts } from "@/features/admin/api/admin.api";
+import { adminUpdateCampaign, adminGetCauses, adminGetProducts, adminAddCampaignProducts } from "@/features/admin/api/admin.api";
 import { Campaign, CampaignProduct } from "@/features/campaigns/types/campaign.types";
 import { isValidUrl } from "@/utils/url";
 
@@ -174,6 +174,17 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
       }))));
 
       await adminUpdateCampaign(campaign.id, formData);
+
+      // ADD THIS
+      if (cart.length > 0) {
+        await adminAddCampaignProducts({
+          campaignId: campaign.id,
+          products: cart.map((p) => ({
+            productId: p.productId,
+            quantity: p.quantity,
+          })),
+        });
+      }
       showToast("✅ Campaign updated!", "success");
       setTimeout(() => { onSuccess(); onClose(); }, 1000);
     } catch (err: any) {
@@ -200,9 +211,8 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
         </div>
 
         {toast.msg && (
-          <div className={`mx-6 mt-4 px-4 py-2 rounded-xl text-sm text-center font-medium ${
-            toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
-          }`}>{toast.msg}</div>
+          <div className={`mx-6 mt-4 px-4 py-2 rounded-xl text-sm text-center font-medium ${toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
+            }`}>{toast.msg}</div>
         )}
 
         <div className="p-6 space-y-8">
@@ -325,9 +335,8 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
                   }
                 </select>
                 <button onClick={addToCart} disabled={!selectedProductId}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shrink-0 ${
-                    selectedProductId ? "bg-[#334E79] text-white hover:bg-[#2a3e60]" : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  }`}>
+                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shrink-0 ${selectedProductId ? "bg-[#334E79] text-white hover:bg-[#2a3e60]" : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    }`}>
                   <FiPlus size={14} /> Add
                 </button>
               </div>
@@ -404,9 +413,8 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl sticky bottom-0">
           <button onClick={onClose} className="px-5 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium transition">Cancel</button>
           <button onClick={handleSubmit} disabled={loading}
-            className={`px-6 py-2 rounded-xl text-sm font-semibold transition ${
-              loading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#334E79] hover:bg-[#2a3e60] text-white"
-            }`}>
+            className={`px-6 py-2 rounded-xl text-sm font-semibold transition ${loading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#334E79] hover:bg-[#2a3e60] text-white"
+              }`}>
             {loading ? "Saving..." : "Save Changes"}
           </button>
         </div>
