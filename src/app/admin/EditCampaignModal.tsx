@@ -9,7 +9,7 @@ interface Props {
   isOpen: boolean;
   campaign: Campaign | null;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: () => void; 
 }
 
 interface CauseOption { id: number; name: string; }
@@ -176,15 +176,15 @@ export default function EditCampaignModal({ isOpen, campaign, onClose, onSuccess
       await adminUpdateCampaign(campaign.id, formData);
 
       // ADD THIS
-      if (cart.length > 0) {
-        await adminAddCampaignProducts({
-          campaignId: campaign.id,
-          products: cart.map((p) => ({
-            productId: p.productId,
-            quantity: p.quantity,
-          })),
-        });
-      }
+      // if (cart.length > 0) {
+      //   await adminAddCampaignProducts({
+      //     campaignId: campaign.id,
+      //     products: cart.map((p) => ({
+      //       productId: p.productId,
+      //       quantity: p.quantity,
+      //     })),
+      //   });
+      // }
       showToast("✅ Campaign updated!", "success");
       setTimeout(() => { onSuccess(); onClose(); }, 1000);
     } catch (err: any) {

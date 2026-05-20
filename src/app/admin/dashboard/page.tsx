@@ -400,3 +400,288 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import {
+//   Users,
+//   HeartHandshake,
+//   HandCoins,
+//   BadgeDollarSign,
+//   Loader2,
+//   RefreshCcw,
+// } from "lucide-react";
+
+// import { adminGetDashboard } from "@/features/admin/api/admin.api";
+
+// interface DashboardData {
+//   totalUsers: number;
+//   totalCampaigns: number;
+//   activeCampaigns: number;
+//   pendingCampaigns: number;
+//   totalDonors: number;
+//   totalAmount: number;
+// }
+
+// export default function AdminDashboardPage() {
+//   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState("");
+
+//   const fetchDashboard = async () => {
+//     try {
+//       setLoading(true);
+//       setError("");
+
+//       const response = await adminGetDashboard();
+
+//       setDashboard(response.data || response);
+//     } catch (err: any) {
+//       console.error("Dashboard Error:", err);
+//       setError(err.message || "Failed to load dashboard");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchDashboard();
+//   }, []);
+
+//   const stats = [
+//     {
+//       title: "Total Users",
+//       value: dashboard?.totalUsers || 0,
+//       icon: Users,
+//       color: "bg-blue-100 text-blue-600",
+//     },
+//     {
+//       title: "Total Campaigns",
+//       value: dashboard?.totalCampaigns || 0,
+//       icon: HeartHandshake,
+//       color: "bg-purple-100 text-purple-600",
+//     },
+//     {
+//       title: "Active Campaigns",
+//       value: dashboard?.activeCampaigns || 0,
+//       icon: HandCoins,
+//       color: "bg-green-100 text-green-600",
+//     },
+//     {
+//       title: "Pending Campaigns",
+//       value: dashboard?.pendingCampaigns || 0,
+//       icon: Loader2,
+//       color: "bg-yellow-100 text-yellow-600",
+//     },
+//     {
+//       title: "Total Donors",
+//       value: dashboard?.totalDonors || 0,
+//       icon: Users,
+//       color: "bg-pink-100 text-pink-600",
+//     },
+//     {
+//       title: "Total Donations",
+//       value: `₹${Number(
+//         dashboard?.totalAmount || 0
+//       ).toLocaleString()}`,
+//       icon: BadgeDollarSign,
+//       color: "bg-emerald-100 text-emerald-600",
+//     },
+//   ];
+
+//   if (loading) {
+//     return (
+//       <div className="flex h-[70vh] items-center justify-center">
+//         <div className="flex flex-col items-center gap-4">
+//           <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+//           <p className="text-gray-500">Loading dashboard...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (error) {
+//     return (
+//       <div className="flex h-[70vh] items-center justify-center px-4">
+//         <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-8 shadow-lg">
+//           <div className="flex flex-col items-center gap-4 text-center">
+//             <div className="rounded-full bg-red-100 p-4">
+//               <RefreshCcw className="h-8 w-8 text-red-500" />
+//             </div>
+
+//             <div>
+//               <h2 className="text-xl font-semibold text-red-600">
+//                 Failed to Load Dashboard
+//               </h2>
+
+//               <p className="mt-2 text-sm text-gray-500">{error}</p>
+//             </div>
+
+//             <button
+//               onClick={fetchDashboard}
+//               className="rounded-xl bg-indigo-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+//             >
+//               Retry
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="space-y-8 p-6">
+//       {/* Header */}
+//       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+//         <div>
+//           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+//             Admin Dashboard
+//           </h1>
+
+//           <p className="text-gray-500">
+//             Monitor platform statistics and donation activities.
+//           </p>
+//         </div>
+
+//         <button
+//           onClick={fetchDashboard}
+//           className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-700"
+//         >
+//           <RefreshCcw className="h-4 w-4" />
+//           Refresh
+//         </button>
+//       </div>
+
+//       {/* Stats Grid */}
+//       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+//         {stats.map((item) => {
+//           const Icon = item.icon;
+
+//           return (
+//             <div
+//               key={item.title}
+//               className="rounded-2xl border border-gray-100 bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+//             >
+//               <div className="flex items-center justify-between">
+//                 <div className="space-y-2">
+//                   <p className="text-sm font-medium text-gray-500">
+//                     {item.title}
+//                   </p>
+
+//                   <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+//                     {item.value}
+//                   </h2>
+//                 </div>
+
+//                 <div className={`rounded-2xl p-4 ${item.color}`}>
+//                   <Icon className="h-8 w-8" />
+//                 </div>
+//               </div>
+//             </div>
+//           );
+//         })}
+//       </div>
+
+//       {/* Extra Analytics */}
+//       <div className="grid gap-6 lg:grid-cols-2">
+//         {/* Campaign Insights */}
+//         <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-md">
+//           <div className="space-y-6">
+//             <div>
+//               <h2 className="text-xl font-semibold text-gray-900">
+//                 Campaign Insights
+//               </h2>
+
+//               <p className="text-sm text-gray-500">
+//                 Current platform campaign overview.
+//               </p>
+//             </div>
+
+//             <div className="space-y-4">
+//               <div className="flex items-center justify-between rounded-xl border p-4">
+//                 <span className="font-medium text-gray-700">
+//                   Active Campaigns
+//                 </span>
+
+//                 <span className="text-lg font-bold text-green-600">
+//                   {dashboard?.activeCampaigns || 0}
+//                 </span>
+//               </div>
+
+//               <div className="flex items-center justify-between rounded-xl border p-4">
+//                 <span className="font-medium text-gray-700">
+//                   Pending Campaigns
+//                 </span>
+
+//                 <span className="text-lg font-bold text-yellow-600">
+//                   {dashboard?.pendingCampaigns || 0}
+//                 </span>
+//               </div>
+
+//               <div className="flex items-center justify-between rounded-xl border p-4">
+//                 <span className="font-medium text-gray-700">
+//                   Total Campaigns
+//                 </span>
+
+//                 <span className="text-lg font-bold text-indigo-600">
+//                   {dashboard?.totalCampaigns || 0}
+//                 </span>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Donation Overview */}
+//         <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-md">
+//           <div className="space-y-6">
+//             <div>
+//               <h2 className="text-xl font-semibold text-gray-900">
+//                 Donation Overview
+//               </h2>
+
+//               <p className="text-sm text-gray-500">
+//                 Donation and donor engagement summary.
+//               </p>
+//             </div>
+
+//             <div className="space-y-4">
+//               <div className="flex items-center justify-between rounded-xl border p-4">
+//                 <span className="font-medium text-gray-700">
+//                   Total Donors
+//                 </span>
+
+//                 <span className="text-lg font-bold text-pink-600">
+//                   {dashboard?.totalDonors || 0}
+//                 </span>
+//               </div>
+
+//               <div className="flex items-center justify-between rounded-xl border p-4">
+//                 <span className="font-medium text-gray-700">
+//                   Total Donations
+//                 </span>
+
+//                 <span className="text-lg font-bold text-emerald-600">
+//                   ₹{Number(
+//                     dashboard?.totalAmount || 0
+//                   ).toLocaleString()}
+//                 </span>
+//               </div>
+
+//               <div className="flex items-center justify-between rounded-xl border p-4">
+//                 <span className="font-medium text-gray-700">
+//                   Platform Users
+//                 </span>
+
+//                 <span className="text-lg font-bold text-blue-600">
+//                   {dashboard?.totalUsers || 0}
+//                 </span>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }

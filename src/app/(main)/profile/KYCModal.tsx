@@ -196,7 +196,7 @@ export default function KYCModal({ isOpen, onClose, campaigns = [], onSuccess }:
         {/* Toast */}
         {toast.msg && (
           <div className={`mx-6 mt-4 px-4 py-2 rounded-xl text-sm text-center font-medium ${
-            toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
+            toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500 u=(new Date).toISOString()"
           }`}>
             {toast.msg}
           </div>

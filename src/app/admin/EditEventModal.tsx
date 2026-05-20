@@ -242,7 +242,7 @@ export default function EditEventModal({
         const res = await adminGetCauses();
         setCauses(res.data || res);
       } catch (err) {
-        console.error("❌ causes error:", err);
+        console.error("causes error:", err);
       }
     };
     fetchCauses();

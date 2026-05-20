@@ -11,6 +11,7 @@ type User = {
 type AuthState = {
   user: User | null;
   token: string | null;
+  tokenExpiry: number | null;
 
   // actions
   setUser: (user: User, token: string) => void;
@@ -23,6 +24,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
+      tokenExpiry: null,
 
       // ✅ Set full user (login / initial load)
       setUser: (user, token) => {
@@ -30,10 +32,18 @@ export const useAuthStore = create<AuthState>()(
 
         // Save cookie for middleware
         if (typeof document !== "undefined") {
-          document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`;
+          document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
         }
 
-        set({ user, token });
+        // set({ user, token });
+
+        const expiry = Date.now() + 1000 * 60 * 60 * 24;
+
+        set({
+          user,
+          token,
+          tokenExpiry: expiry,
+        });
       },
 
       // ✅ Update only part of user (PROFILE IMAGE FIX 🔥)
@@ -55,7 +65,7 @@ export const useAuthStore = create<AuthState>()(
           localStorage.removeItem("token");
         }
 
-        set({ user: null, token: null });
+        set({ user: null, token: null, tokenExpiry: null, });
       },
     }),
     {
@@ -63,6 +73,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
+        tokenExpiry: state.tokenExpiry,
       }),
     }
   )

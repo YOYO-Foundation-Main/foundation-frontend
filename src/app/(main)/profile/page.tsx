@@ -188,13 +188,7 @@
 //                   )}
 
 //                   {/* Hover overlay */}
-//                   <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-//                     {uploadingPhoto ? (
-//                       <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-//                     ) : (
-//                       <FiCamera size={20} className="text-white" />
-//                     )}
-//                   </div>
+//                  
 //                 </div>
 
 //                 {/* Small camera badge */}
@@ -1080,6 +1074,7 @@ function DonationStatusBadge({ status }: { status: string }) {
       <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
       {s.label}
     </span>
+    
   );
 }
 
@@ -1123,7 +1118,7 @@ function DonationCard({ donation }: { donation: Donation }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-2">
 
           {/* Top row: campaign title + badges */}
           <div className="flex items-start justify-between gap-2 mb-1.5">

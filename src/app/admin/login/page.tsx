@@ -148,7 +148,8 @@ export default function AdminLoginPage() {
       setError("");
       const res = await adminLogin({ email, password });
       setAdmin(res.user, res.token);
-      router.push("/admin/dashboard");
+      router.replace("/admin/dashboard");
+      router.refresh();
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
@@ -282,8 +283,8 @@ export default function AdminLoginPage() {
             <div className="relative group">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#D2252B] transition-colors duration-200">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
                 </svg>
               </div>
               <input
@@ -310,8 +311,8 @@ export default function AdminLoginPage() {
             <div className="relative group">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#D2252B] transition-colors duration-200">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
               </div>
               <input
@@ -336,17 +337,16 @@ export default function AdminLoginPage() {
           <button
             onClick={handleLogin}
             disabled={!email || !password || loading}
-            className={`relative w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 overflow-hidden ${
-              email && password && !loading
+            className={`relative w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 overflow-hidden ${email && password && !loading
                 ? "bg-[#D2252B] hover:bg-[#B81E23] text-white shadow-lg shadow-red-200 active:scale-[0.98]"
                 : "bg-gray-100 text-gray-300 cursor-not-allowed"
-            }`}
+              }`}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <svg className="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
                 Signing you in…
               </span>
@@ -354,8 +354,8 @@ export default function AdminLoginPage() {
               <span className="flex items-center justify-center gap-2">
                 Sign in to Admin Panel
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12 5 19 12 12 19"/>
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
                 </svg>
               </span>
             )}

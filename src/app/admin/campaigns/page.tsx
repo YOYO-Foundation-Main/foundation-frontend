@@ -14,7 +14,7 @@ import { isValidUrl } from "@/utils/url";
 
 function getProgress(raised: number, goal: number): number {
   if (!goal) return 0;
-  return Math.min(Math.round((raised / goal) * 100), 100);
+  return Math.min(Math.round((raised/ goal) * 100), 100);
 }
 
 // ✅ FIXED: Handle null endDate

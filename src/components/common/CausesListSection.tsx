@@ -114,3 +114,4 @@ export default function CausesPage() {
     </div>
   );
 }
+

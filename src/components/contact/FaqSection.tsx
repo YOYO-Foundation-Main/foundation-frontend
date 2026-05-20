@@ -35,10 +35,8 @@ export default function FaqSection() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const toggle = (index: number) => {
-    setActiveIndex(index === activeIndex ? -1 : index);  
-    const toggle = (index:1)=>{
-      console.log("this is testing")
-    }
+    setActiveIndex(index === activeIndex ? -1 : index);
+
   };
 
   return (
@@ -65,9 +63,8 @@ export default function FaqSection() {
             return (
               <div
                 key={index}
-                className={`rounded-xl border transition ${
-                  isActive ? "bg-white shadow-sm" : "bg-transparent"
-                }`}
+                className={`rounded-xl border transition ${isActive ? "bg-white shadow-sm" : "bg-transparent"
+                  }`}
               >
 
                 {/* HEADER */}

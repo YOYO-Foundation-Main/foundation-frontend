@@ -24,7 +24,7 @@ export const useAdminStore = create<AdminAuthState>()(
       setAdmin: (admin, token) => {
         // ✅ Save cookie for middleware protection
         if (typeof document !== "undefined") {
-          document.cookie = `adminToken=${token}; path=/; max-age=${60 * 60 * 24 * 7}`;
+          document.cookie = `adminToken=${token}; path=/; max-age=${60 * 60 * 24}`;
         }
         set({ admin, adminToken: token });
       },
