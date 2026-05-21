@@ -95,6 +95,13 @@ export default function CampaignDetailPage() {
   // const isFullyFunded = Math.round(progress) === 100;
   const isFullyFunded =
     (campaign.raisedAmount || 0) >= (campaign.goalAmount || 0);
+
+  const remainingAmount =
+    Math.max(
+      (campaign.goalAmount || 0) -
+      (campaign.raisedAmount || 0),
+      0
+    );
   const donorCount = donations.length;
 
   // ── Product qty handlers (logic unchanged) ──
@@ -453,6 +460,13 @@ export default function CampaignDetailPage() {
                           alert("Please select at least one product");
                           return;
                         }
+
+                        if (productDonationTotal > remainingAmount) {
+                          alert(
+                            `Selected products exceed remaining campaign requirement of ₹${fmt(remainingAmount)}`
+                          );
+                          return;
+                        }
                         localStorage.setItem(
                           "donationData",
                           JSON.stringify({
@@ -499,6 +513,16 @@ export default function CampaignDetailPage() {
                   ) : (
                     <div className="space-y-4">
 
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                        <p className="text-xs font-semibold text-amber-700">
+                          Remaining amount needed:
+                        </p>
+
+                        <p className="text-lg font-extrabold text-amber-800">
+                          ₹{fmt(remainingAmount)}
+                        </p>
+                      </div>
+
                       {/* Products reference table */}
                       {products.length > 0 && (
                         <div className="rounded-xl border border-gray-100 overflow-hidden">
@@ -530,7 +554,15 @@ export default function CampaignDetailPage() {
                           {[1800, 2500, 4000].map((amt) => (
                             <button
                               key={amt}
-                              onClick={() => setDonationAmount(amt)}
+                              // onClick={() => setDonationAmount(amt)}
+                              onClick={() => {
+                                if (amt > remainingAmount) {
+                                  setDonationAmount(remainingAmount);
+                                  return;
+                                }
+
+                                setDonationAmount(amt);
+                              }}
                               className={`py-2 rounded-lg border text-xs font-bold transition-all ${donationAmount === amt
                                 ? "border-[#D2252B] bg-[#D2252B]/5 text-[#D2252B]"
                                 : "border-gray-200 text-gray-600 hover:border-gray-300"
@@ -554,7 +586,17 @@ export default function CampaignDetailPage() {
                             placeholder="0"
                             className="w-full border-2 border-gray-200 focus:border-[#D2252B] outline-none pl-8 pr-4 py-3 rounded-xl text-sm font-bold transition-colors"
                             value={donationAmount || ""}
-                            onChange={(e) => setDonationAmount(Number(e.target.value))}
+                            // onChange={(e) => setDonationAmount(Number(e.target.value))}
+                            onChange={(e) => {
+                              const value = Number(e.target.value);
+
+                              if (value > remainingAmount) {
+                                setDonationAmount(remainingAmount);
+                                return;
+                              }
+
+                              setDonationAmount(value);
+                            }}
                           />
                         </div>
                       </div>
@@ -577,7 +619,12 @@ export default function CampaignDetailPage() {
                           );
                           router.push(`/Donate/${campaign.id}/Checkout?mode=${mode}`);
                         }}
-                        disabled={!donationAmount || donationAmount <= 0}
+                        // disabled={!donationAmount || donationAmount <= 0}
+                        disabled={
+                          isFullyFunded ||
+                          !donationAmount ||
+                          donationAmount <= 0
+                        }
                         className={`w-full py-3.5 rounded-xl font-extrabold text-sm transition-all duration-200 ${donationAmount > 0
                           ? "bg-[#D2252B] text-white hover:bg-[#b51e23] shadow-md hover:shadow-lg active:scale-[0.98]"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
