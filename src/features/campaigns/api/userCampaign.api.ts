@@ -23,7 +23,7 @@ export const startCampaignDraft = async (data: {
   email: string;
   mobile: string;
   causeId: number;
-}): Promise<{ id: number; [key: string]: any }> => {
+}): Promise<{ id: number;[key: string]: any }> => {
   const token = getUserToken();
   if (!token) throw new Error("Please login to create a campaign");
 
@@ -85,17 +85,23 @@ export const updateCampaignDraftBeneficiary = async (
 // ── Step 4: Add products to campaign draft ────────────────────────────────────
 // POST /api/campaign/products
 // Body: { draftId, products: [{ productId, quantity }] }
+// export const addCampaignProducts = async (
+//   draftId: number,
+//   products: { productId: number; quantity: number }[]
+// )
 export const addCampaignProducts = async (
   draftId: number,
-  products: { productId: number; quantity: number }[]
-): Promise<any> => {
+  products: { productId: number; quantity: number }[],
+  manualGoalAmount?: number
+)
+  : Promise<any> => {
   const token = getUserToken();
   if (!token) throw new Error("Please login to continue");
 
   const res = await fetch(`${BASE_URL}/api/campaign/products`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ draftId, products }),
+    body: JSON.stringify({ draftId, products, manualGoalAmount}),
   });
   const result = await res.json();
   console.log("📡 [CAMPAIGN PRODUCTS]:", res.status, result);

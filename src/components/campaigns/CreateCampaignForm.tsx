@@ -60,6 +60,7 @@ export default function CreateCampaignForm() {
 
   // Step 4 — cart
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [manualGoalAmount, setManualGoalAmount] = useState(0);
   const [selectedProductId, setSelectedProductId] = useState("");
 
   // Pre-fill user info
@@ -197,13 +198,28 @@ export default function CreateCampaignForm() {
   };
 
   const handleStep4 = async () => {
-    if (cart.length === 0) { showToast("Please add at least one product", "error"); return; }
+    // if (cart.length === 0) { showToast("Please add at least one product", "error"); return; }
+    if (cart.length === 0 && manualGoalAmount <= 0) {
+      showToast(
+        "Please either add products or enter target amount",
+        "error"
+      );
+      return;
+    }
     if (!draftId) return;
     try {
       setLoading(true);
+      // await addCampaignProducts(
+      //   draftId,
+      //   cart.map((i) => ({ productId: i.product.id, quantity: i.quantity }))
+      // );
       await addCampaignProducts(
         draftId,
-        cart.map((i) => ({ productId: i.product.id, quantity: i.quantity }))
+        cart.map((i) => ({
+          productId: i.product.id,
+          quantity: i.quantity,
+        })),
+        manualGoalAmount
       );
       setStep(5);
     } catch (err: any) {
@@ -515,7 +531,29 @@ export default function CreateCampaignForm() {
                   </div>
                 )}
               </div>
+              {/* Manual Goal Amount */}
 
+              {cart.length === 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <label className="block text-xs font-semibold text-blue-700 mb-2">
+                    Campaign Target Amount
+                  </label>
+
+                  <input
+                    type="number"
+                    placeholder="Enter target amount"
+                    value={manualGoalAmount || ""}
+                    onChange={(e) =>
+                      setManualGoalAmount(Number(e.target.value))
+                    }
+                    className="w-full border border-blue-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B]"
+                  />
+
+                  <p className="text-[11px] text-blue-600 mt-2">
+                    Use this if you do not want to add products.
+                  </p>
+                </div>
+              )}
               {/* Cart items */}
               {cart.length === 0 ? (
                 <div className="bg-gray-50 rounded-xl p-6 text-center text-sm text-gray-400 border-2 border-dashed border-gray-200">
@@ -557,7 +595,27 @@ export default function CreateCampaignForm() {
                           className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
                           <FiMinus size={12} />
                         </button>
-                        <span className="w-8 text-center text-sm font-bold text-gray-800">{item.quantity}</span>
+                        {/* <span className="w-8 text-center text-sm font-bold text-gray-800">{item.quantity}</span> */}
+                        <input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => {
+                            const value = Number(e.target.value);
+
+                            setCart((prev) =>
+                              prev.map((cartItem) =>
+                                cartItem.product.id === item.product.id
+                                  ? {
+                                    ...cartItem,
+                                    quantity: value > 0 ? value : 1,
+                                  }
+                                  : cartItem
+                              )
+                            );
+                          }}
+                          className="w-16 border border-gray-200 rounded-lg py-1 text-center text-sm font-bold outline-none focus:border-[#D2252B]"
+                        />
                         <button onClick={() => updateQty(item.product.id, 1)}
                           className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
                           <FiPlus size={12} />

@@ -573,7 +573,7 @@ export default function CampaignDetailPage() {
                           ))}
                         </div>
                       </div>
-
+                         
                       {/* Custom input */}
                       <div>
                         <p className="text-xs font-semibold text-gray-500 mb-2">Or enter amount</p>
