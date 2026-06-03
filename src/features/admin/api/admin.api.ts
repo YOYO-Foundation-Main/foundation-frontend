@@ -514,3 +514,92 @@ export const getContactQueries = async () => {
 
   return res.json();
 };
+
+
+//NGOs 
+export const getAllNgos = async () => {
+const res = await fetch(`${BASE_URL}/api/ngo/admin/ngos`,
+{
+headers: authHeaders(),
+}
+);
+
+const result = await res.json();
+
+if (!res.ok) {
+throw new Error(
+result.message || "Failed to fetch NGOs"
+);
+}
+
+return result;
+};
+
+export const getNgoById = async (
+id: number
+) => {
+const res = await fetch(
+`${BASE_URL}/api/ngo/admin/ngos/${id}`,
+{
+headers: authHeaders(),
+}
+);
+
+const result = await res.json();
+
+if (!res.ok) {
+throw new Error(
+result.message || "Failed to fetch NGO"
+);
+}
+
+return result;
+};
+
+export const approveNgo = async (
+id: number
+) => {
+const res = await fetch(
+`${BASE_URL}/api/ngo/admin/ngos/${id}/approve`,
+{
+method: "PUT",
+headers: authHeaders(),
+}
+);
+
+const result = await res.json();
+
+if (!res.ok) {
+throw new Error(
+result.message || "Failed to approve NGO"
+);
+}
+
+return result;
+};
+
+export const rejectNgo = async (
+id: number,
+rejectionReason: string
+) => {
+const res = await fetch(
+`${BASE_URL}/api/ngo/admin/ngos/${id}/reject`,
+{
+method: "PUT",
+headers: authHeaders(),
+body: JSON.stringify({
+rejectionReason,
+}),
+}
+);
+
+const result = await res.json();
+
+if (!res.ok) {
+throw new Error(
+result.message || "Failed to reject NGO"
+);
+}
+
+return result;
+};

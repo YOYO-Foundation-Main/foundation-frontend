@@ -40,6 +40,9 @@ const NAV = [
   { label: "Users", href: "/admin/users", icon: FiUsers },
   { label: "KYC Verification", href: "/admin/kyc", icon: FiShield },
 
+  // -------NGO---------------------
+    { label: "NGO Verification ", href: "/admin/ngos", icon: FiShield },
+
   // ───── CONTENT ─────
   { label: "Blogs", href: "/admin/blogs", icon: FiFileText },
   { label: "Events", href: "/admin/events", icon: FiCalendar },

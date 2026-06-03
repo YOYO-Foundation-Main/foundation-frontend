@@ -195,8 +195,8 @@ export default function Footer() {
             {[
               ["About Us", "/about"],
               ["Causes", "/causes"],
-              ["Volunteers", "#"],
-              ["Partners", "#"],
+              // ["Volunteers", "#"],
+              ["Partners", "/partners"],
               ["Contact", "/contact"],
               ["Blog", "/blog"],
             ].map(([label, link]) => (
@@ -220,8 +220,8 @@ export default function Footer() {
           <ul className="space-y-3 text-sm">
             {[
               "F.A.Q",
-              "News",
-              "Reports",
+              // "News",
+              // "Reports",
               "Terms of Use",
               "Privacy Policy",
             ].map((item) => (
