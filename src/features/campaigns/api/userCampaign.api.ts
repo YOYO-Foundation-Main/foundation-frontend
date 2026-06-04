@@ -56,28 +56,73 @@ export const updateCampaignDraftDetails = async (draftId: number, data: FormData
 };
 
 // ── Step 3: Update beneficiary ────────────────────────────────────────────────
-// PUT /api/campaign-draft/:id — JSON { beneficiaryName, beneficiaryRelation, ... }
+// export const updateCampaignDraftBeneficiary = async (
+//   draftId: number,
+//   data: {
+//     beneficiaryType: string;
+
+//     ngoId?: string;
+
+//     beneficiaryName?: string;
+//     beneficiaryRelation?: string;
+//     beneficiaryMobile?: string;
+//     beneficiaryCity?: string;
+//     beneficiaryState?: string;
+//   }
+// ): Promise<any> => {
+//   const token = getUserToken();
+//   if (!token) throw new Error("Please login to continue");
+
+//   const res = await fetch(`${BASE_URL}/api/campaign-draft/${draftId}`, {
+//     method: "PUT",
+//     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+//     body: JSON.stringify(data),
+//   });
+//   const result = await res.json();
+//   console.log("📡 [DRAFT BENEFICIARY]:", res.status, result);
+//   if (!res.ok) throw new Error(result.message || "Failed to update beneficiary");
+//   return result?.data || result;
+// };
 export const updateCampaignDraftBeneficiary = async (
   draftId: number,
   data: {
-    beneficiaryName: string;
-    beneficiaryRelation: string;
-    beneficiaryMobile: string;
-    beneficiaryCity: string;
-    beneficiaryState: string;
+    beneficiaryType: string;
+
+    ngoId?: string;
+
+    beneficiaryName?: string;
+    beneficiaryRelation?: string;
+    beneficiaryMobile?: string;
+    beneficiaryCity?: string;
+    beneficiaryState?: string;
   }
 ): Promise<any> => {
   const token = getUserToken();
-  if (!token) throw new Error("Please login to continue");
 
-  const res = await fetch(`${BASE_URL}/api/campaign-draft/${draftId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify(data),
-  });
+  if (!token) {
+    throw new Error("Please login to continue");
+  }
+
+  const res = await fetch(
+    `${BASE_URL}/api/campaign-draft/${draftId}/beneficiary`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }
+  );
+
   const result = await res.json();
-  console.log("📡 [DRAFT BENEFICIARY]:", res.status, result);
-  if (!res.ok) throw new Error(result.message || "Failed to update beneficiary");
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to update beneficiary"
+    );
+  }
+
   return result?.data || result;
 };
 

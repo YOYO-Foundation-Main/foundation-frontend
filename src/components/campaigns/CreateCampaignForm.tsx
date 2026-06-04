@@ -15,7 +15,12 @@ import { useRouter } from "next/navigation";
 interface CauseOption { id: number; name: string; }
 interface Product { id: number; name: string; price: number; description: string; image: string | null; }
 interface CartItem { product: Product; quantity: number; }
-
+interface Ngo {
+  id: number;
+  ngoName: string;
+  state: string;
+  district: string;
+}
 const STEPS = [
   { id: 1, label: "Your Info" },
   { id: 2, label: "Campaign" },
@@ -41,6 +46,8 @@ export default function CreateCampaignForm() {
   // Data
   const [causes, setCauses] = useState<CauseOption[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [ngos, setNgos] = useState<Ngo[]>([]);
+  const [loadingNgos, setLoadingNgos] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
   // Step 1
@@ -53,9 +60,34 @@ export default function CreateCampaignForm() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Step 3
+  // const [step3, setStep3] = useState({
+  //   beneficiaryName: "", beneficiaryRelation: "",
+  //   beneficiaryMobile: "", beneficiaryCity: "", beneficiaryState: "",
+  // });
+  // const [step3, setStep3] = useState({
+  //   beneficiaryType: "SELF",
+
+  //   ngoId: "",
+
+  //   beneficiaryName: "",
+  //   beneficiaryRelation: "",
+  //   beneficiaryMobile: "",
+  //   beneficiaryCity: "",
+  //   beneficiaryState: "",
+  // });
+
+
+  // Step 3
   const [step3, setStep3] = useState({
-    beneficiaryName: "", beneficiaryRelation: "",
-    beneficiaryMobile: "", beneficiaryCity: "", beneficiaryState: "",
+    beneficiaryType: "",
+
+    ngoId: "",
+
+    beneficiaryName: "",
+    beneficiaryRelation: "",
+    beneficiaryMobile: "",
+    beneficiaryCity: "",
+    beneficiaryState: "",
   });
 
   // Step 4 — cart
@@ -85,6 +117,30 @@ export default function CreateCampaignForm() {
     loadCauses();
   }, []);
 
+  //load ngos
+  useEffect(() => {
+    const loadNgos = async () => {
+      try {
+        setLoadingNgos(true);
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ngo/public/verified`
+        );
+
+        const data = await res.json();
+
+        setNgos(data?.data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingNgos(false);
+      }
+    };
+
+    loadNgos();
+  }, []);
+
+
   // Load products when reaching step 4
   useEffect(() => {
     if (step !== 4 || products.length > 0) return;
@@ -110,8 +166,16 @@ export default function CreateCampaignForm() {
     setStep(1); setDraftId(null); setSubmitted(false);
     setStep1({ name: "", email: "", mobile: "", causeId: "" });
     setStep2({ title: "", description: "" });
-    setStep3({ beneficiaryName: "", beneficiaryRelation: "", beneficiaryMobile: "", beneficiaryCity: "", beneficiaryState: "" });
-    setCart([]); setSelectedProductId("");
+    setStep3({
+      beneficiaryType: "SELF",
+      ngoId: "",
+
+      beneficiaryName: "",
+      beneficiaryRelation: "",
+      beneficiaryMobile: "",
+      beneficiaryCity: "",
+      beneficiaryState: "",
+    }); setCart([]); setSelectedProductId("");
     setImageFile(null); setImagePreview(null);
   };
 
@@ -183,18 +247,174 @@ export default function CreateCampaignForm() {
     } finally { setLoading(false); }
   };
 
+  // const handleStep3 = async () => {
+  //   if (!step3.beneficiaryName) { showToast("Beneficiary name is required", "error"); return; }
+  //   if (!step3.beneficiaryRelation) { showToast("Relation is required", "error"); return; }
+  //   if (!step3.beneficiaryMobile) { showToast("Beneficiary mobile is required", "error"); return; }
+  //   if (!draftId) return;
+  //   try {
+  //     setLoading(true);
+  //     await updateCampaignDraftBeneficiary(draftId, step3);
+  //     setStep(4);
+  //   } catch (err: any) {
+  //     showToast(err.message || "Failed to save beneficiary", "error");
+  //   } finally { setLoading(false); }
+  // };
+
+  // const handleStep3 = async () => {
+  //   if (!draftId) return;
+
+  //   if (!step3.beneficiaryType) {
+  //     showToast("Please select beneficiary type", "error");
+  //     return;
+  //   }
+
+  //   if (step3.beneficiaryType === "NGO") {
+  //     if (!step3.ngoId) {
+  //       showToast("Please select NGO", "error");
+  //       return;
+  //     }
+  //   }
+
+  //   if (step3.beneficiaryType === "INDIVIDUAL") {
+  //     if (!step3.beneficiaryName) {
+  //       showToast("Beneficiary name required", "error");
+  //       return;
+  //     }
+
+  //     if (!step3.beneficiaryRelation) {
+  //       showToast("Relation required", "error");
+  //       return;
+  //     }
+
+  //     if (!step3.beneficiaryMobile) {
+  //       showToast("Mobile required", "error");
+  //       return;
+  //     }
+  //   }
+
+  //   try {
+  //     setLoading(true);
+
+  //     await updateCampaignDraftBeneficiary(
+  //       draftId,
+  //       step3
+  //     );
+
+  //     setStep(4);
+  //   } catch (err: any) {
+  //     showToast(
+  //       err.message || "Failed to save beneficiary",
+  //       "error"
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleStep3 = async () => {
-    if (!step3.beneficiaryName) { showToast("Beneficiary name is required", "error"); return; }
-    if (!step3.beneficiaryRelation) { showToast("Relation is required", "error"); return; }
-    if (!step3.beneficiaryMobile) { showToast("Beneficiary mobile is required", "error"); return; }
     if (!draftId) return;
+
     try {
       setLoading(true);
-      await updateCampaignDraftBeneficiary(draftId, step3);
+
+      if (step3.beneficiaryType === "SELF") {
+        console.log("STEP 3 DATA", step3);
+        await updateCampaignDraftBeneficiary(
+          draftId,
+          {
+            beneficiaryType: "SELF",
+          }
+        );
+      }
+
+      else if (
+        step3.beneficiaryType === "NGO"
+      ) {
+        if (!step3.ngoId) {
+          showToast(
+            "Please select NGO",
+            "error"
+          );
+          return;
+        }
+
+        await updateCampaignDraftBeneficiary(
+          draftId,
+          {
+            beneficiaryType: "NGO",
+            ngoId: step3.ngoId,
+          }
+        );
+      }
+
+      else {
+        if (!step3.beneficiaryName) {
+          showToast(
+            "Beneficiary name required",
+            "error"
+          );
+          return;
+        }
+
+        if (!step3.beneficiaryMobile) {
+          showToast(
+            "Beneficiary mobile required",
+            "error"
+          );
+          return;
+        }
+
+        if (!step3.beneficiaryCity) {
+          showToast(
+            "Beneficiary city required",
+            "error"
+          );
+          return;
+        }
+
+        if (!step3.beneficiaryState) {
+          showToast(
+            "Beneficiary state required",
+            "error"
+          );
+          return;
+        }
+
+        await updateCampaignDraftBeneficiary(
+          draftId,
+          {
+            beneficiaryType: "INDIVIDUAL",
+
+            beneficiaryName:
+              step3.beneficiaryName,
+
+            beneficiaryRelation:
+              step3.beneficiaryRelation,
+
+            beneficiaryMobile:
+              step3.beneficiaryMobile,
+
+            beneficiaryCity:
+              step3.beneficiaryCity,
+
+            beneficiaryState:
+              step3.beneficiaryState,
+          }
+        );
+      }
+
       setStep(4);
+
     } catch (err: any) {
-      showToast(err.message || "Failed to save beneficiary", "error");
-    } finally { setLoading(false); }
+      showToast(
+        err.message ||
+        "Failed to save beneficiary",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleStep4 = async () => {
@@ -405,45 +625,201 @@ export default function CreateCampaignForm() {
           )}
 
           {/* ── STEP 3: Beneficiary ── */}
+
           {step === 3 && (
-            <div className="p-6 space-y-4">
-              <p className="text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
-                Who will directly benefit from this campaign?
-              </p>
+            <div className="p-6 space-y-5">
+
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Beneficiary Name <span className="text-red-500">*</span></label>
-                <input type="text" placeholder="e.g. Ramesh Patel" value={step3.beneficiaryName}
-                  onChange={(e) => setStep3({ ...step3, beneficiaryName: e.target.value })}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Relation / Role <span className="text-red-500">*</span></label>
-                <input type="text" placeholder="e.g. NGO Head, Patient, Student" value={step3.beneficiaryRelation}
-                  onChange={(e) => setStep3({ ...step3, beneficiaryRelation: e.target.value })}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Mobile <span className="text-red-500">*</span></label>
-                <input type="tel" placeholder="10-digit mobile" maxLength={10} value={step3.beneficiaryMobile}
-                  onChange={(e) => setStep3({ ...step3, beneficiaryMobile: e.target.value.replace(/\D/g, "") })}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">City</label>
-                  <input type="text" placeholder="e.g. Ahmedabad" value={step3.beneficiaryCity}
-                    onChange={(e) => setStep3({ ...step3, beneficiaryCity: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
+                <label className="block text-sm font-semibold mb-3">
+                  Who will receive the donations?
+                </label>
+
+                <div className="space-y-3">
+
+                  <label className="flex items-center gap-3 border rounded-xl p-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={
+                        step3.beneficiaryType === "SELF"
+                      }
+                      onChange={() =>
+                        setStep3({
+                          ...step3,
+                          beneficiaryType: "SELF",
+                        })
+                      }
+                    />
+                    <div>
+                      <p className="font-medium">
+                        Myself
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Donations are for me.
+                      </p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 border rounded-xl p-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={
+                        step3.beneficiaryType ===
+                        "INDIVIDUAL"
+                      }
+                      onChange={() =>
+                        setStep3({
+                          ...step3,
+                          beneficiaryType:
+                            "INDIVIDUAL",
+                        })
+                      }
+                    />
+                    <div>
+                      <p className="font-medium">
+                        Individual
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Donations for a person.
+                      </p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 border rounded-xl p-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={
+                        step3.beneficiaryType === "NGO"
+                      }
+                      onChange={() =>
+                        setStep3({
+                          ...step3,
+                          beneficiaryType: "NGO",
+                        })
+                      }
+                    />
+                    <div>
+                      <p className="font-medium">
+                        Verified NGO
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Donate through an NGO.
+                      </p>
+                    </div>
+                  </label>
+
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">State</label>
-                  <input type="text" placeholder="e.g. Gujarat" value={step3.beneficiaryState}
-                    onChange={(e) => setStep3({ ...step3, beneficiaryState: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B] transition" />
-                </div>
               </div>
+
+              {step3.beneficiaryType === "NGO" && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Select NGO
+                  </label>
+
+                  <select
+                    value={step3.ngoId}
+                    onChange={(e) =>
+                      setStep3({
+                        ...step3,
+                        ngoId: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-xl px-3 py-3"
+                  >
+                    <option value="">
+                      Select NGO
+                    </option>
+
+                    {ngos.map((ngo) => (
+                      <option
+                        key={ngo.id}
+                        value={ngo.id}
+                      >
+                        {ngo.ngoName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {step3.beneficiaryType ===
+                "INDIVIDUAL" && (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Beneficiary Name"
+                      value={step3.beneficiaryName}
+                      onChange={(e) =>
+                        setStep3({
+                          ...step3,
+                          beneficiaryName:
+                            e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-xl px-3 py-3"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Relation"
+                      value={step3.beneficiaryRelation}
+                      onChange={(e) =>
+                        setStep3({
+                          ...step3,
+                          beneficiaryRelation:
+                            e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-xl px-3 py-3"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Mobile"
+                      value={step3.beneficiaryMobile}
+                      onChange={(e) =>
+                        setStep3({
+                          ...step3,
+                          beneficiaryMobile:
+                            e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-xl px-3 py-3"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="City"
+                      value={step3.beneficiaryCity}
+                      onChange={(e) =>
+                        setStep3({
+                          ...step3,
+                          beneficiaryCity:
+                            e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-xl px-3 py-3"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="State"
+                      value={step3.beneficiaryState}
+                      onChange={(e) =>
+                        setStep3({
+                          ...step3,
+                          beneficiaryState:
+                            e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-xl px-3 py-3"
+                    />
+                  </>
+                )}
+
             </div>
           )}
+
 
           {/* ── STEP 4: Products ── */}
           {step === 4 && (
@@ -671,7 +1047,7 @@ export default function CreateCampaignForm() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-4">
+              {/* <div className="bg-gray-50 rounded-xl p-4">
                 <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">Beneficiary</p>
                 <div className="grid grid-cols-2 gap-y-1 text-sm">
                   <span className="text-gray-500">Name</span><span className="font-medium text-gray-800">{step3.beneficiaryName}</span>
@@ -679,6 +1055,98 @@ export default function CreateCampaignForm() {
                   <span className="text-gray-500">Mobile</span><span className="font-medium text-gray-800">{step3.beneficiaryMobile}</span>
                   <span className="text-gray-500">Location</span><span className="font-medium text-gray-800">{[step3.beneficiaryCity, step3.beneficiaryState].filter(Boolean).join(", ") || "—"}</span>
                 </div>
+              </div> */}
+
+              {/* <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">
+                  Beneficiary
+                </p>
+
+                <div className="grid grid-cols-2 gap-y-1 text-sm">
+
+                  <span className="text-gray-500">Type</span>
+                  <span className="font-medium">
+                    {step3.beneficiaryType}
+                  </span>
+
+                  {step3.beneficiaryType === "NGO" && (
+                    <>
+                      <span className="text-gray-500">
+                        NGO
+                      </span>
+
+                      <span className="font-medium">
+                        {
+                          ngos.find(
+                            (n) =>
+                              n.id === Number(step3.ngoId)
+                          )?.ngoName
+                        }
+                      </span>
+                    </>
+                  )}
+
+                  {step3.beneficiaryType === "INDIVIDUAL" && (
+                    <>
+                      <span className="text-gray-500">
+                        Name
+                      </span>
+
+                      <span className="font-medium">
+                        {step3.beneficiaryName}
+                      </span>
+                    </>
+                  )}
+
+                </div>
+              </div> */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">
+                  Beneficiary
+                </p>
+
+                {step3.beneficiaryType === "SELF" && (
+                  <p className="text-sm font-medium">
+                    Myself
+                  </p>
+                )}
+
+                {step3.beneficiaryType === "NGO" && (
+                  <p className="text-sm font-medium">
+                    {
+                      ngos.find(
+                        (n) =>
+                          n.id === Number(step3.ngoId)
+                      )?.ngoName
+                    }
+                  </p>
+                )}
+
+                {step3.beneficiaryType ===
+                  "INDIVIDUAL" && (
+                    <div className="grid grid-cols-2 gap-y-1 text-sm">
+                      <span>Name</span>
+                      <span>
+                        {step3.beneficiaryName}
+                      </span>
+
+                      <span>Relation</span>
+                      <span>
+                        {step3.beneficiaryRelation}
+                      </span>
+
+                      <span>Mobile</span>
+                      <span>
+                        {step3.beneficiaryMobile}
+                      </span>
+
+                      <span>Location</span>
+                      <span>
+                        {step3.beneficiaryCity},{" "}
+                        {step3.beneficiaryState}
+                      </span>
+                    </div>
+                  )}
               </div>
 
               {cart.length > 0 && (
