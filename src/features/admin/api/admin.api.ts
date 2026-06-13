@@ -518,88 +518,242 @@ export const getContactQueries = async () => {
 
 //NGOs 
 export const getAllNgos = async () => {
-const res = await fetch(`${BASE_URL}/api/ngo/admin/ngos`,
-{
-headers: authHeaders(),
-}
-);
+  const res = await fetch(`${BASE_URL}/api/ngo/admin/ngos`,
+    {
+      headers: authHeaders(),
+    }
+  );
 
-const result = await res.json();
+  const result = await res.json();
 
-if (!res.ok) {
-throw new Error(
-result.message || "Failed to fetch NGOs"
-);
-}
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to fetch NGOs"
+    );
+  }
 
-return result;
+  return result;
 };
 
 export const getNgoById = async (
-id: number
+  id: number
 ) => {
-const res = await fetch(
-`${BASE_URL}/api/ngo/admin/ngos/${id}`,
-{
-headers: authHeaders(),
-}
-);
+  const res = await fetch(
+    `${BASE_URL}/api/ngo/admin/ngos/${id}`,
+    {
+      headers: authHeaders(),
+    }
+  );
 
-const result = await res.json();
+  const result = await res.json();
 
-if (!res.ok) {
-throw new Error(
-result.message || "Failed to fetch NGO"
-);
-}
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to fetch NGO"
+    );
+  }
 
-return result;
+  return result;
 };
 
 export const approveNgo = async (
-id: number
+  id: number
 ) => {
-const res = await fetch(
-`${BASE_URL}/api/ngo/admin/ngos/${id}/approve`,
-{
-method: "PUT",
-headers: authHeaders(),
-}
-);
+  const res = await fetch(
+    `${BASE_URL}/api/ngo/admin/ngos/${id}/approve`,
+    {
+      method: "PUT",
+      headers: authHeaders(),
+    }
+  );
 
-const result = await res.json();
+  const result = await res.json();
 
-if (!res.ok) {
-throw new Error(
-result.message || "Failed to approve NGO"
-);
-}
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to approve NGO"
+    );
+  }
 
-return result;
+  return result;
 };
 
 export const rejectNgo = async (
-id: number,
-rejectionReason: string
+  id: number,
+  rejectionReason: string
 ) => {
-const res = await fetch(
-`${BASE_URL}/api/ngo/admin/ngos/${id}/reject`,
-{
-method: "PUT",
-headers: authHeaders(),
-body: JSON.stringify({
-rejectionReason,
-}),
-}
-);
+  const res = await fetch(
+    `${BASE_URL}/api/ngo/admin/ngos/${id}/reject`,
+    {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({
+        rejectionReason,
+      }),
+    }
+  );
 
-const result = await res.json();
+  const result = await res.json();
 
-if (!res.ok) {
-throw new Error(
-result.message || "Failed to reject NGO"
-);
-}
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to reject NGO"
+    );
+  }
 
-return result;
+  return result;
 };
+
+
+// =====================================
+// VOLUNTEERS
+// =====================================
+
+export const getAllVolunteers = async (
+  page = 1,
+  limit = 10,
+  search = "",
+  status = ""
+) => {
+
+  const params = new URLSearchParams();
+
+  params.append("page", String(page));
+  params.append("limit", String(limit));
+
+  if (search) {
+    params.append("search", search);
+  }
+
+  if (status) {
+    params.append("status", status);
+  }
+
+  const res = await fetch(
+    `${BASE_URL}/api/volunteers/admin?${params.toString()}`,
+    {
+      headers: authHeaders(),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message ||
+      "Failed to fetch volunteers"
+    );
+  }
+
+  return result;
+};
+
+export const getVolunteerById =
+  async (id: number) => {
+
+    const res = await fetch(
+      `${BASE_URL}/api/volunteers/admin/${id}`,
+      {
+        headers: authHeaders(),
+      }
+    );
+
+    const result =
+      await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        result.message ||
+        "Failed to fetch volunteer"
+      );
+    }
+
+    return result;
+  };
+
+export const updateVolunteerStatus =
+  async (
+    id: number,
+    status:
+      | "PENDING"
+      | "APPROVED"
+      | "REJECTED"
+  ) => {
+
+    const res = await fetch(
+      `${BASE_URL}/api/volunteers/admin/${id}/status`,
+      {
+        method: "PATCH",
+
+        headers: {
+          ...authHeaders(),
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          status,
+        }),
+      }
+    );
+
+    const result =
+      await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        result.message ||
+        "Failed to update volunteer"
+      );
+    }
+
+    return result;
+  };
+
+export const getVolunteerStats =
+  async () => {
+
+    const res = await fetch(
+      `${BASE_URL}/api/volunteers/admin/stats`,
+      {
+        headers: authHeaders(),
+      }
+    );
+
+    const result =
+      await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        result.message ||
+        "Failed to fetch stats"
+      );
+    }
+
+    return result.data;
+  };
+
+export const deleteVolunteer =
+  async (id: number) => {
+
+    const res = await fetch(
+      `${BASE_URL}/api/volunteers/admin/${id}`,
+      {
+        method: "DELETE",
+
+        headers: authHeaders(),
+      }
+    );
+
+    const result =
+      await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        result.message ||
+        "Failed to delete volunteer"
+      );
+    }
+
+    return result;
+  };

@@ -51,7 +51,7 @@ const NAV = [
   { label: "Contact Queries", href: "/admin/contacts", icon: FiCalendar },
 
   // ───── GLOBAL ANALYTICS (optional upgrade) ─────
-  // { label: "Analytics", href: "/admin/analytics", icon: FiBarChart2 },
+  { label: "Volunteers", href: "/admin/volunteer", icon: FiUsers },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
