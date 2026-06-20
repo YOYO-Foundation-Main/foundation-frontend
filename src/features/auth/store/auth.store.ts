@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthState>()(
 
       // ✅ Set full user (login / initial load)
       setUser: (user, token) => {
-        console.log("🧠 setUser:", user);
+        console.log("setUser:", user);
 
         // Save cookie for middleware
         if (typeof document !== "undefined") {

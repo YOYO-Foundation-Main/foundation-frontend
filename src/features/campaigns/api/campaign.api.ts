@@ -8,6 +8,7 @@ export const getCampaigns = async (): Promise<CampaignResponse> => {
         next: {revalidate: 60},
 
     });
+    console.log(res);
     if (!res.ok) throw new Error(`Failed to fetch campaigns: ${res.status}`);
     return res.json();
 };

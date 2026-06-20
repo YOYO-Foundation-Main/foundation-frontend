@@ -193,7 +193,7 @@ function getDaysLeft(endDate: string | null): number | null {
  * 26–50%  → amber/orange (gaining momentum)
  * 51–75%  → blue (on track)
  * 76–99%  → green (almost there!)
- * 100%    → emerald + special state (fully funded 🎉)
+ * 100%    → emerald + special state (fully funded)
  */
 function getProgressMeta(progress: number): {
   barColor: string;

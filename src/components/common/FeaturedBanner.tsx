@@ -66,7 +66,7 @@ export default function FeaturedCarousel() {
 
   if (loading) {
     return (
-      <div className="w-full h-[420px] bg-[#f5ede6] rounded-3xl flex items-center justify-center">
+      <div className="w-full h-[420px] bg-[#f5ede6] rounded-3xl flex items-center justify-center ">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-[#FF5A1F] border-t-transparent rounded-full animate-spin" />
           <p className="text-[#FF5A1F] text-sm font-medium tracking-wide">
@@ -87,8 +87,7 @@ export default function FeaturedCarousel() {
 
   return (
     <div
-      className="relative w-full rounded-3xl overflow-hidden cursor-pointer select-none group"
-      style={{ height: "clamp(320px, 45vw, 500px)" }}
+      className="relative w-[1240px] h-[496px] mx-[240px] mt-10 flex rounded-3xl overflow-hidden cursor-pointer select-none group"
       onClick={() => router.push(`/campaigns/${c.id}`)}
     >
       {/* Background Image — full bleed */}

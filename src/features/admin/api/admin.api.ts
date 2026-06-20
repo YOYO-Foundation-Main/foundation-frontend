@@ -757,3 +757,121 @@ export const deleteVolunteer =
 
     return result;
   };
+
+// ================= GALLERY =================
+
+// Get All Gallery
+export const adminGetGallery = async () => {
+  const res = await fetch(`${BASE_URL}/api/gallery`, {
+    headers: authHeaders(),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch gallery");
+  }
+
+  return res.json();
+};
+
+// Create Gallery
+export const adminCreateGallery = async (
+  data: FormData
+) => {
+  const res = await fetch(
+    `${BASE_URL}/api/gallery`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getAdminToken()}`,
+      },
+      body: data,
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message ||
+      "Failed to create gallery"
+    );
+  }
+
+  return result;
+};
+
+// Update Gallery
+export const adminUpdateGallery = async (
+  id: number,
+  data: FormData
+) => {
+  const res = await fetch(
+    `${BASE_URL}/api/gallery/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${getAdminToken()}`,
+      },
+      body: data,
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message ||
+      "Failed to update gallery"
+    );
+  }
+
+  return result;
+};
+
+// Delete Gallery
+export const adminDeleteGallery = async (
+  id: number
+) => {
+  const res = await fetch(
+    `${BASE_URL}/api/gallery/${id}`,
+    {
+      method: "DELETE",
+      headers: authHeaders(),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message ||
+      "Failed to delete gallery"
+    );
+  }
+
+  return result;
+};
+//featured Gallery
+
+export const adminToggleFeaturedGallery =
+  async (id: number) => {
+    const res = await fetch(
+      `${BASE_URL}/api/gallery/${id}/feature`,
+      {
+        method: "PATCH",
+        headers: authHeaders(),
+      }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        result.message ||
+        "Failed to update feature status"
+      );
+    }
+
+    return result;
+  };

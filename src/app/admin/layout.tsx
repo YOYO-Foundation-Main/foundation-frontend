@@ -8,6 +8,7 @@ import {
   FiPackage, FiDollarSign, FiMenu, FiX, FiShield,
 } from "react-icons/fi";
 import { useAdminStore } from "@/features/admin/store/admin.store";
+import { Contact, ImageIcon } from "lucide-react";
 
 const NAV = [
   // ───── OVERVIEW ─────
@@ -48,10 +49,15 @@ const NAV = [
   { label: "Events", href: "/admin/events", icon: FiCalendar },
 
   // ───── SUPPORT ─────
-  { label: "Contact Queries", href: "/admin/contacts", icon: FiCalendar },
+  { label: "Contact Queries", href: "/admin/contacts", icon: Contact },
 
-  // ───── GLOBAL ANALYTICS (optional upgrade) ─────
+  // ───── Volunteers Admin (optional upgrade) ─────
   { label: "Volunteers", href: "/admin/volunteer", icon: FiUsers },
+
+
+// gallery
+    { label: "Gallery", href: "/admin/gallery", icon: ImageIcon },
+
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

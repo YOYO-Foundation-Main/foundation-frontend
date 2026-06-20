@@ -179,7 +179,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onSuccess }: Prop
                     )}
                     <p className="text-[10px] text-gray-400 mt-1">Recommended: 1200 × 600px · JPG/PNG</p>
                     <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-                  </div>
+                  </div> 
                 </div>
               </div>
 
