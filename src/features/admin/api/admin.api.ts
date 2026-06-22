@@ -811,7 +811,7 @@ export const adminUpdateGallery = async (
     {
       method: "PUT",
       headers: {
-        Authorization: `Bearer ${getAdminToken()}`,
+        Authorization: `Bearer ${getAdminToken()}`
       },
       body: data,
     }
@@ -821,8 +821,7 @@ export const adminUpdateGallery = async (
 
   if (!res.ok) {
     throw new Error(
-      result.message ||
-      "Failed to update gallery"
+      result.message || "Failed to update gallery"
     );
   }
 
@@ -852,6 +851,31 @@ export const adminDeleteGallery = async (
 
   return result;
 };
+
+// Delete Single Gallery Image
+export const adminDeleteGalleryImage = async (
+  imageId: number
+) => {
+  const res = await fetch(
+    `${BASE_URL}/api/gallery/image/${imageId}`,
+    {
+      method: "DELETE",
+      headers: authHeaders(),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message ||
+      "Failed to delete image"
+    );
+  }
+
+  return result;
+};
+
 //featured Gallery
 
 export const adminToggleFeaturedGallery =
