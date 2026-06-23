@@ -35,7 +35,7 @@ const NAV = [
     ],
   },
   
-  // { label: "Product Category", href: "/admin/product-categories", icon: FolderTree },
+  { label: "Product Category", href: "/admin/product-categories", icon: FolderTree },
 
 
   { label: "Products", href: "/admin/products", icon: FiPackage },
