@@ -454,6 +454,137 @@ export const adminDeleteProduct = async (id: number) => {
   return res.json();
 };
 
+// ================= PRODUCT CATEGORIES =================
+
+// Get All Categories
+export const adminGetProductCategories =
+  async () => {
+
+    const res = await fetch(
+      `${BASE_URL}/api/product-categories`,
+      {
+        headers: authHeaders(),
+        cache: "no-store",
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(
+        "Failed to fetch categories"
+      );
+    }
+
+    return res.json();
+  };
+
+
+// Get Single Category
+export const adminGetProductCategoryById =
+  async (id: number) => {
+
+    const res = await fetch(
+      `${BASE_URL}/api/product-categories/${id}`,
+      {
+        headers: authHeaders(),
+        cache: "no-store",
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(
+        "Failed to fetch category"
+      );
+    }
+
+    return res.json();
+  };
+
+
+// Create Category
+export const adminCreateProductCategory =
+  async (data: FormData) => {
+
+    const res = await fetch(
+      `${BASE_URL}/api/product-categories`,
+      {
+        method: "POST",
+        headers: {
+          Authorization:
+            `Bearer ${getAdminToken()}`
+        },
+        body: data,
+      }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        result.message ||
+        "Failed to create category"
+      );
+    }
+
+    return result;
+  };
+
+
+// Update Category
+export const adminUpdateProductCategory =
+  async (
+    id: number,
+    data: FormData
+  ) => {
+
+    const res = await fetch(
+      `${BASE_URL}/api/product-categories/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization:
+            `Bearer ${getAdminToken()}`
+        },
+        body: data,
+      }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        result.message ||
+        "Failed to update category"
+      );
+    }
+
+    return result;
+  };
+
+
+// Delete Category
+export const adminDeleteProductCategory =
+  async (id: number) => {
+
+    const res = await fetch(
+      `${BASE_URL}/api/product-categories/${id}`,
+      {
+        method: "DELETE",
+        headers: authHeaders(),
+      }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        result.message ||
+        "Failed to delete category"
+      );
+    }
+
+    return result;
+  };
+
 
 
 // ================= KYC (paste these at the bottom of admin.api.ts) =================

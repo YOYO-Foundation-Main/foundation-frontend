@@ -8,7 +8,7 @@ import {
   FiPackage, FiDollarSign, FiMenu, FiX, FiShield,
 } from "react-icons/fi";
 import { useAdminStore } from "@/features/admin/store/admin.store";
-import { Contact, ImageIcon } from "lucide-react";
+import { Contact, FolderTree, ImageIcon } from "lucide-react";
 
 const NAV = [
   // ───── OVERVIEW ─────
@@ -34,6 +34,9 @@ const NAV = [
       { label: "Top Donors", href: "/admin/top-donors" },
     ],
   },
+  
+  // { label: "Product Category", href: "/admin/product-categories", icon: FolderTree },
+
 
   { label: "Products", href: "/admin/products", icon: FiPackage },
 

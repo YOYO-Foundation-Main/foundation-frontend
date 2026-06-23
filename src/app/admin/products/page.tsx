@@ -252,7 +252,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { FiSearch, FiPlus, FiEdit2, FiTrash2, FiPackage, FiGrid, FiList, FiTrendingUp, FiCheckCircle, FiXCircle } from "react-icons/fi";
-import { adminGetProducts, adminDeleteProduct } from "@/features/admin/api/admin.api";
+import { adminGetProducts, adminDeleteProduct, adminGetProductCategories } from "@/features/admin/api/admin.api";
 import { Product } from "@/features/admin/types/product.types";
 import CreateProductModal from "@/components/admin/CreateProductModal";
 import EditProductModal from "@/components/admin/EditProductModal";

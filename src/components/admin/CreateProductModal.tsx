@@ -1,7 +1,7 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FiX, FiUpload, FiTrash2 } from "react-icons/fi";
-import { adminCreateProduct } from "@/features/admin/api/admin.api";
+import { adminCreateProduct, adminGetProductCategories } from "@/features/admin/api/admin.api";
 
 interface Props {
   isOpen: boolean;
@@ -15,15 +15,33 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess }: Props
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [form, setForm] = useState({ name: "", price: "", description: "" });
+  const [form, setForm] = useState({ name: "", price: "", description: "", categoryId: "" });
+  const [categories, setCategories] =
+    useState<any[]>([]);
 
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res =
+          await adminGetProductCategories();
+
+        setCategories(
+          res.data || []
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadCategories();
+  }, []);
   const showToast = (msg: string, type: "success" | "error") => {
     setToast({ msg, type });
     setTimeout(() => setToast({ msg: "", type: "" }), 3000);
   };
 
   const reset = () => {
-    setForm({ name: "", price: "", description: "" });
+    setForm({ name: "", price: "", description: "", categoryId: "" });
     setImageFile(null);
     setImagePreview(null);
   };
@@ -45,6 +63,10 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess }: Props
       formData.append("name", form.name);
       formData.append("price", form.price);
       formData.append("description", form.description);
+      formData.append(
+        "categoryId",
+        form.categoryId
+      );
       if (imageFile) formData.append("image", imageFile);
 
       await adminCreateProduct(formData);
@@ -75,9 +97,8 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess }: Props
         </div>
 
         {toast.msg && (
-          <div className={`mx-6 mt-4 px-4 py-2 rounded-xl text-sm text-center font-medium ${
-            toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
-          }`}>{toast.msg}</div>
+          <div className={`mx-6 mt-4 px-4 py-2 rounded-xl text-sm text-center font-medium ${toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
+            }`}>{toast.msg}</div>
         )}
 
         <div className="p-6 space-y-4">
@@ -135,6 +156,37 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess }: Props
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+              Category
+              <span className="text-red-500">*</span>
+            </label>
+
+            <select
+              value={form.categoryId}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  categoryId: e.target.value,
+                })
+              }
+              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-400"
+            >
+              <option value="">
+                Select Category
+              </option>
+
+              {categories.map((cat) => (
+                <option
+                  key={cat.id}
+                  value={cat.id}
+                >
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Description */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Description</label>
@@ -148,9 +200,8 @@ export default function CreateProductModal({ isOpen, onClose, onSuccess }: Props
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
           <button onClick={() => { reset(); onClose(); }} className="px-5 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium transition">Cancel</button>
           <button onClick={handleSubmit} disabled={loading}
-            className={`px-6 py-2 rounded-xl text-sm font-semibold transition ${
-              loading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}>
+            className={`px-6 py-2 rounded-xl text-sm font-semibold transition ${loading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}>
             {loading ? "Adding..." : "Add Product"}
           </button>
         </div>
