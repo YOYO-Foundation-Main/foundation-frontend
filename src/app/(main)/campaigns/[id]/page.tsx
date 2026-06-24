@@ -92,6 +92,9 @@ export default function CampaignDetailPage() {
   const progress = getProgress(campaign.raisedAmount || 0, campaign.goalAmount || 1);
   const progressMeta = getProgressMeta(Math.round(progress));
   const daysLeft = getDaysLeft(campaign.endDate);
+  const campaignClosed =
+    !campaign.isActive ||
+    (campaign.raisedAmount || 0) >= (campaign.goalAmount || 0);
   // const isFullyFunded = Math.round(progress) === 100;
   const isFullyFunded =
     (campaign.raisedAmount || 0) >= (campaign.goalAmount || 0);
@@ -461,12 +464,12 @@ export default function CampaignDetailPage() {
                           return;
                         }
 
-                        if (productDonationTotal > remainingAmount) {
-                          alert(
-                            `Selected products exceed remaining campaign requirement of ₹${fmt(remainingAmount)}`
-                          );
-                          return;
-                        }
+                        // if (productDonationTotal > remainingAmount) {
+                        //   alert(
+                        //     `Selected products exceed remaining campaign requirement of ₹${fmt(remainingAmount)}`
+                        //   );
+                        //   return;
+                        // }
                         localStorage.setItem(
                           "donationData",
                           JSON.stringify({
@@ -478,15 +481,24 @@ export default function CampaignDetailPage() {
                         );
                         router.push(`/Donate/${campaign.id}/Checkout?mode=products`);
                       }}
-                      disabled={selectedCount === 0}
+
+                      disabled={
+                        selectedCount === 0 ||
+                        campaignClosed
+                      }
                       className={`w-full py-3.5 rounded-xl font-extrabold text-sm transition-all duration-200 ${selectedCount > 0
                         ? "bg-[#D2252B] text-white hover:bg-[#b51e23] shadow-md hover:shadow-lg active:scale-[0.98]"
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
                         }`}
                     >
-                      {selectedCount > 0
+                      {/* {selectedCount > 0
                         ? `Donate ₹${fmt(productDonationTotal)}`
-                        : "Select items to donate"}
+                        : "Select items to donate"} */}
+                      {campaignClosed
+                        ? "Campaign Completed"
+                        : selectedCount > 0
+                          ? `Donate ₹${fmt(productDonationTotal)}`
+                          : "Select items to donate"}
                     </button>
                   </div>
                 </div>
@@ -495,8 +507,8 @@ export default function CampaignDetailPage() {
               {/* ════════════ MONEY MODE ════════════ */}
               {mode === "money" && (
                 <>
-                  {isFullyFunded ? (
-                    <div className="border border-emerald-200 bg-emerald-50 rounded-2xl p-6 text-center">
+                  {campaignClosed ?
+                    (<div className="border border-emerald-200 bg-emerald-50 rounded-2xl p-6 text-center">
                       <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
                         <FiCheckCircle className="text-emerald-600" size={26} />
                       </div>
@@ -510,132 +522,127 @@ export default function CampaignDetailPage() {
                         Direct money donations are now closed.
                       </p>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
+                    ) : (
+                      <div className="space-y-4">
 
-                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                        <p className="text-xs font-semibold text-amber-700">
-                          Remaining amount needed:
-                        </p>
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                          <p className="text-xs font-semibold text-amber-700">
+                            Remaining amount needed:
+                          </p>
 
-                        <p className="text-lg font-extrabold text-amber-800">
-                          ₹{fmt(remainingAmount)}
-                        </p>
-                      </div>
+                          <p className="text-lg font-extrabold text-amber-800">
+                            ₹{fmt(remainingAmount)}
+                          </p>
+                        </div>
 
-                      {/* Products reference table */}
-                      {products.length > 0 && (
-                        <div className="rounded-xl border border-gray-100 overflow-hidden">
-                          <div className="grid grid-cols-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider px-4 py-2.5 bg-gray-50 border-b border-gray-100">
-                            <span>Item</span>
-                            <span className="text-center">Qty Needed</span>
-                            <span className="text-right">Price/Unit</span>
+                        {/* Products reference table */}
+                        {products.length > 0 && (
+                          <div className="rounded-xl border border-gray-100 overflow-hidden">
+                            <div className="grid grid-cols-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+                              <span>Item</span>
+                              <span className="text-center">Qty Needed</span>
+                              <span className="text-right">Price/Unit</span>
+                            </div>
+                            <div className="divide-y divide-gray-100">
+                              {products.map((p: CampaignProduct) => (
+                                <div key={p.id} className="grid grid-cols-3 items-center px-4 py-2.5 text-sm">
+                                  <span className="text-gray-700 truncate">{p.name}</span>
+                                  <span className="text-center text-gray-500">{p.quantity}</span>
+                                  <span className="text-right font-semibold text-gray-800">₹{p.price}</span>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="grid grid-cols-3 px-4 py-3 bg-gray-50 border-t border-gray-200 text-sm font-extrabold text-gray-800">
+                              <span className="col-span-2">Total Goal</span>
+                              <span className="text-right">₹{fmt(campaign.goalAmount || 0)}</span>
+                            </div>
                           </div>
-                          <div className="divide-y divide-gray-100">
-                            {products.map((p: CampaignProduct) => (
-                              <div key={p.id} className="grid grid-cols-3 items-center px-4 py-2.5 text-sm">
-                                <span className="text-gray-700 truncate">{p.name}</span>
-                                <span className="text-center text-gray-500">{p.quantity}</span>
-                                <span className="text-right font-semibold text-gray-800">₹{p.price}</span>
-                              </div>
+                        )}
+
+                        {/* Quick amounts */}
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 mb-2">Quick Select</p>
+                          <div className="grid grid-cols-3 gap-2">
+                            {[1800, 2500, 4000].map((amt) => (
+                              <button
+                                key={amt}
+                                // onClick={() => setDonationAmount(amt)}
+                                onClick={() => {
+                                  setDonationAmount(amt);
+
+
+                                  setDonationAmount(amt);
+                                }}
+                                className={`py-2 rounded-lg border text-xs font-bold transition-all ${donationAmount === amt
+                                  ? "border-[#D2252B] bg-[#D2252B]/5 text-[#D2252B]"
+                                  : "border-gray-200 text-gray-600 hover:border-gray-300"
+                                  }`}
+                              >
+                                ₹{fmt(amt)}
+                              </button>
                             ))}
                           </div>
-                          <div className="grid grid-cols-3 px-4 py-3 bg-gray-50 border-t border-gray-200 text-sm font-extrabold text-gray-800">
-                            <span className="col-span-2">Total Goal</span>
-                            <span className="text-right">₹{fmt(campaign.goalAmount || 0)}</span>
+                        </div>
+
+                        {/* Custom input */}
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 mb-2">Or enter amount</p>
+                          <div className="relative">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm pointer-events-none">
+                              ₹
+                            </span>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              className="w-full border-2 border-gray-200 focus:border-[#D2252B] outline-none pl-8 pr-4 py-3 rounded-xl text-sm font-bold transition-colors"
+                              value={donationAmount || ""}
+                              // onChange={(e) => setDonationAmount(Number(e.target.value))}
+                              onChange={(e) => {
+                                setDonationAmount(Number(e.target.value));
+                              }}
+                            />
                           </div>
                         </div>
-                      )}
 
-                      {/* Quick amounts */}
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-2">Quick Select</p>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[1800, 2500, 4000].map((amt) => (
-                            <button
-                              key={amt}
-                              // onClick={() => setDonationAmount(amt)}
-                              onClick={() => {
-                                if (amt > remainingAmount) {
-                                  setDonationAmount(remainingAmount);
-                                  return;
-                                }
-
-                                setDonationAmount(amt);
-                              }}
-                              className={`py-2 rounded-lg border text-xs font-bold transition-all ${donationAmount === amt
-                                ? "border-[#D2252B] bg-[#D2252B]/5 text-[#D2252B]"
-                                : "border-gray-200 text-gray-600 hover:border-gray-300"
-                                }`}
-                            >
-                              ₹{fmt(amt)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                         
-                      {/* Custom input */}
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-2">Or enter amount</p>
-                        <div className="relative">
-                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm pointer-events-none">
-                            ₹
-                          </span>
-                          <input
-                            type="number"
-                            placeholder="0"
-                            className="w-full border-2 border-gray-200 focus:border-[#D2252B] outline-none pl-8 pr-4 py-3 rounded-xl text-sm font-bold transition-colors"
-                            value={donationAmount || ""}
-                            // onChange={(e) => setDonationAmount(Number(e.target.value))}
-                            onChange={(e) => {
-                              const value = Number(e.target.value);
-
-                              if (value > remainingAmount) {
-                                setDonationAmount(remainingAmount);
-                                return;
-                              }
-
-                              setDonationAmount(value);
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* ✅ Original logic untouched */}
-                      <button
-                        onClick={() => {
-                          if (mode === "money" && donationAmount <= 0) {
-                            alert("Please enter donation amount");
-                            return;
+                        {/* ✅ Original logic untouched */}
+                        <button
+                          onClick={() => {
+                            if (mode === "money" && donationAmount <= 0) {
+                              alert("Please enter donation amount");
+                              return;
+                            }
+                            localStorage.setItem(
+                              "donationData",
+                              JSON.stringify({
+                                campaignId: campaign.id,
+                                selectedProductDetails,
+                                donationAmount,
+                                mode,
+                              })
+                            );
+                            router.push(`/Donate/${campaign.id}/Checkout?mode=${mode}`);
+                          }}
+                          // disabled={!donationAmount || donationAmount <= 0}
+                          disabled={
+                            campaignClosed ||
+                            !donationAmount ||
+                            donationAmount <= 0
                           }
-                          localStorage.setItem(
-                            "donationData",
-                            JSON.stringify({
-                              campaignId: campaign.id,
-                              selectedProductDetails,
-                              donationAmount,
-                              mode,
-                            })
-                          );
-                          router.push(`/Donate/${campaign.id}/Checkout?mode=${mode}`);
-                        }}
-                        // disabled={!donationAmount || donationAmount <= 0}
-                        disabled={
-                          isFullyFunded ||
-                          !donationAmount ||
-                          donationAmount <= 0
-                        }
-                        className={`w-full py-3.5 rounded-xl font-extrabold text-sm transition-all duration-200 ${donationAmount > 0
-                          ? "bg-[#D2252B] text-white hover:bg-[#b51e23] shadow-md hover:shadow-lg active:scale-[0.98]"
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                          }`}
-                      >
-                        {donationAmount > 0
-                          ? `Donate ₹${fmt(donationAmount)}`
-                          : "Enter amount to donate"}
-                      </button>
-                    </div>
-                  )}
+                          className={`w-full py-3.5 rounded-xl font-extrabold text-sm transition-all duration-200 ${donationAmount > 0
+                            ? "bg-[#D2252B] text-white hover:bg-[#b51e23] shadow-md hover:shadow-lg active:scale-[0.98]"
+                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            }`}
+                        >
+                          {
+                            campaignClosed
+                              ? "Campaign Completed"
+                              : donationAmount > 0
+                                ? `Donate ₹${fmt(donationAmount)}`
+                                : "Enter amount to donate"
+                          }
+                        </button>
+                      </div>
+                    )}
                 </>
               )}
 
@@ -645,7 +652,7 @@ export default function CampaignDetailPage() {
 
         </div>
       </div>
-    </div>
+    </div >
 
   );
 }
