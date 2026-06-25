@@ -7,6 +7,7 @@ import {
   donate,
   createOrder,
   verifyPayment,
+  getPlatformSettings,
 } from "@/features/donations/api/donation.api";
 import { loadRazorpay } from "@/utils/loadRazorpay";
 import Image from "next/image";
@@ -19,6 +20,17 @@ import { MdVolunteerActivism } from "react-icons/md";
 
 export default function CheckoutPage() {
   const [donationData, setDonationData] = useState<any>(null);
+  const [platformSettings, setPlatformSettings] = useState<any>(null);
+  const [isTipEnabled, setIsTipEnabled] =
+    useState(true);
+  const [selectedTipPercent, setSelectedTipPercent] =
+    useState<number>(0);
+
+  const [customTip, setCustomTip] =
+    useState<number>(0);
+
+  const [useCustomTip, setUseCustomTip] =
+    useState(false);
   const [form, setForm] = useState({
     donorName: "",
     donorEmail: "",
@@ -34,6 +46,23 @@ export default function CheckoutPage() {
       const parsed = JSON.parse(data);
       setDonationData({ ...parsed, products: parsed.products || [] });
     }
+
+    const loadSettings = async () => {
+      try {
+        const settings =
+          await getPlatformSettings();
+        console.log("SETTINGS RESPONSE", settings);
+        setPlatformSettings(settings.data);
+
+        setSelectedTipPercent(
+          settings.data.defaultTipPercent || 0
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadSettings();
   }, []);
 
   if (!donationData)
@@ -69,6 +98,11 @@ export default function CheckoutPage() {
         donorEmail: form.donorEmail,
         donorMobile: form.donorMobile,
         isAnonymous: form.isAnonymous,
+
+        tipAmount:
+          platformSettings?.isTipEnabled
+            ? tipAmount
+            : 0,
       };
       if (donationData?.mode === "products") {
         payload.items = donationData?.selectedProductDetails?.map((p: any) => ({
@@ -124,10 +158,49 @@ export default function CheckoutPage() {
   const totalAmount =
     donationData.mode === "products"
       ? donationData.selectedProductDetails?.reduce(
-          (sum: number, p: any) => sum + p.price * p.quantity,
-          0
-        )
+        (sum: number, p: any) =>
+          sum + p.price * p.quantity,
+        0
+      )
       : donationData.donationAmount;
+
+
+  // const tipAmount =
+  //   useCustomTip
+  //     ? customTip
+  //     : Math.round(
+  //       totalAmount *
+  //       (selectedTipPercent / 100)
+  //     );
+
+  const calculatedTip =
+    useCustomTip
+      ? customTip
+      : Math.round(
+        totalAmount *
+        (selectedTipPercent / 100)
+      );
+
+  const tipAmount =
+    platformSettings?.isTipEnabled
+      ? calculatedTip
+      : 0;
+
+  const finalPayableAmount =
+    totalAmount + tipAmount;
+
+  donationData.mode === "products"
+    ? donationData.selectedProductDetails?.reduce(
+      (sum: number, p: any) => sum + p.price * p.quantity,
+      0
+    )
+    : donationData.donationAmount;
+
+  // console.log("totalAmount", totalAmount);
+  // console.log("tipAmount", tipAmount);
+  // console.log("finalPayableAmount", finalPayableAmount);
+  // console.log("isTipEnabled", isTipEnabled);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-orange-50/30 pt-24 pb-16 px-4 md:px-6">
@@ -247,6 +320,95 @@ export default function CheckoutPage() {
             </div>
           )}
 
+
+          {platformSettings?.isTipEnabled && (
+            <div className="border-t border-gray-100 p-5 space-y-4">
+
+              <div>
+                <p className="text-sm font-bold text-gray-900">
+                  Support Foundation Platform
+                </p>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  Helps us maintain the platform and support more causes.
+                </p>
+              </div>
+
+              <div className="flex gap-2 flex-wrap">
+                {platformSettings?.tipOptions?.map(
+                  (tip: number) => (
+                    <button
+                      key={tip}
+                      type="button"
+                      onClick={() => {
+                        setUseCustomTip(false);
+                        setSelectedTipPercent(tip);
+                      }}
+                      className={`px-3 py-2 rounded-xl border text-sm font-semibold ${!useCustomTip &&
+                        selectedTipPercent === tip
+                        ? "border-[#D2252B] bg-[#D2252B]/10 text-[#D2252B]"
+                        : "border-gray-200 text-gray-600"
+                        }`}
+                    >
+                      {tip}%
+                    </button>
+                  )
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setUseCustomTip(true)}
+                  className={`px-3 py-2 rounded-xl border text-sm font-semibold ${useCustomTip
+                    ? "border-[#D2252B] bg-[#D2252B]/10 text-[#D2252B]"
+                    : "border-gray-200 text-gray-600"
+                    }`}
+                >
+                  Custom
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUseCustomTip(false);
+                    setSelectedTipPercent(0);
+                  }}
+                  className="px-3 py-2 rounded-xl border border-gray-200 text-sm font-semibold"
+                >
+                  No Tip
+                </button>
+              </div>
+
+              {useCustomTip && (
+                <input
+                  type="number"
+                  value={customTip}
+                  onChange={(e) =>
+                    setCustomTip(Number(e.target.value))
+                  }
+                  placeholder="Enter custom tip"
+                  className="w-full border rounded-xl px-4 py-3 text-sm"
+                />
+              )}
+
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Donation</span>
+                  <span>₹{totalAmount}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Platform Support</span>
+                  <span>₹{tipAmount}</span>
+                </div>
+
+                <div className="border-t pt-2 flex justify-between font-bold text-base">
+                  <span>Total Payable</span>
+                  <span>₹{finalPayableAmount}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Trust strip */}
           <div className="border-t border-gray-100 bg-gray-50/60 px-5 py-3.5 flex items-center justify-center gap-6">
             {[
@@ -347,11 +509,10 @@ export default function CheckoutPage() {
             {/* Anonymous toggle */}
             <label className="flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-2xl p-4 cursor-pointer hover:border-rose-200 hover:bg-rose-50/30 transition-all group">
               {/* Custom checkbox */}
-              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                form.isAnonymous
-                  ? "bg-[#D2252B] border-[#D2252B]"
-                  : "border-gray-300 group-hover:border-[#D2252B]/40"
-              }`}>
+              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${form.isAnonymous
+                ? "bg-[#D2252B] border-[#D2252B]"
+                : "border-gray-300 group-hover:border-[#D2252B]/40"
+                }`}>
                 {form.isAnonymous && (
                   <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
                     <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -389,8 +550,7 @@ export default function CheckoutPage() {
                 ) : (
                   <>
                     <FiLock size={15} />
-                    Proceed to Payment · ₹{totalAmount?.toLocaleString("en-IN")}
-                  </>
+                    Proceed to Payment · ₹{finalPayableAmount?.toLocaleString("en-IN")}</>
                 )}
               </span>
             </button>

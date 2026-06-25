@@ -51,6 +51,43 @@ export const getDonationById = async (donationId: string) => {
   return res.json();
 };
 
+//get tip amount admin added
+export const getPlatformSettings = async () => {
+  const res = await fetch(
+    `${BASE_URL}/api/platform-settings`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch platform settings");
+  }
+
+  return res.json();
+};
+
+//update platform settings
+export const updatePlatformSettings =
+  async (data: any) => {
+    const res = await fetch(
+      `${BASE_URL}/api/platform-settings`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(
+        "Failed to update settings"
+      );
+    }
+
+    return res.json();
+  };
+
 // 5. Download Invoice 
 export const downloadInvoice = async (donationId: string) => {
   const res = await fetch(

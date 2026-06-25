@@ -8,7 +8,7 @@ import {
   FiPackage, FiDollarSign, FiMenu, FiX, FiShield,
 } from "react-icons/fi";
 import { useAdminStore } from "@/features/admin/store/admin.store";
-import { Contact, FolderTree, ImageIcon } from "lucide-react";
+import { Contact, FolderTree, ImageIcon, Settings } from "lucide-react";
 
 const NAV = [
   // ───── OVERVIEW ─────
@@ -57,6 +57,8 @@ const NAV = [
   // ───── Volunteers Admin (optional upgrade) ─────
   { label: "Volunteers", href: "/admin/volunteer", icon: FiUsers },
 
+  //platform settings
+    { label: "Platform Settings", href: "/admin/platform-setting", icon: Settings },
 
 // gallery
     { label: "Gallery", href: "/admin/gallery", icon: ImageIcon },
