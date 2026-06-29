@@ -156,7 +156,17 @@ export default function CreateEventModal({ onClose, onSuccess }: any) {
     description: "",
     location: "",
     eventDate: "",
+
+    startTime: "",
+    endTime: "",
+    category: "",
+    volunteersNeeded: "",
+
+    benefits: "",
+    requirements: "",
+
     causeId: "",
+    userId: "",
   });
 
   const [causes, setCauses] = useState<any[]>([]);
@@ -196,6 +206,19 @@ export default function CreateEventModal({ onClose, onSuccess }: any) {
     fd.append("description", form.description);
     fd.append("location", form.location);
     fd.append("eventDate", form.eventDate);
+    fd.append("startTime", form.startTime);
+    fd.append("endTime", form.endTime);
+    fd.append("category", form.category);
+    fd.append(
+      "volunteersNeeded",
+      String(form.volunteersNeeded)
+    );
+    fd.append("benefits", form.benefits);
+    fd.append("requirements", form.requirements);
+
+    if (form.userId) {
+      fd.append("userId", String(form.userId));
+    }
     fd.append("causeId", String(form.causeId));
     fd.append("createdBy", String(admin?.id));
     if (image) fd.append("image", image);
@@ -274,7 +297,7 @@ export default function CreateEventModal({ onClose, onSuccess }: any) {
             </div>
             <div>
               <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                <FiCalendar className="w-3.5 h-3.5 text-indigo-400" /> Date
+                <FiCalendar className="w-3.5 h-3.5 text-indigo-400" />Event Date
               </label>
               <input
                 type="date"
@@ -283,6 +306,124 @@ export default function CreateEventModal({ onClose, onSuccess }: any) {
                 onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+                <FiCalendar className="w-3.5 h-3.5 text-indigo-400" />
+                Start Time
+              </label>
+
+              <input
+                type="time"
+                value={form.startTime}
+                className="w-full border border-slate-200 bg-slate-50 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    startTime: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+                <FiCalendar className="w-3.5 h-3.5 text-indigo-400" />
+                End Time
+              </label>
+
+              <input
+                type="time"
+                value={form.endTime}
+                className="w-full border border-slate-200 bg-slate-50 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    endTime: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+          </div>
+
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              <FiTag className="w-3.5 h-3.5 text-indigo-400" />
+              Category
+            </label>
+
+            <input
+              placeholder="Health"
+              value={form.category}
+              className="w-full border border-slate-200 bg-slate-50 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  category: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              Volunteers Needed
+            </label>
+
+            <input
+              type="number"
+              placeholder="80"
+              value={form.volunteersNeeded}
+              className="w-full border border-slate-200 bg-slate-50 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  volunteersNeeded: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              Benefits
+            </label>
+
+            <textarea
+              rows={2}
+              placeholder="Certificate, Refreshments"
+              value={form.benefits}
+              className="w-full border border-slate-200 bg-slate-50 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 resize-none"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  benefits: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              Requirements
+            </label>
+
+            <textarea
+              rows={2}
+              placeholder="18+, Basic First Aid"
+              value={form.requirements}
+              className="w-full border border-slate-200 bg-slate-50 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 resize-none"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  requirements: e.target.value,
+                })
+              }
+            />
           </div>
 
           {/* Cause */}

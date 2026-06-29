@@ -90,7 +90,7 @@
 //   return (
 //     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 //       <div className="bg-white p-6 rounded-xl w-[450px] max-h-[90vh] overflow-y-auto space-y-4">
-        
+
 //         {/* Header */}
 //         <div className="flex justify-between items-center">
 //           <h2 className="text-lg text-black font-semibold">Edit Event</h2>
@@ -227,6 +227,16 @@ export default function EditEventModal({
     description: "",
     location: "",
     eventDate: "",
+
+    startTime: "",
+    endTime: "",
+
+    category: "",
+    volunteersNeeded: "",
+
+    benefits: "",
+    requirements: "",
+
     causeId: "",
   });
   const [causes, setCauses] = useState<any[]>([]);
@@ -251,16 +261,35 @@ export default function EditEventModal({
   // Populate form when event changes
   useEffect(() => {
     if (event) {
+      // setForm({
+      //   title: event.title || "",
+      //   description: event.description || "",
+      //   location: event.location || "",
+      //   eventDate: event.eventDate?.split("T")[0] || "",
+      //   causeId: event.causeId?.toString() || "",
+      // });
+
       setForm({
         title: event.title || "",
         description: event.description || "",
         location: event.location || "",
         eventDate: event.eventDate?.split("T")[0] || "",
+
+        startTime: event.startTime || "",
+        endTime: event.endTime || "",
+
+        category: event.category || "",
+        volunteersNeeded: event.volunteersNeeded?.toString() || "",
+
+        benefits: event.benefits || "",
+        requirements: event.requirements || "",
+
         causeId: event.causeId?.toString() || "",
       });
       setImagePreview(event.image || null);
       setImage(null);
     }
+
   }, [event]);
 
   const handleImageChange = (file: File | null) => {
@@ -281,12 +310,44 @@ export default function EditEventModal({
     if (!form.eventDate) return alert("Event date is required");
 
     const fd = new FormData();
+    // fd.append("title", form.title);
+    // fd.append("description", form.description);
+    // fd.append("location", form.location);
+    // fd.append("eventDate", form.eventDate);
+    // fd.append("causeId", String(form.causeId));
+    // if (image) fd.append("image", image);
+
     fd.append("title", form.title);
+
     fd.append("description", form.description);
+
     fd.append("location", form.location);
+
     fd.append("eventDate", form.eventDate);
+
+    fd.append("startTime", form.startTime);
+
+    fd.append("endTime", form.endTime);
+
+    fd.append("category", form.category);
+
+    fd.append(
+      "volunteersNeeded",
+      form.volunteersNeeded
+    );
+
+    fd.append("benefits", form.benefits);
+
+    fd.append(
+      "requirements",
+      form.requirements
+    );
+
     fd.append("causeId", String(form.causeId));
-    if (image) fd.append("image", image);
+
+    if (image) {
+      fd.append("image", image);
+    }
 
     try {
       setLoading(true);
@@ -365,7 +426,7 @@ export default function EditEventModal({
             </div>
             <div>
               <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                <FiCalendar className="w-3.5 h-3.5 text-amber-500" /> Date
+                <FiCalendar className="w-3.5 h-3.5 text-amber-500" /> Event Date
               </label>
               <input
                 type="date"
@@ -374,6 +435,125 @@ export default function EditEventModal({
                 onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
               />
             </div>
+          </div>
+
+          {/* Start Time */}
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              Start Time
+            </label>
+
+            <input
+              type="text"
+              placeholder="09:00 AM"
+              value={form.startTime}
+              className="w-full border border-slate-200 bg-slate-50 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  startTime: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          {/* End Time */}
+
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              End Time
+            </label>
+
+            <input
+              type="text"
+              placeholder="03:00 PM"
+              value={form.endTime}
+              className="w-full border border-slate-200 bg-slate-50 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  endTime: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+                Category
+              </label>
+
+              <input
+                placeholder="Health"
+                value={form.category}
+                className="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    category: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+                Volunteers Needed
+              </label>
+
+              <input
+                type="number"
+                placeholder="50"
+                value={form.volunteersNeeded}
+                className="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    volunteersNeeded: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+          </div>
+
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              Benefits
+            </label>
+
+            <textarea
+              rows={2}
+              value={form.benefits}
+              placeholder="Certificate, Refreshments"
+              className="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 resize-none"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  benefits: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+              Requirements
+            </label>
+
+            <textarea
+              rows={2}
+              value={form.requirements}
+              placeholder="18+, Bring ID Card"
+              className="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 resize-none"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  requirements: e.target.value,
+                })
+              }
+            />
           </div>
 
           {/* Cause */}
@@ -477,7 +657,7 @@ export default function EditEventModal({
             {loading ? "Saving…" : "Save Changes"}
           </button>
         </div>
-      </div> 
+      </div>
     </div>
   );
 }
