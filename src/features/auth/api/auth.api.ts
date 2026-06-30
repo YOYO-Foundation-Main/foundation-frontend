@@ -92,3 +92,29 @@ export const verifyOtp = async (email: string, otp: string) => {
 
   return result; // { message, token }
 };
+
+// ================= GOOGLE LOGIN =================
+export const googleLogin = async (idToken: string) => {
+  console.log("📤 [GOOGLE LOGIN]");
+
+  const res = await fetch(`${BASE_URL}/google`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      idToken,
+    }),
+  });
+
+  const result = await res.json();
+
+  console.log("📡 [GOOGLE LOGIN STATUS]:", res.status);
+  console.log("📥 [GOOGLE LOGIN RESPONSE]:", result);
+
+  if (!res.ok) {
+    throw new Error(result.message || result.error || "Google login failed");
+  }
+
+  return result;
+};

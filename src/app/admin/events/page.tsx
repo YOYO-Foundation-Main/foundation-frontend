@@ -580,10 +580,44 @@ export default function AdminEventsPage() {
       {/* ── Stats ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Total Events", value: events.length, color: "text-indigo-600", border: "border-indigo-100", bg: "bg-indigo-50", dot: "bg-indigo-400" },
-          { label: "Active", value: events.filter((e) => e.isActive).length, color: "text-emerald-600", border: "border-emerald-100", bg: "bg-emerald-50", dot: "bg-emerald-400" },
-          { label: "This Month", value: thisMonth, color: "text-sky-600", border: "border-sky-100", bg: "bg-sky-50", dot: "bg-sky-400" },
-          { label: "Causes Covered", value: causesCount, color: "text-amber-600", border: "border-amber-100", bg: "bg-amber-50", dot: "bg-amber-400" },
+          {
+            label: "Total Events",
+            value: events.length,
+            color: "text-indigo-600",
+            border: "border-indigo-100",
+            bg: "bg-indigo-50",
+            dot: "bg-indigo-400",
+          },
+          {
+            label: "Active Events",
+            value: events.filter((e) => e.isActive).length,
+            color: "text-emerald-600",
+            border: "border-emerald-100",
+            bg: "bg-emerald-50",
+            dot: "bg-emerald-400",
+          },
+          {
+            label: "Volunteers Needed",
+            value: events.reduce(
+              (sum, e) => sum + (e.volunteersNeeded || 0),
+              0
+            ),
+            color: "text-sky-600",
+            border: "border-sky-100",
+            bg: "bg-sky-50",
+            dot: "bg-sky-400",
+          },
+          {
+            label: "Registrations",
+            value: events.reduce(
+              (sum, e) => sum + (e._count?.registrations || 0),
+              0
+            ),
+            color: "text-amber-600",
+            border: "border-amber-100",
+            bg: "bg-amber-50",
+            dot: "bg-amber-400",
+          },
         ].map((s) => (
           <div key={s.label} className={`${s.bg} border ${s.border} rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm`}>
             <div className={`w-2.5 h-2.5 rounded-full ${s.dot} shrink-0`} />

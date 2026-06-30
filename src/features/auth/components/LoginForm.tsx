@@ -2,8 +2,10 @@
 import { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
-import { loginUser, sendOtp } from "@/features/auth/api/auth.api";
+import { loginUser, sendOtp, googleLogin, } from "@/features/auth/api/auth.api";
 import { useAuthStore } from "@/features/auth/store/auth.store";
+import { GoogleLogin } from "@react-oauth/google";
+
 
 type Step = "signup" | "login" | "otp";
 type Mode = "password" | "otp";
@@ -13,6 +15,8 @@ interface Props {
   setEmail: (email: string) => void;
   onClose: () => void;
 }
+
+console.log(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
 function decodeJwt(token: string) {
   try { return JSON.parse(atob(token.split(".")[1])); }
@@ -86,9 +90,8 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
     <div className="flex-1 px-8 py-8 flex flex-col justify-center overflow-y-auto">
 
       {toast.msg && (
-        <div className={`mb-4 text-sm text-center px-4 py-2 rounded-full font-medium ${
-          toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
-        }`}>
+        <div className={`mb-4 text-sm text-center px-4 py-2 rounded-full font-medium ${toast.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
+          }`}>
           {toast.msg}
         </div>
       )}
@@ -147,9 +150,49 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
       <div className="mt-1">
         <p className="text-center text-sm text-gray-500 mb-3">Or</p>
         <div className="flex justify-center gap-4">
-          <button className="w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition">
-            <FaGoogle className="text-[#EA4335]" size={18} />
-          </button>
+          <GoogleLogin
+            theme="outline"
+            shape="circle"
+            size="large"
+            text="continue_with"
+            onSuccess={async (credentialResponse) => {
+              try {
+                console.log("Google Response:", credentialResponse);
+
+                if (!credentialResponse.credential) {
+                  throw new Error("Google did not return credential");
+                }
+
+                const res = await googleLogin(
+                  credentialResponse.credential
+                );
+
+                console.log("Backend Response:", res);
+
+                setUser(res.user, res.token);
+
+                showToast(
+                  "Google Login Successful",
+                  "success"
+                );
+
+                setTimeout(() => {
+                  onClose();
+                }, 800);
+
+              } catch (err: any) {
+                console.error(err);
+                showToast(
+                  err.message || "Google Login Failed",
+                  "error"
+                );
+              }
+            }}
+            onError={() => {
+              console.log("Google Login Failed");
+              showToast("Google Login Failed", "error");
+            }}
+          />
           <button className="w-11 h-11 rounded-full bg-[#1877F2] flex items-center justify-center hover:bg-[#166fe5] transition">
             <FaFacebook className="text-white" size={18} />
           </button>
@@ -170,20 +213,18 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
       <div className="border-t border-gray-100 pt-4 mt-4 flex justify-end">
         {mode === "password" ? (
           <button onClick={handleLogin} disabled={!email || !password || loading}
-            className={`px-8 py-2.5 rounded-full text-sm font-medium transition ${
-              email && password && !loading
-                ? "bg-[#D2252B] text-white hover:bg-red-700 cursor-pointer"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }`}>
+            className={`px-8 py-2.5 rounded-full text-sm font-medium transition ${email && password && !loading
+              ? "bg-[#D2252B] text-white hover:bg-red-700 cursor-pointer"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}>
             {loading ? "Please wait..." : "Sign In"}
           </button>
         ) : (
           <button onClick={handleSendOtp} disabled={!email || loading}
-            className={`px-8 py-2.5 rounded-full text-sm font-medium transition ${
-              email && !loading
-                ? "bg-[#D2252B] text-white hover:bg-red-700 cursor-pointer"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }`}>
+            className={`px-8 py-2.5 rounded-full text-sm font-medium transition ${email && !loading
+              ? "bg-[#D2252B] text-white hover:bg-red-700 cursor-pointer"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}>
             {loading ? "Sending..." : "Send OTP"}
           </button>
         )}
