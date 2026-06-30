@@ -23,6 +23,7 @@ function decodeJwt(token: string) {
   catch { return null; }
 }
 
+
 export default function LoginForm({ setStep, setEmail, onClose }: Props) {
   const [mode, setMode] = useState<Mode>("password");
   const [email, setEmailLocal] = useState("");
@@ -205,9 +206,12 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
       </p>
 
       <p className="text-xs text-center text-gray-400 mt-4 leading-relaxed">
-        By continuing, you agree to the YOYO Foundation{" "}
+        By continuing, you agree to the YOYO Foundation Page{" "}
+        By continuing, you agree to the YOYO Foundation Page{" "}
         <span className="underline cursor-pointer">terms</span> and acknowledge receipt of our{" "}
         <span className="underline cursor-pointer">privacy notice</span>.
+        <span className="underline cursor-pointer">privacy notice</span>.
+
       </p>
 
       <div className="border-t border-gray-100 pt-4 mt-4 flex justify-end">
