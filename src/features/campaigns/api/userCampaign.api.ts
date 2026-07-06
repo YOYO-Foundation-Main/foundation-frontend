@@ -24,18 +24,131 @@ export const startCampaignDraft = async (data: {
   mobile: string;
   causeId: number;
 }): Promise<{ id: number;[key: string]: any }> => {
-  const token = getUserToken();
-  if (!token) throw new Error("Please login to create a campaign");
 
   const res = await fetch(`${BASE_URL}/api/campaign-draft/start`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
   const result = await res.json();
   console.log("📡 [DRAFT START]:", res.status, result);
   if (!res.ok) throw new Error(result.message || "Failed to start campaign draft");
   return result?.data || result;
+};
+
+// campaign send-otp
+export const sendCampaignOtp = async (
+  identifier: string
+): Promise<any> => {
+  const res = await fetch(
+    `${BASE_URL}/api/campaign-draft/send-otp`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        identifier,
+      }),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to send OTP");
+  }
+
+  return result;
+};
+
+//verify otp
+export const verifyCampaignOtp = async (
+  identifier: string,
+  otp: string
+): Promise<any> => {
+  const res = await fetch(
+    `${BASE_URL}/api/campaign-draft/verify-otp`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        identifier,
+        otp,
+      }),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "OTP verification failed");
+  }
+
+  return result;
+};
+
+//resume draft api
+export const resumeCampaignDraft = async (): Promise<any> => {
+  const token = getUserToken();
+
+  if (!token) {
+    throw new Error("User not logged in");
+  }
+
+  const res = await fetch(
+    `${BASE_URL}/api/campaign-draft/resume`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to resume draft");
+  }
+
+  return result.draft;
+};
+
+//Update Product Category API
+export const updateCampaignProductCategory = async (
+  draftId: number,
+  productCategoryId: number
+): Promise<any> => {
+
+  const token = getUserToken();
+
+  if (!token) {
+    throw new Error("Please login to continue");
+  }
+
+  const res = await fetch(
+    `${BASE_URL}/api/campaign-draft/${draftId}/category`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        productCategoryId,
+      }),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to save category");
+  }
+
+  return result.data;
 };
 
 // ── Step 2: Update campaign details ──────────────────────────────────────────
@@ -133,25 +246,109 @@ export const updateCampaignDraftBeneficiary = async (
 // export const addCampaignProducts = async (
 //   draftId: number,
 //   products: { productId: number; quantity: number }[]
+// // )
+// export const addCampaignProducts = async (
+//   draftId: number,
+//   products: { productId: number; quantity: number }[],
+//   manualGoalAmount?: number
 // )
+//   : Promise<any> => {
+//   const token = getUserToken();
+//   if (!token) throw new Error("Please login to continue");
+
+//   const res = await fetch(`${BASE_URL}/api/campaign/products`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+//     body: JSON.stringify({ draftId, products, manualGoalAmount}),
+//   });
+//   const result = await res.json();
+//   console.log("📡 [CAMPAIGN PRODUCTS]:", res.status, result);
+//   if (!res.ok) throw new Error(result.message || "Failed to add products");
+//   return result?.data || result;
+// };
+// =====================================
+// GET PRODUCT CATEGORIES
+// =====================================
+
+export const getProductCategories = async (): Promise<any[]> => {
+  const res = await fetch(
+    `${BASE_URL}/api/product-categories`
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to fetch product categories"
+    );
+  }
+
+  return result.data;
+};
+
+// =====================================
+// GET PRODUCTS BY CATEGORY
+// =====================================
+
+export const getProductsByCategory = async (
+  categoryId: number
+): Promise<any[]> => {
+
+  const res = await fetch(
+    `${BASE_URL}/api/products/category/${categoryId}`
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to fetch products"
+    );
+  }
+
+  return result.products;
+};
+
+
+//Update Product API
 export const addCampaignProducts = async (
   draftId: number,
-  products: { productId: number; quantity: number }[],
-  manualGoalAmount?: number
-)
-  : Promise<any> => {
-  const token = getUserToken();
-  if (!token) throw new Error("Please login to continue");
+  products: {
+    productId: number;
+    quantity: number;
+  }[],
+  manualGoalAmount: number
 
-  const res = await fetch(`${BASE_URL}/api/campaign/products`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ draftId, products, manualGoalAmount}),
-  });
+): Promise<any> => {
+
+  const token = getUserToken();
+
+  if (!token) {
+    throw new Error("Please login to continue");
+  }
+
+  const res = await fetch(
+    `${BASE_URL}/api/campaign-draft/${draftId}/funding`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        products,
+        manualGoalAmount,
+      }),
+    }
+  );
+
   const result = await res.json();
-  console.log("📡 [CAMPAIGN PRODUCTS]:", res.status, result);
-  if (!res.ok) throw new Error(result.message || "Failed to add products");
-  return result?.data || result;
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to save products");
+  }
+
+  return result.data;
 };
 
 // ── Step 5: Submit draft ──────────────────────────────────────────────────────

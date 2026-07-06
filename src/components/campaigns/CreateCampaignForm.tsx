@@ -3,9 +3,15 @@ import { useState, useEffect, useRef } from "react";
 import { FiX, FiUpload, FiTrash2, FiCheck, FiChevronRight, FiPlus, FiMinus } from "react-icons/fi";
 import {
   startCampaignDraft,
+  sendCampaignOtp,
+  verifyCampaignOtp,
+  resumeCampaignDraft,
   updateCampaignDraftDetails,
   updateCampaignDraftBeneficiary,
+  updateCampaignProductCategory,
   addCampaignProducts,
+  getProductCategories,
+  getProductsByCategory,
   submitCampaignDraft,
 } from "@/features/campaigns/api/userCampaign.api";
 import { useAuthStore } from "@/features/auth/store/auth.store";
@@ -13,6 +19,13 @@ import { isValidUrl } from "@/utils/url";
 import { useRouter } from "next/navigation";
 // interface Props { isOpen: boolean; onClose: () => void; }
 interface CauseOption { id: number; name: string; }
+interface ProductCategory {
+  id: number;
+  name: string;
+  description?: string;
+  image?: string;
+  productCount: number;
+}
 interface Product { id: number; name: string; price: number; description: string; image: string | null; }
 interface CartItem { product: Product; quantity: number; }
 interface Ngo {
@@ -29,13 +42,11 @@ const STEPS = [
   { id: 5, label: "Review" },
 ];
 
-// function isValidUrl(url: string | null | undefined): boolean {
-//   if (!url) return false;
-//   try { new URL(url); return true; } catch { return false; }
-// }
-
 export default function CreateCampaignForm() {
-  const { user } = useAuthStore();
+  const {
+    user,
+    setUser,
+  } = useAuthStore();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [draftId, setDraftId] = useState<number | null>(null);
@@ -43,12 +54,31 @@ export default function CreateCampaignForm() {
   const [submitted, setSubmitted] = useState(false);
   const [toast, setToast] = useState({ msg: "", type: "" });
 
+
+  const [otpModalOpen, setOtpModalOpen] = useState(false);
+
+  const [otp, setOtp] = useState("");
+
+  const [otpLoading, setOtpLoading] = useState(false);
+
+  const [sendingOtp, setSendingOtp] = useState(false);
+
+  const [identifier, setIdentifier] = useState("");
+
+
   // Data
   const [causes, setCauses] = useState<CauseOption[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [ngos, setNgos] = useState<Ngo[]>([]);
   const [loadingNgos, setLoadingNgos] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+
+  const [selectedCategory, setSelectedCategory] =
+    useState<number | null>(null);
+
+  const [loadingCategories, setLoadingCategories] =
+    useState(false);
 
   // Step 1
   const [step1, setStep1] = useState({ name: "", email: "", mobile: "", causeId: "" });
@@ -58,24 +88,6 @@ export default function CreateCampaignForm() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  // Step 3
-  // const [step3, setStep3] = useState({
-  //   beneficiaryName: "", beneficiaryRelation: "",
-  //   beneficiaryMobile: "", beneficiaryCity: "", beneficiaryState: "",
-  // });
-  // const [step3, setStep3] = useState({
-  //   beneficiaryType: "SELF",
-
-  //   ngoId: "",
-
-  //   beneficiaryName: "",
-  //   beneficiaryRelation: "",
-  //   beneficiaryMobile: "",
-  //   beneficiaryCity: "",
-  //   beneficiaryState: "",
-  // });
-
 
   // Step 3
   const [step3, setStep3] = useState({
@@ -100,6 +112,85 @@ export default function CreateCampaignForm() {
     if (user) {
       setStep1((p) => ({ ...p, name: user.name || "", email: user.email || "" }));
     }
+  }, [user]);
+
+
+  // Resume existing draft
+  useEffect(() => {
+    const loadDraft = async () => {
+      if (!user) return;
+
+      try {
+        const draft = await resumeCampaignDraft();
+
+        if (!draft) return;
+
+        setDraftId(draft.id);
+
+        console.log("RESTORED STEP =", draft.currentStep);
+        setStep(draft.currentStep);
+
+        setSelectedCategory(
+          draft.productCategoryId || null
+        );
+
+        setManualGoalAmount(
+          Number(draft.manualGoalAmount || 0)
+        );
+
+        // STEP 1
+        setStep1({
+          name: draft.name || "",
+          email: draft.email || "",
+          mobile: draft.mobile || "",
+          causeId: draft.causeId ? String(draft.causeId) : "",
+        });
+
+        // STEP 2
+        setStep2({
+          title: draft.title || "",
+          description: draft.description || "",
+        });
+
+        if (draft.image) {
+          setImagePreview(draft.image);
+        }
+
+        // STEP 3
+        setStep3({
+          beneficiaryType: draft.beneficiaryType || "",
+          ngoId: draft.ngoId ? String(draft.ngoId) : "",
+          beneficiaryName: draft.beneficiaryName || "",
+          beneficiaryRelation: draft.beneficiaryRelation || "",
+          beneficiaryMobile: draft.beneficiaryMobile || "",
+          beneficiaryCity: draft.beneficiaryCity || "",
+          beneficiaryState: draft.beneficiaryState || "",
+        });
+
+        // STEP 4
+        if (
+          draft.campaignProducts &&
+          Array.isArray(draft.campaignProducts)
+        ) {
+          const restoredCart = draft.campaignProducts.map((item: any) => ({
+            product: {
+              id: item.productId,
+              name: item.name,
+              price: item.price,
+              image: item.image,
+              description: "",
+            },
+            quantity: item.quantity,
+          }));
+
+          setCart(restoredCart);
+        }
+      } catch (err) {
+        console.log("No draft found");
+      }
+    };
+
+    loadDraft();
   }, [user]);
 
   // Load causes
@@ -142,20 +233,76 @@ export default function CreateCampaignForm() {
 
 
   // Load products when reaching step 4
+  // useEffect(() => {
+  //   if (step !== 4 || products.length > 0) return;
+  //   const load = async () => {
+  //     try {
+  //       setLoadingProducts(true);
+  //       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products`);
+  //       const data = await res.json();
+  //       // Response: { success: true, Products: [...] }
+  //       setProducts(data?.Products || data?.products || []);
+  //     } catch { /* no products ok */ }
+  //     finally { setLoadingProducts(false); }
+  //   };
+  //   load();
+  // }, [step]);
   useEffect(() => {
-    if (step !== 4 || products.length > 0) return;
-    const load = async () => {
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+
+        const data =
+          await getProductCategories();
+
+        setCategories(data);
+      } catch (err: any) {
+        showToast(
+          err.message ||
+          "Failed to load categories",
+          "error"
+        );
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+
+  //product according to cat.
+  useEffect(() => {
+    if (!selectedCategory) {
+      setProducts([]);
+      return;
+    }
+
+    const fetchProducts = async () => {
       try {
         setLoadingProducts(true);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products`);
-        const data = await res.json();
-        // Response: { success: true, Products: [...] }
-        setProducts(data?.Products || data?.products || []);
-      } catch { /* no products ok */ }
-      finally { setLoadingProducts(false); }
+
+        const data =
+          await getProductsByCategory(
+            selectedCategory
+          );
+        console.log("Fetched products:", data);
+
+        setProducts(data);
+      } catch (err: any) {
+        showToast(
+          err.message ||
+          "Failed to load products",
+          "error"
+        );
+      } finally {
+        setLoadingProducts(false);
+      }
     };
-    load();
-  }, [step]);
+
+    fetchProducts();
+  }, [selectedCategory]);
+
 
   const showToast = (msg: string, type: "success" | "error") => {
     setToast({ msg, type });
@@ -185,6 +332,9 @@ export default function CreateCampaignForm() {
   };
   // ── Cart helpers ──────────────────────────────────────────────────────────
   const cartTotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  // console.log("Products state:", products);
+  // console.log("Is Array:", Array.isArray(products));
+
 
   const addToCart = () => {
     if (!selectedProductId) return;
@@ -219,16 +369,65 @@ export default function CreateCampaignForm() {
     try {
       setLoading(true);
       const result = await startCampaignDraft({
-        name: step1.name, email: step1.email,
-        mobile: step1.mobile, causeId: Number(step1.causeId),
+        name: step1.name,
+        email: step1.email,
+        mobile: step1.mobile,
+        causeId: Number(step1.causeId),
       });
-      const id = result?.id || result?.draftId;
-      if (!id) throw new Error("No draft ID returned");
+
+      const id = result.id;
+
       setDraftId(id);
-      setStep(2);
+
+      setIdentifier(step1.email);
+
+      await sendCampaignOtp(step1.email);
+      setOtpModalOpen(true);
+      // setStep(2);
     } catch (err: any) {
       showToast(err.message || "Failed to start draft", "error");
     } finally { setLoading(false); }
+  };
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      showToast("Please enter OTP", "error");
+      return;
+    }
+
+    try {
+      setOtpLoading(true);
+
+      // Verify OTP
+      const loginResponse = await verifyCampaignOtp(
+        identifier,
+        otp
+      );
+
+      // Save JWT
+      const { token, user } = loginResponse;
+
+      setUser(loginResponse.user, loginResponse.token);
+
+      // Resume campaign
+      // const resume = await resumeCampaignDraft();
+
+      // if (resume?.draft) {
+      //   setDraftId(resume.draft.id);
+      //   setStep(resume.draft.currentStep);
+      // }
+
+      setOtpModalOpen(false);
+
+      showToast("Logged in successfully", "success");
+
+    } catch (err: any) {
+      showToast(
+        err.message || "OTP verification failed",
+        "error"
+      );
+    } finally {
+      setOtpLoading(false);
+    }
   };
 
   const handleStep2 = async () => {
@@ -247,70 +446,6 @@ export default function CreateCampaignForm() {
     } finally { setLoading(false); }
   };
 
-  // const handleStep3 = async () => {
-  //   if (!step3.beneficiaryName) { showToast("Beneficiary name is required", "error"); return; }
-  //   if (!step3.beneficiaryRelation) { showToast("Relation is required", "error"); return; }
-  //   if (!step3.beneficiaryMobile) { showToast("Beneficiary mobile is required", "error"); return; }
-  //   if (!draftId) return;
-  //   try {
-  //     setLoading(true);
-  //     await updateCampaignDraftBeneficiary(draftId, step3);
-  //     setStep(4);
-  //   } catch (err: any) {
-  //     showToast(err.message || "Failed to save beneficiary", "error");
-  //   } finally { setLoading(false); }
-  // };
-
-  // const handleStep3 = async () => {
-  //   if (!draftId) return;
-
-  //   if (!step3.beneficiaryType) {
-  //     showToast("Please select beneficiary type", "error");
-  //     return;
-  //   }
-
-  //   if (step3.beneficiaryType === "NGO") {
-  //     if (!step3.ngoId) {
-  //       showToast("Please select NGO", "error");
-  //       return;
-  //     }
-  //   }
-
-  //   if (step3.beneficiaryType === "INDIVIDUAL") {
-  //     if (!step3.beneficiaryName) {
-  //       showToast("Beneficiary name required", "error");
-  //       return;
-  //     }
-
-  //     if (!step3.beneficiaryRelation) {
-  //       showToast("Relation required", "error");
-  //       return;
-  //     }
-
-  //     if (!step3.beneficiaryMobile) {
-  //       showToast("Mobile required", "error");
-  //       return;
-  //     }
-  //   }
-
-  //   try {
-  //     setLoading(true);
-
-  //     await updateCampaignDraftBeneficiary(
-  //       draftId,
-  //       step3
-  //     );
-
-  //     setStep(4);
-  //   } catch (err: any) {
-  //     showToast(
-  //       err.message || "Failed to save beneficiary",
-  //       "error"
-  //     );
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const handleStep3 = async () => {
     if (!draftId) return;
@@ -465,8 +600,6 @@ export default function CreateCampaignForm() {
     else if (step === 4) handleStep4();
   };
 
-
-
   const selectedCause = causes.find((c) => c.id === Number(step1.causeId));
 
   // ── Success screen ─────────────────────────────────────────────────────────
@@ -571,6 +704,74 @@ export default function CreateCampaignForm() {
                   {causes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
+            </div>
+          )}
+
+          {otpModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+
+              <div className="bg-white rounded-2xl w-full max-w-sm p-6">
+
+                <h2 className="text-lg font-bold">
+                  Verify OTP
+                </h2>
+
+                <p className="text-sm text-gray-500 mt-2">
+                  OTP sent to
+                </p>
+
+                <p className="font-semibold mb-4">
+                  {identifier}
+                </p>
+
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) =>
+                    setOtp(
+                      e.target.value.replace(/\D/g, "")
+                    )
+                  }
+                  placeholder="Enter OTP"
+                  className="w-full border rounded-xl px-4 py-3 mb-4"
+                />
+
+                <button
+                  onClick={handleVerifyOtp}
+                  disabled={otpLoading}
+                  className="w-full bg-[#D2252B] text-white rounded-xl py-3 font-semibold"
+                >
+                  {otpLoading
+                    ? "Verifying..."
+                    : "Verify OTP"}
+                </button>
+
+                <button
+                  onClick={async () => {
+                    try {
+                      await sendCampaignOtp(
+                        identifier,
+                      );
+
+                      showToast(
+                        "OTP sent again",
+                        "success"
+                      );
+                    } catch (err: any) {
+                      showToast(
+                        err.message,
+                        "error"
+                      );
+                    }
+                  }}
+                  className="w-full mt-3 text-sm text-[#D2252B]"
+                >
+                  Resend OTP
+                </button>
+
+              </div>
+
             </div>
           )}
 
@@ -825,62 +1026,133 @@ export default function CreateCampaignForm() {
           {step === 4 && (
             <div className="p-6 space-y-4">
               <p className="text-xs text-gray-500">Select products needed for this campaign and set quantities.</p>
+              {/* Product Categories */}
+              <div className="space-y-3">
 
+                <label className="block text-xs font-semibold text-gray-600">
+                  Select Product Category
+                </label>
+
+                {loadingCategories ? (
+
+                  <div className="text-center py-6 text-gray-400">
+                    Loading categories...
+                  </div>
+
+                ) : (
+
+                  <div className="grid grid-cols-2 gap-3">
+
+                    {categories.map((category) => (
+                      <div
+                        key={category.id}
+                        onClick={async () => {
+
+                          if (selectedCategory === category.id) return;
+
+                          setSelectedCategory(category.id);
+                          setCart([]);
+
+                          try {
+
+                            setLoadingProducts(true);
+
+                            await updateCampaignProductCategory(
+                              draftId!,
+                              category.id
+                            );
+
+                            // const result =
+                            //   await getProductsByCategory(category.id);
+                            // console.log(result);
+                            // setProducts(result);
+
+                          } catch (err: any) {
+
+                            showToast(
+                              err.message || "Failed to load products",
+                              "error"
+                            );
+
+                          } finally {
+
+                            setLoadingProducts(false);
+
+                          }
+
+                        }}
+                        className={`cursor-pointer rounded-xl border p-3 transition
+                         ${selectedCategory === category.id
+                            ? "border-[#D2252B] bg-red-50"
+                            : "border-gray-200 hover:border-[#D2252B]"
+                          }`}
+                      >
+
+                        <div className="w-full h-24 rounded-lg overflow-hidden bg-gray-100">
+
+                          <img
+                            src={category.image}
+                            alt={category.name}
+                            className="w-full h-full object-cover"
+                          />
+
+                        </div>
+
+                        <p className="mt-2 text-sm font-semibold text-gray-800">
+
+                          {category.name}
+
+                        </p>
+
+                        <p className="text-xs text-gray-500">
+
+                          {category.productCount} products
+
+                        </p>
+
+                      </div>
+
+                    ))}
+
+                  </div>
+
+                )}
+
+              </div>
               {/* Product selection grid with images */}
               <div className="space-y-3">
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Available Products</label>
+                {/* <label className="block text-xs font-semibold text-gray-600 mb-1.5">Available Products</label> */}
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">
 
-                {loadingProducts ? (
-                  <div className="text-center py-8 text-gray-400">Loading products...</div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto p-1">
-                    {products
-                      .filter((p) => !cart.find((c) => c.product.id === p.id))
-                      .map((product) => (
-                        <div
-                          key={product.id}
-                          onClick={() => {
-                            setSelectedProductId(String(product.id));
-                            // Auto-add to cart when clicked
-                            const existing = cart.find((i) => i.product.id === product.id);
-                            if (existing) {
-                              setCart(cart.map((i) =>
-                                i.product.id === product.id
-                                  ? { ...i, quantity: i.quantity + 1 }
-                                  : i
-                              ));
-                            } else {
-                              setCart([...cart, { product, quantity: 1 }]);
-                            }
-                            setSelectedProductId("");
-                          }}
-                          className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200 cursor-pointer hover:border-[#D2252B] hover:bg-red-50 transition group"
-                        >
-                          {/* Product Image */}
-                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 shrink-0">
-                            {isValidUrl(product.image) ? (
-                              <img
-                                src={product.image || "/assets/placeholder.png"}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
-                                <span className="text-[10px] text-gray-500">No img</span>
-                              </div>
-                            )}
-                          </div>
+                  {selectedCategory
+                    ? "Available Products"
+                    : "Select a category first"}
 
-                          {/* Product Info */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-800 truncate">{product.name}</p>
-                            <p className="text-xs font-bold text-[#D2252B]">₹{product.price.toLocaleString("en-US")}</p>
-                          </div>
+                </label>
+                {!selectedCategory ? (
 
-                          {/* Add button */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
+                  <div className="text-center py-8 text-gray-400 border border-dashed rounded-xl">
+
+                    Select a category above to view products.
+
+                  </div>
+
+                ) :
+                  loadingProducts ? (
+                    <div className="text-center py-8 text-gray-400">Loading products...</div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto p-1">
+                      {/* console.log("products =", products);
+                      console.log("isArray =", Array.isArray(products)); */}
+
+                      {products
+                        .filter((p) => !cart.find((c) => c.product.id === p.id))
+                        .map((product) => (
+                          <div
+                            key={product.id}
+                            onClick={() => {
+                              setSelectedProductId(String(product.id));
+                              // Auto-add to cart when clicked
                               const existing = cart.find((i) => i.product.id === product.id);
                               if (existing) {
                                 setCart(cart.map((i) =>
@@ -891,25 +1163,98 @@ export default function CreateCampaignForm() {
                               } else {
                                 setCart([...cart, { product, quantity: 1 }]);
                               }
+                              setSelectedProductId("");
                             }}
-                            className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-[#D2252B] hover:text-white hover:border-[#D2252B] transition shrink-0"
+                            className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200 cursor-pointer hover:border-[#D2252B] hover:bg-red-50 transition group"
                           >
-                            <FiPlus size={14} />
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                )}
+                            {/* Product Image */}
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 shrink-0">
+                              {isValidUrl(product.image) ? (
+                                <img
+                                  src={product.image || "/assets/placeholder.png"}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
+                                  <span className="text-[10px] text-gray-500">No img</span>
+                                </div>
+                              )}
+                            </div>
 
-                {!loadingProducts && products.filter((p) => !cart.find((c) => c.product.id === p.id)).length === 0 && (
-                  <div className="text-center py-6 text-gray-400 text-sm bg-gray-50 rounded-xl border border-dashed">
-                    {cart.length > 0 ? "All products added to cart ✓" : "No products available"}
-                  </div>
-                )}
+                            {/* Product Info */}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-gray-800 truncate">{product.name}</p>
+                              <p className="text-xs font-bold text-[#D2252B]">₹{product.price.toLocaleString("en-US")}</p>
+                            </div>
+
+                            {/* Add button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const existing = cart.find((i) => i.product.id === product.id);
+                                if (existing) {
+                                  setCart(cart.map((i) =>
+                                    i.product.id === product.id
+                                      ? { ...i, quantity: i.quantity + 1 }
+                                      : i
+                                  ));
+                                } else {
+                                  setCart([...cart, { product, quantity: 1 }]);
+                                }
+                              }}
+                              className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-[#D2252B] hover:text-white hover:border-[#D2252B] transition shrink-0"
+                            >
+                              <FiPlus size={14} />
+                            </button>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+
+                {/* {!loadingProducts && products.filter((p) => !cart.find((c) => c.product.id === p.id)).length === 0 && ( */}
+                <div className="text-center py-6 text-gray-400 text-sm bg-gray-50 rounded-xl border border-dashed">
+
+                  {products.length === 0
+                    ? "No products available in this category."
+                    : "All products already added to cart ✓"}
+
+                </div>
+                <div className="text-center py-6 text-gray-400 text-sm bg-gray-50 rounded-xl border border-dashed">
+                  {cart.length > 0 ? "All products added to cart ✓" : "No products available"}
+                </div>
+                {/* )} */}
               </div>
               {/* Manual Goal Amount */}
+              {/* Additional Cash Requirement */}
 
-              {cart.length === 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+
+                <label className="block text-xs font-semibold text-blue-700 mb-2">
+
+                  Additional Cash Requirement (Optional)
+
+                </label>
+
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Enter amount needed"
+                  value={manualGoalAmount || ""}
+                  onChange={(e) =>
+                    setManualGoalAmount(Number(e.target.value))
+                  }
+                  className="w-full border border-blue-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#D2252B]"
+                />
+
+                <p className="text-[11px] text-blue-600 mt-2">
+
+                  Add an additional cash requirement along with products if needed.
+
+                </p>
+
+              </div>
+              {/* {cart.length === 0 && (
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                   <label className="block text-xs font-semibold text-blue-700 mb-2">
                     Campaign Target Amount
@@ -929,19 +1274,34 @@ export default function CreateCampaignForm() {
                     Use this if you do not want to add products.
                   </p>
                 </div>
-              )}
+              )} */}
               {/* Cart items */}
               {cart.length === 0 ? (
                 <div className="bg-gray-50 rounded-xl p-6 text-center text-sm text-gray-400 border-2 border-dashed border-gray-200">
-                  No products added yet. Click on any product above to add.
+                  No products selected yet.
+
+                  You can raise funds using:
+
+                  • Products only
+                  • Cash only
+                  • Products + Cash
                 </div>
               ) : (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-gray-600">Your Cart ({cart.length} items)</label>
+                    {/* <label className="text-xs font-semibold text-gray-600">Your Cart ({cart.length} items)</label> */}
+                    <label className="text-xs font-semibold text-gray-600">
+
+                      Selected Products
+                      ({cart.reduce((s, i) => s + i.quantity, 0)} items)
+
+                    </label>
                     <button
-                      onClick={() => setCart([])}
-                      className="text-[10px] text-red-400 hover:text-red-600 transition"
+                      onClick={() => {
+
+                        setCart([]);
+
+                      }} className="text-[10px] text-red-400 hover:text-red-600 transition"
                     >
                       Clear all
                     </button>
@@ -984,7 +1344,7 @@ export default function CreateCampaignForm() {
                                 cartItem.product.id === item.product.id
                                   ? {
                                     ...cartItem,
-                                    quantity: value > 0 ? value : 1,
+                                    quantity: Math.max(1, value || 1),
                                   }
                                   : cartItem
                               )
@@ -1010,13 +1370,56 @@ export default function CreateCampaignForm() {
                   ))}
 
                   {/* Total */}
-                  <div className="flex items-center justify-between bg-[#D2252B]/5 border border-[#D2252B]/20 rounded-xl px-4 py-3 mt-2">
+                  {/* <div className="flex items-center justify-between bg-[#D2252B]/5 border border-[#D2252B]/20 rounded-xl px-4 py-3 mt-2">
                     <span className="text-sm font-semibold text-gray-700">
                       Total ({cart.reduce((s, i) => s + i.quantity, 0)} items)
                     </span>
                     <span className="text-base font-bold text-[#D2252B]">
                       ₹{cartTotal.toLocaleString("en-US")}
                     </span>
+                  </div> */}
+                  {/* Goal Summary */}
+
+                  <div className="rounded-xl border border-[#D2252B]/20 bg-[#D2252B]/5 p-4 space-y-3">
+
+                    <div className="flex justify-between text-sm">
+
+                      <span className="text-gray-600">
+                        Products Value
+                      </span>
+
+                      <span className="font-semibold">
+                        ₹{cartTotal.toLocaleString("en-US")}
+                      </span>
+
+                    </div>
+
+                    <div className="flex justify-between text-sm">
+
+                      <span className="text-gray-600">
+                        Cash Requirement
+                      </span>
+
+                      <span className="font-semibold">
+                        ₹{manualGoalAmount.toLocaleString("en-US")}
+                      </span>
+
+                    </div>
+
+                    <div className="border-t pt-3 flex justify-between">
+
+                      <span className="font-bold text-gray-800">
+                        Total Campaign Goal
+                      </span>
+
+                      <span className="text-lg font-bold text-[#D2252B]">
+
+                        ₹{(cartTotal + manualGoalAmount).toLocaleString("en-US")}
+
+                      </span>
+
+                    </div>
+
                   </div>
                 </div>
               )}
@@ -1047,59 +1450,6 @@ export default function CreateCampaignForm() {
                 </div>
               </div>
 
-              {/* <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">Beneficiary</p>
-                <div className="grid grid-cols-2 gap-y-1 text-sm">
-                  <span className="text-gray-500">Name</span><span className="font-medium text-gray-800">{step3.beneficiaryName}</span>
-                  <span className="text-gray-500">Role</span><span className="font-medium text-gray-800">{step3.beneficiaryRelation}</span>
-                  <span className="text-gray-500">Mobile</span><span className="font-medium text-gray-800">{step3.beneficiaryMobile}</span>
-                  <span className="text-gray-500">Location</span><span className="font-medium text-gray-800">{[step3.beneficiaryCity, step3.beneficiaryState].filter(Boolean).join(", ") || "—"}</span>
-                </div>
-              </div> */}
-
-              {/* <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">
-                  Beneficiary
-                </p>
-
-                <div className="grid grid-cols-2 gap-y-1 text-sm">
-
-                  <span className="text-gray-500">Type</span>
-                  <span className="font-medium">
-                    {step3.beneficiaryType}
-                  </span>
-
-                  {step3.beneficiaryType === "NGO" && (
-                    <>
-                      <span className="text-gray-500">
-                        NGO
-                      </span>
-
-                      <span className="font-medium">
-                        {
-                          ngos.find(
-                            (n) =>
-                              n.id === Number(step3.ngoId)
-                          )?.ngoName
-                        }
-                      </span>
-                    </>
-                  )}
-
-                  {step3.beneficiaryType === "INDIVIDUAL" && (
-                    <>
-                      <span className="text-gray-500">
-                        Name
-                      </span>
-
-                      <span className="font-medium">
-                        {step3.beneficiaryName}
-                      </span>
-                    </>
-                  )}
-
-                </div>
-              </div> */}
               <div className="bg-gray-50 rounded-xl p-4">
                 <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">
                   Beneficiary
@@ -1198,7 +1548,7 @@ export default function CreateCampaignForm() {
             <button onClick={handleSubmit} disabled={loading}
               className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition ${loading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#D2252B] hover:bg-red-700 text-white"
                 }`}>
-              {loading ? "Submitting..." : "🚀 Submit Campaign"}
+              {loading ? "Submitting..." : "Submit Campaign"}
             </button>
           )}
         </div>
@@ -1208,4 +1558,3 @@ export default function CreateCampaignForm() {
 }
 
 
-// new ui design of full section 

@@ -24,7 +24,7 @@ export default function RootLayout({
         <GoogleOAuthProvider
           clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}
         >
-          <p>{process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}</p>
+          {/* <p>{process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}</p> */}
           <AuthProvider>
             {children}
           </AuthProvider>
@@ -33,7 +33,7 @@ export default function RootLayout({
     </html>
   );
 }
-console.log(
-  "GOOGLE CLIENT ID:",
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
-);
+// console.log(
+//   "GOOGLE CLIENT ID:",
+//   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+// );

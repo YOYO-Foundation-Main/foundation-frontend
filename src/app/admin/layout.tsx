@@ -34,7 +34,7 @@ const NAV = [
       { label: "Top Donors", href: "/admin/top-donors" },
     ],
   },
-  
+
   { label: "Product Category", href: "/admin/product-categories", icon: FolderTree },
 
 
@@ -45,7 +45,7 @@ const NAV = [
   { label: "KYC Verification", href: "/admin/kyc", icon: FiShield },
 
   // -------NGO---------------------
-    { label: "NGO Verification ", href: "/admin/ngos", icon: FiShield },
+  { label: "NGO Verification ", href: "/admin/ngos", icon: FiShield },
 
   // ───── CONTENT ─────
   { label: "Blogs", href: "/admin/blogs", icon: FiFileText },
@@ -58,15 +58,16 @@ const NAV = [
   { label: "Volunteers", href: "/admin/volunteer", icon: FiUsers },
 
   //platform settings
-    { label: "Platform Settings", href: "/admin/platform-setting", icon: Settings },
+  { label: "Platform Settings", href: "/admin/platform-setting", icon: Settings },
 
-// gallery
-    { label: "Gallery", href: "/admin/gallery", icon: ImageIcon },
+  // gallery
+  { label: "Gallery", href: "/admin/gallery", icon: ImageIcon },
 
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isSuperAdminRoute = pathname.startsWith("/admin/super");
   const isLoginPage = pathname === "/admin/login";
   const router = useRouter();
   const { admin, logoutAdmin } = useAdminStore();
@@ -88,7 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
- 
+
   const handleLogout = () => {
     logoutAdmin();
     router.push("/admin/login");
@@ -101,13 +102,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  // useEffect(() => {
+  //   if (!admin && !isLoginPage) {
+  //     router.replace("/admin/login");
+  //   }
+  // }, [admin, isLoginPage, router]);
   useEffect(() => {
-    if (!admin && !isLoginPage) {
+    if (!admin && !isLoginPage && !isSuperAdminRoute) {
       router.replace("/admin/login");
     }
-  }, [admin, isLoginPage, router]);
+  }, [admin, isLoginPage, isSuperAdminRoute, router]);
 
-   if (isLoginPage) {
+  if (isLoginPage || isSuperAdminRoute) {
     return <>{children}</>;
   }
 

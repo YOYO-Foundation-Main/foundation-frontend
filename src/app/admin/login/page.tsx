@@ -148,7 +148,11 @@ export default function AdminLoginPage() {
       setError("");
       const res = await adminLogin({ email, password });
       setAdmin(res.user, res.token);
-      router.replace("/admin/dashboard");
+      if (res.user.role === "SUPER_ADMIN") {
+        router.replace("/admin/super/dashboard");
+      } else {
+        router.replace("/admin/dashboard");
+      }
       router.refresh();
     } catch (err: any) {
       setError(err.message || "Login failed");
@@ -338,8 +342,8 @@ export default function AdminLoginPage() {
             onClick={handleLogin}
             disabled={!email || !password || loading}
             className={`relative w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 overflow-hidden ${email && password && !loading
-                ? "bg-[#D2252B] hover:bg-[#B81E23] text-white shadow-lg shadow-red-200 active:scale-[0.98]"
-                : "bg-gray-100 text-gray-300 cursor-not-allowed"
+              ? "bg-[#D2252B] hover:bg-[#B81E23] text-white shadow-lg shadow-red-200 active:scale-[0.98]"
+              : "bg-gray-100 text-gray-300 cursor-not-allowed"
               }`}
           >
             {loading ? (

@@ -564,18 +564,18 @@ export default function Navbar() {
             )}
 
             {/* Logged in */}
+
+            {/* Create Campaign CTA */}
+            <button
+              onClick={() => router.push("/startcampaign")}
+              className="hidden md:flex items-center gap-2 bg-[#D2252B] hover:bg-[#b91c22] px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 shadow-lg shadow-red-900/30 whitespace-nowrap"
+            >
+              <FiPlus size={14} />
+              <span className="hidden lg:inline">Create Campaign</span>
+              <span className="lg:hidden">Create</span>
+            </button>
             {isLoggedIn && (
               <>
-                {/* Create Campaign CTA */}
-                <button
-                  onClick={() => router.push("/startcampaign")}
-                  className="hidden md:flex items-center gap-2 bg-[#D2252B] hover:bg-[#b91c22] px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 shadow-lg shadow-red-900/30 whitespace-nowrap"
-                >
-                  <FiPlus size={14} />
-                  <span className="hidden lg:inline">Create Campaign</span>
-                  <span className="lg:hidden">Create</span>
-                </button>
-
                 {/* Profile dropdown */}
                 <div ref={profileRef} className="relative hidden md:block">
                   <button
