@@ -165,7 +165,7 @@
 // }
 
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAdminStore } from "@/features/admin/store/admin.store";
@@ -177,6 +177,7 @@ import {
   FiSettings,
   FiLogOut,
   FiShield,
+  FiChevronDown,
 } from "react-icons/fi";
 // import { LuBuildingIcon } from "lucide-react";
 
@@ -191,15 +192,43 @@ const NAV = [
     href: "/admin/super/admins",
     icon: FiShield,
   },
+  // {
+  //   label: "Finance",
+  //   href: "/admin/super/finance",
+  //   icon: FiDollarSign,
+  // },
   {
     label: "Finance",
-    href: "/admin/super/finance",
     icon: FiDollarSign,
+    children: [
+      {
+        label: "Overview",
+        href: "/admin/super/finance",
+      },
+      {
+        label: "Revenue Trend",
+        href: "/admin/super/finance/revenue",
+      },
+      {
+        label: "Donations",
+        href: "/admin/super/finance/donations",
+      },
+    ],
   },
   {
     label: "NGOs",
     href: "/admin/super/ngos",
     icon: FiUsers,
+  },
+  {
+    label: "Campaigns",
+    icon: FiUsers,
+     children: [
+      {
+        label: "Overview",
+        href: "/admin/super/campaigns",
+      },
+    ]
   },
   {
     label: "Users",
@@ -221,6 +250,29 @@ export default function SuperAdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { admin, logoutAdmin } = useAdminStore();
+
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const expanded: Record<string, boolean> = {};
+
+    NAV.forEach((item) => {
+      if (
+        item.children?.some((child) => pathname.startsWith(child.href))
+      ) {
+        expanded[item.label] = true;
+      }
+    });
+
+    setOpenMenus(expanded);
+  }, [pathname]);
+
+  const toggleMenu = (label: string) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
 
   const handleLogout = () => {
     logoutAdmin();
@@ -279,28 +331,85 @@ export default function SuperAdminLayout({
         {/* Nav links */}
         <nav className="flex-1 px-3 space-y-0.5">
           {NAV.map((item) => {
+            // -----------------------------
+            // Parent with children
+            // -----------------------------
+            if (item.children) {
+              const expanded = openMenus[item.label];
+
+              const parentActive = item.children.some((child) =>
+                pathname.startsWith(child.href)
+              );
+
+              return (
+                <div key={item.label}>
+                  <button
+                    onClick={() => toggleMenu(item.label)}
+                    className={`w-full group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${parentActive
+                      ? "bg-red-600 text-white shadow-lg shadow-red-900/40"
+                      : "text-gray-400 hover:bg-gray-800/70 hover:text-white"
+                      }`}
+                  >
+                    <item.icon size={17} />
+
+                    <span className="flex-1 text-left">
+                      {item.label}
+                    </span>
+
+                    <FiChevronDown
+                      size={15}
+                      className={`transition-transform duration-200 ${expanded ? "rotate-180" : ""
+                        }`}
+                    />
+                  </button>
+
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ${expanded ? "max-h-96 mt-1" : "max-h-0"
+                      }`}
+                  >
+                    <div className="ml-6 pl-3 border-l border-gray-800 space-y-1">
+                      {item.children.map((child) => {
+                        const active = pathname === child.href;
+
+                        return (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            className={`flex items-center rounded-lg px-3 py-2 text-sm transition ${active
+                              ? "bg-red-500 text-white"
+                              : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                              }`}
+                          >
+                            {child.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // -----------------------------
+            // Normal link
+            // -----------------------------
             const active = pathname === item.href;
+
             return (
               <Link
                 key={item.href}
-                href={item.href}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-                  active
-                    ? "bg-red-600 text-white shadow-lg shadow-red-900/40"
-                    : "text-gray-400 hover:bg-gray-800/70 hover:text-white"
-                }`}
-              >
-                {/* Active indicator dot */}
-                <span
-                  className={`shrink-0 transition-all duration-150 ${
-                    active ? "text-white" : "text-gray-600 group-hover:text-gray-300"
+                href={item.href!}
+                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${active
+                  ? "bg-red-600 text-white shadow-lg shadow-red-900/40"
+                  : "text-gray-400 hover:bg-gray-800/70 hover:text-white"
                   }`}
-                >
-                  <item.icon size={17} />
-                </span>
-                <span className="truncate">{item.label}</span>
+              >
+                <item.icon size={17} />
 
-                {/* Active pill on right */}
+                <span className="truncate">
+                  {item.label}
+                </span>
+
                 {active && (
                   <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />
                 )}

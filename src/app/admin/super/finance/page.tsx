@@ -1,136 +1,84 @@
 // "use client";
 
 // import { useEffect, useState } from "react";
-// import { getFinanceOverview } from "@/features/super-admin/api/finance.api";
+// import { RevenueTrendItem } from "@/features/super-admin/types/finance.types";
+// import { getRevenueTrend } from "@/features/super-admin/api/finance.api";
 
-// type FinanceOverview = {
-//   totalDonations: number;
-//   totalDonationAmount: number;
-//   totalPlatformTips: number;
-//   totalPaidAmount: number;
-//   todayRevenue: number;
-//   monthRevenue: number;
-//   yearRevenue: number;
-//   revenueGrowth: number;
-//   totalDonors: number;
-//   totalCampaigns: number;
-// };
-
-// export default function SuperDashboard() {
-//   const [data, setData] = useState<FinanceOverview | null>(null);
+// export default function RevenueTrendPage() {
+//   const [data, setData] = useState<RevenueTrendItem[]>([]);
 //   const [loading, setLoading] = useState(true);
 
-//   useEffect(() => {
-//     loadOverview();
-//   }, []);
-
-//   const loadOverview = async () => {
+//   const loadRevenueTrend = async () => {
 //     try {
 //       setLoading(true);
-//       const res = await getFinanceOverview();
+
+//       const res = await getRevenueTrend();
+
 //       setData(res.data);
-//     } catch (err) {
-//       console.error(err);
+//     } catch (err: any) {
+//       alert(err.message);
 //     } finally {
 //       setLoading(false);
 //     }
 //   };
 
-//   const cards = [
-//     {
-//       title: "Total Donations",
-//       value: data?.totalDonations ?? 0,
-//       color: "bg-blue-500",
-//     },
-//     {
-//       title: "Donation Amount",
-//       value: `₹${(data?.totalDonationAmount ?? 0).toLocaleString()}`,
-//       color: "bg-green-500",
-//     },
-//     {
-//       title: "Platform Tips",
-//       value: `₹${(data?.totalPlatformTips ?? 0).toLocaleString()}`,
-//       color: "bg-purple-500",
-//     },
-//     {
-//       title: "Total Revenue",
-//       value: `₹${(data?.totalPaidAmount ?? 0).toLocaleString()}`,
-//       color: "bg-red-500",
-//     },
-//     {
-//       title: "Today's Revenue",
-//       value: `₹${(data?.todayRevenue ?? 0).toLocaleString()}`,
-//       color: "bg-orange-500",
-//     },
-//     {
-//       title: "Monthly Revenue",
-//       value: `₹${(data?.monthRevenue ?? 0).toLocaleString()}`,
-//       color: "bg-indigo-500",
-//     },
-//     {
-//       title: "Yearly Revenue",
-//       value: `₹${(data?.yearRevenue ?? 0).toLocaleString()}`,
-//       color: "bg-cyan-500",
-//     },
-//     {
-//       title: "Revenue Growth",
-//       value: `${data?.revenueGrowth ?? 0}%`,
-//       color: "bg-emerald-500",
-//     },
-//     {
-//       title: "Total Donors",
-//       value: data?.totalDonors ?? 0,
-//       color: "bg-pink-500",
-//     },
-//     {
-//       title: "Campaigns",
-//       value: data?.totalCampaigns ?? 0,
-//       color: "bg-yellow-500",
-//     },
-//   ];
+//   useEffect(() => {
+//     loadRevenueTrend();
+//   }, []);
 
 //   if (loading) {
 //     return (
-//       <div className="p-6">
-//         <p className="text-gray-500">Loading dashboard...</p>
+//       <div className="p-10 text-center text-gray-500">
+//         Loading revenue trend...
 //       </div>
 //     );
 //   }
 
 //   return (
-//     <div className="space-y-8">
-
-//       <div>
-//         <h1 className="text-3xl font-bold text-gray-800">
-//           Super Admin Dashboard
-//         </h1>
-
-//         <p className="text-gray-500 mt-2">
-//           Finance Overview
-//         </p>
+//     <div className="bg-white rounded-xl shadow border overflow-hidden">
+//       <div className="px-6 py-4 border-b">
+//         <h2 className="text-lg font-semibold">
+//           Revenue Trend
+//         </h2>
 //       </div>
 
-//       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-//         {cards.map((card) => (
-//           <div
-//             key={card.title}
-//             className="bg-white rounded-xl shadow-sm border p-5"
-//           >
-//             <div
-//               className={`w-12 h-12 rounded-lg ${card.color} mb-4`}
-//             />
+//       <table className="w-full">
+//         <thead className="bg-gray-50">
+//           <tr>
+//             <th className="text-left px-6 py-3">Month</th>
+//             <th className="text-right px-6 py-3">Donation Amount</th>
+//             <th className="text-right px-6 py-3">Platform Tips</th>
+//             <th className="text-right px-6 py-3">Revenue</th>
+//             <th className="text-center px-6 py-3">Donations</th>
+//           </tr>
+//         </thead>
 
-//             <p className="text-sm text-gray-500">
-//               {card.title}
-//             </p>
+//         <tbody>
+//           {data.map((item) => (
+//             <tr key={item.month} className="border-t">
+//               <td className="px-6 py-4 font-medium">
+//                 {item.month}
+//               </td>
 
-//             <h2 className="text-2xl font-bold mt-2 text-gray-800">
-//               {card.value}
-//             </h2>
-//           </div>
-//         ))}
-//       </div>
+//               <td className="px-6 py-4 text-right">
+//                 ₹{item.donationAmount.toLocaleString()}
+//               </td>
 
+//               <td className="px-6 py-4 text-right">
+//                 ₹{item.platformTips.toLocaleString()}
+//               </td>
+
+//               <td className="px-6 py-4 text-right font-semibold text-green-600">
+//                 ₹{item.totalRevenue.toLocaleString()}
+//               </td>
+
+//               <td className="px-6 py-4 text-center">
+//                 {item.donations}
+//               </td>
+//             </tr>
+//           ))}
+//         </tbody>
+//       </table>
 //     </div>
 //   );
 // }
