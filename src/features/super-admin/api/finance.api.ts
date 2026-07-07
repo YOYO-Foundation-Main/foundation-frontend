@@ -102,3 +102,24 @@ export const getTopCampaigns = async () => {
 
   return result;
 };
+
+// ================= PLATFORM INCOME =================
+export const getPlatformIncome = async () => {
+  const res = await fetch(
+    `${BASE_URL}/api/admin/finance/platform-income`,
+    {
+      headers: authHeaders(),
+      cache: "no-store",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok || !result.success) {
+    throw new Error(
+      result.message || "Failed to fetch platform income"
+    );
+  }
+
+  return result;
+};

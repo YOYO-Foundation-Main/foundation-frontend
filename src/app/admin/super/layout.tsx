@@ -210,6 +210,10 @@ const NAV = [
         href: "/admin/super/finance/revenue",
       },
       {
+        label: "Platform Income Trend",
+        href: "/admin/super/finance/platform",
+      },
+      {
         label: "Donations",
         href: "/admin/super/finance/donations",
       },
