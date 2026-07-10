@@ -129,9 +129,55 @@ export const adminToggleCauseStatus = async (id: number) => {
 };
 
 // ================= CAMPAIGNS =================
-export const adminGetCampaigns = async () => {
-  const res = await fetch(`${BASE_URL}/api/campaigns`, { headers: authHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch campaigns");
+// export const adminGetCampaigns = async () => {
+//   let page = 1;
+//   const limit = 100;
+
+//   let allCampaigns: any[] = [];
+//   let totalPages = 1;
+
+//   do {
+//     const res = await fetch(
+//       `${BASE_URL}/api/campaigns?page=${page}&limit=${limit}`,
+//       {
+//         headers: authHeaders(),
+//       }
+//     );
+
+//     if (!res.ok) {
+//       throw new Error("Failed to fetch campaigns");
+//     }
+
+//     const result = await res.json();
+
+//     allCampaigns.push(...(result.campaigns || []));
+
+//     totalPages = result.totalPages;
+
+//     page++;
+
+//   } while (page <= totalPages);
+
+//   return {
+//     campaigns: allCampaigns,
+//     total: allCampaigns.length,
+//   };
+// };
+export const adminGetCampaigns = async (
+  page = 1,
+  limit = 10
+) => {
+  const res = await fetch(
+    `${BASE_URL}/api/campaigns?page=${page}&limit=${limit}`,
+    {
+      headers: authHeaders(),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch campaigns");
+  }
+
   return res.json();
 };
 

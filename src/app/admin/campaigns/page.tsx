@@ -14,7 +14,7 @@ import { isValidUrl } from "@/utils/url";
 
 function getProgress(raised: number, goal: number): number {
   if (!goal) return 0;
-  return Math.min(Math.round((raised/ goal) * 100), 100);
+  return Math.min(Math.round((raised / goal) * 100), 100);
 }
 
 // ✅ FIXED: Handle null endDate
@@ -35,16 +35,64 @@ function formatDate(date: string | null): string {
   });
 }
 
-function mapStatus(status: string): { label: string; color: string } {
-  switch (status?.toUpperCase()) {
-    case "APPROVED": return { label: "Active", color: "bg-blue-50 text-blue-600 border border-blue-200" };
-    case "PENDING": return { label: "Pending", color: "bg-yellow-50 text-yellow-600 border border-yellow-200" };
-    case "DRAFT": return { label: "Draft", color: "bg-gray-100 text-gray-500 border border-gray-200" };
-    case "COMPLETED": return { label: "Completed", color: "bg-green-50 text-green-600 border border-green-200" };
-    case "REJECTED": return { label: "Rejected", color: "bg-red-50 text-red-500 border border-red-200" };
-    default: return { label: status || "Unknown", color: "bg-gray-100 text-gray-500 border border-gray-200" };
+// function mapStatus(status: string): { label: string; color: string } {
+//   switch (status?.toUpperCase()) {
+//     case "APPROVED": return { label: "Active", color: "bg-blue-50 text-blue-600 border border-blue-200" };
+//     case "PENDING": return { label: "Pending", color: "bg-yellow-50 text-yellow-600 border border-yellow-200" };
+//     case "DRAFT": return { label: "Draft", color: "bg-gray-100 text-gray-500 border border-gray-200" };
+//     case "COMPLETED": return { label: "Completed", color: "bg-green-50 text-green-600 border border-green-200" };
+//     case "REJECTED": return { label: "Rejected", color: "bg-red-50 text-red-500 border border-red-200" };
+//     default: return { label: status || "Unknown", color: "bg-gray-100 text-gray-500 border border-gray-200" };
+//   }
+// }
+function mapStatus(campaign: Campaign): { label: string; color: string } {
+  // Archived (Soft Deleted)
+  if (!campaign.isActive) {
+    return {
+      label: "Archived",
+      color: "bg-gray-200 text-gray-700 border border-gray-300",
+    };
+  }
+
+  switch (campaign.status?.toUpperCase()) {
+    case "APPROVED":
+      return {
+        label: "Active",
+        color: "bg-blue-50 text-blue-600 border border-blue-200",
+      };
+
+    case "PENDING":
+      return {
+        label: "Pending",
+        color: "bg-yellow-50 text-yellow-600 border border-yellow-200",
+      };
+
+    case "DRAFT":
+      return {
+        label: "Draft",
+        color: "bg-gray-100 text-gray-500 border border-gray-200",
+      };
+
+    case "COMPLETED":
+      return {
+        label: "Completed",
+        color: "bg-green-50 text-green-600 border border-green-200",
+      };
+
+    case "REJECTED":
+      return {
+        label: "Rejected",
+        color: "bg-red-50 text-red-500 border border-red-200",
+      };
+
+    default:
+      return {
+        label: campaign.status || "Unknown",
+        color: "bg-gray-100 text-gray-500 border border-gray-200",
+      };
   }
 }
+
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function AdminCampaignsPage() {
@@ -53,7 +101,9 @@ export default function AdminCampaignsPage() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("All");
   const [selected, setSelected] = useState<Campaign | null>(null);
-  const [perPage, setPerPage] = useState(8);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  // const [perPage, setPerPage] = useState(10);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingCampaign, setPendingCampaign] = useState<Campaign | null>(null);
 
@@ -86,13 +136,20 @@ export default function AdminCampaignsPage() {
   //   }
   // };
 
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = async (pageNumber = page) => {
     try {
       setLoading(true);
 
-      const data = await adminGetCampaigns();
+      const data = await adminGetCampaigns(pageNumber, 10);
 
-      const list: Campaign[] = data?.campaigns || data || [];
+      // const list = data.campaigns || [];
+      const list: Campaign[] = data.campaigns || [];
+
+      setCampaigns(list);
+
+      setPage(data.page);
+
+      setTotalPages(data.totalPages);
 
       setCampaigns(list);
 
@@ -116,7 +173,9 @@ export default function AdminCampaignsPage() {
     }
   };
 
-  useEffect(() => { fetchCampaigns(); }, []);
+  useEffect(() => {
+    fetchCampaigns(page);
+  }, [page]);
 
   const handleStatusToggle = async (campaign: Campaign) => {
     const newStatus = campaign.status?.toUpperCase() === "APPROVED" ? "PENDING" : "APPROVED";
@@ -180,23 +239,74 @@ export default function AdminCampaignsPage() {
     showToast("✅ Campaign deleted", "success");
   };
 
+  // const counts = {
+  //   All: campaigns.length,
+  //   Active: campaigns.filter((c) => c.status?.toUpperCase() === "APPROVED").length,
+  //   Pending: campaigns.filter((c) => c.status?.toUpperCase() === "PENDING").length,
+  //   Draft: campaigns.filter((c) => c.status?.toUpperCase() === "DRAFT").length,
+  //   Completed: campaigns.filter((c) => c.status?.toUpperCase() === "COMPLETED").length,
+  //   Featured: campaigns.filter((c) => c.isFeatured).length,
+  // };
   const counts = {
     All: campaigns.length,
-    Active: campaigns.filter((c) => c.status?.toUpperCase() === "APPROVED").length,
-    Pending: campaigns.filter((c) => c.status?.toUpperCase() === "PENDING").length,
-    Draft: campaigns.filter((c) => c.status?.toUpperCase() === "DRAFT").length,
-    Completed: campaigns.filter((c) => c.status?.toUpperCase() === "COMPLETED").length,
-    Featured: campaigns.filter((c) => c.isFeatured).length,
+    Active: campaigns.filter(
+      (c) => c.isActive && c.status?.toUpperCase() === "APPROVED"
+    ).length,
+
+    Pending: campaigns.filter(
+      (c) => c.isActive && c.status?.toUpperCase() === "PENDING"
+    ).length,
+
+    Draft: campaigns.filter(
+      (c) => c.isActive && c.status?.toUpperCase() === "DRAFT"
+    ).length,
+
+    Completed: campaigns.filter(
+      (c) => c.isActive && c.status?.toUpperCase() === "COMPLETED"
+    ).length,
+
+    Featured: campaigns.filter(
+      (c) => c.isActive && c.isFeatured
+    ).length,
+
+    Archived: campaigns.filter(
+      (c) => !c.isActive
+    ).length,
   };
 
   const filtered = campaigns.filter((c) => {
+    // const tabMatch =
+    //   activeTab === "All" ||
+    //   (activeTab === "Active" && c.status?.toUpperCase() === "APPROVED") ||
+    //   (activeTab === "Pending" && c.status?.toUpperCase() === "PENDING") ||
+    //   (activeTab === "Draft" && c.status?.toUpperCase() === "DRAFT") ||
+    //   (activeTab === "Completed" && c.status?.toUpperCase() === "COMPLETED") ||
+    //   (activeTab === "Featured" && c.isFeatured);
     const tabMatch =
-      activeTab === "All" ||
-      (activeTab === "Active" && c.status?.toUpperCase() === "APPROVED") ||
-      (activeTab === "Pending" && c.status?.toUpperCase() === "PENDING") ||
-      (activeTab === "Draft" && c.status?.toUpperCase() === "DRAFT") ||
-      (activeTab === "Completed" && c.status?.toUpperCase() === "COMPLETED") ||
-      (activeTab === "Featured" && c.isFeatured);
+      (activeTab === "All" && c.isActive) ||
+
+      (activeTab === "Active" &&
+        c.isActive &&
+        c.status?.toUpperCase() === "APPROVED") ||
+
+      (activeTab === "Pending" &&
+        c.isActive &&
+        c.status?.toUpperCase() === "PENDING") ||
+
+      (activeTab === "Draft" &&
+        c.isActive &&
+        c.status?.toUpperCase() === "DRAFT") ||
+
+      (activeTab === "Completed" &&
+        c.isActive &&
+        c.status?.toUpperCase() === "COMPLETED") ||
+
+      (activeTab === "Featured" &&
+        c.isActive &&
+        c.isFeatured) ||
+
+      (activeTab === "Archived" &&
+        !c.isActive);
 
     const searchMatch =
       c.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -248,7 +358,7 @@ export default function AdminCampaignsPage() {
 
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 flex-wrap">
-              {(["All", "Active", "Pending", "Draft", "Completed", "Featured"] as const).map((tab) => (
+              {(["All", "Active", "Pending", "Draft", "Completed", "Featured", "Archived",] as const).map((tab) => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${activeTab === tab ? "bg-[#334E79] text-white" : "text-gray-500 hover:text-gray-700"
                     }`}
@@ -277,10 +387,10 @@ export default function AdminCampaignsPage() {
             {loading && <div className="p-8 text-center text-sm text-gray-400">Loading campaigns...</div>}
             {!loading && filtered.length === 0 && <div className="p-8 text-center text-sm text-gray-400">No campaigns found</div>}
 
-            {!loading && filtered.slice(0, perPage).map((c) => {
+            {!loading && filtered.slice(0,).map((c) => {
               const progress = getProgress(c.raisedAmount, c.goalAmount);
               const daysLeft = getDaysLeft(c.endDate);
-              const { label, color } = mapStatus(c.status);
+              const { label, color } = mapStatus(c);
               const isSelected = selected?.id === c.id;
               const productCount = c.campaignProducts?.length || 0;
 
@@ -414,17 +524,23 @@ export default function AdminCampaignsPage() {
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <span>Show</span>
-              <select value={perPage} onChange={(e) => setPerPage(Number(e.target.value))}
-                className="border border-gray-200 rounded-lg px-2 py-1 text-xs outline-none">
-                {[8, 12, 16].map((n) => <option key={n}>{n}</option>)}
-              </select>
+
               <span>of {filtered.length} results</span>
             </div>
             <div className="flex items-center gap-1">
-              {[1, 2, 3].map((p) => (
-                <button key={p} className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs transition ${p === 1 ? "bg-blue-600 text-white" : "text-gray-500 hover:bg-gray-100"
-                  }`}>{p}</button>
-              ))}
+              <button
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                Previous
+              </button>
+
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>
@@ -434,10 +550,16 @@ export default function AdminCampaignsPage() {
           <div className="w-[380px] shrink-0 bg-white rounded-xl border border-gray-200 overflow-y-auto max-h-[calc(100vh-140px)] sticky top-0">
 
             <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
-              <span className={`text-[10px] px-2.5 py-1 rounded-full font-medium ${mapStatus(selected.status).color}`}>
-                ● {mapStatus(selected.status).label}
+              <span
+                className={`text-[10px] px-2.5 py-1 rounded-full font-medium ${mapStatus(selected).color}`}
+              >
+                ● {mapStatus(selected).label}
               </span>
-              <button onClick={() => setSelected(null)} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
+
+              <button
+                onClick={() => setSelected(null)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition"
+              >
                 <FiX size={15} />
               </button>
             </div>

@@ -22,14 +22,13 @@ const progressTextClass = (pct: number) => {
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     APPROVED: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
-    PENDING:  "bg-amber-500/15 text-amber-400 border-amber-500/20",
+    PENDING: "bg-amber-500/15 text-amber-400 border-amber-500/20",
     REJECTED: "bg-red-500/15 text-red-400 border-red-500/20",
   };
   return (
     <span
-      className={`text-[10px] px-2.5 py-1 rounded-full font-semibold border backdrop-blur-sm ${
-        styles[status] ?? "bg-gray-500/15 text-gray-400 border-gray-500/20"
-      }`}
+      className={`text-[10px] px-2.5 py-1 rounded-full font-semibold border backdrop-blur-sm ${styles[status] ?? "bg-gray-500/15 text-gray-400 border-gray-500/20"
+        }`}
     >
       {status}
     </span>
@@ -115,7 +114,7 @@ function CampaignCard({ c, onClick }: { c: any; onClick: () => void }) {
           </h2>
           <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
             <svg className="w-3 h-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-              <path fillRule="evenodd" d="M8 1.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zM2 6a6 6 0 1110.74 3.67l3.3 3.29a.75.75 0 11-1.06 1.06l-3.3-3.29A6 6 0 012 6z" clipRule="evenodd"/>
+              <path fillRule="evenodd" d="M8 1.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zM2 6a6 6 0 1110.74 3.67l3.3 3.29a.75.75 0 11-1.06 1.06l-3.3-3.29A6 6 0 012 6z" clipRule="evenodd" />
             </svg>
             {c.location}
           </p>
@@ -150,7 +149,7 @@ function CampaignCard({ c, onClick }: { c: any; onClick: () => void }) {
           <span className="text-[11px] font-semibold text-indigo-500 group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
             Analytics
             <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </span>
         </div>
@@ -176,24 +175,48 @@ function CampaignCard({ c, onClick }: { c: any; onClick: () => void }) {
 export default function CampaignAnalyticsListPage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCampaigns, setTotalCampaigns] = useState(0);
+  const limit = 12;
   const router = useRouter();
 
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const res = await adminGetCampaigns();
+  //       setCampaigns(res.campaigns || []);
+  //     } catch (err) {
+  //       console.error(err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   })();
+  // }, []);
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await adminGetCampaigns();
-        setCampaigns(res.campaigns || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+    fetchCampaigns();
+  }, [page]);
+
+  const fetchCampaigns = async () => {
+    try {
+      setLoading(true);
+
+      const res = await adminGetCampaigns(page, limit);
+
+      setCampaigns(res.campaigns || []);
+      setTotalPages(res.totalPages || 1);
+      setTotalCampaigns(res.total || 0);
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Derived counts
   const approved = campaigns.filter((c) => c.status === "APPROVED").length;
-  const pending  = campaigns.filter((c) => c.status === "PENDING").length;
+  const pending = campaigns.filter((c) => c.status === "PENDING").length;
 
   return (
     <div className="min-h-full bg-gray-50 p-6 flex flex-col gap-6">
@@ -213,7 +236,7 @@ export default function CampaignAnalyticsListPage() {
         {!loading && campaigns.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] font-semibold bg-white border border-gray-100 text-gray-600 px-3 py-1.5 rounded-full shadow-sm">
-              {campaigns.length} total
+              {totalCampaigns} total
             </span>
             <span className="text-[11px] font-semibold bg-emerald-50 border border-emerald-100 text-emerald-600 px-3 py-1.5 rounded-full">
               {approved} approved
@@ -233,15 +256,50 @@ export default function CampaignAnalyticsListPage() {
       ) : campaigns.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {campaigns.map((c) => (
-            <CampaignCard
-              key={c.id}
-              c={c}
-              onClick={() => router.push(`/admin/campaigns/analytics/${c.id}`)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {campaigns.map((c) => (
+              <CampaignCard
+                key={c.id}
+                c={c}
+                onClick={() =>
+                  router.push(`/admin/campaigns/analytics/${c.id}`)
+                }
+              />
+            ))}
+          </div>
+
+          <div className="mt-10 flex items-center justify-center gap-2">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm disabled:opacity-40"
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`h-10 w-10 rounded-lg text-sm font-semibold transition ${page === i + 1
+                    ? "bg-red-600 text-white"
+                    : "border border-gray-300 bg-white hover:bg-gray-100"
+                  }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
 
     </div>
