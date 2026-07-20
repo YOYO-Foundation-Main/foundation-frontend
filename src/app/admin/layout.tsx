@@ -8,6 +8,9 @@ import {
   FiPackage, FiDollarSign, FiMenu, FiX, FiShield,
 } from "react-icons/fi";
 import { useAdminStore } from "@/features/admin/store/admin.store";
+import {
+  adminLogout,
+} from "@/features/admin/api/admin.api";
 import { Contact, FolderTree, ImageIcon, Settings } from "lucide-react";
 
 const NAV = [
@@ -90,9 +93,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
 
-  const handleLogout = () => {
-    logoutAdmin();
-    router.push("/admin/login");
+  // const handleLogout = () => {
+  //   logoutAdmin();
+  //   router.push("/admin/login");
+  // };
+  const handleLogout = async () => {
+    try {
+      await adminLogout();
+
+      logoutAdmin();     
+      router.replace("/admin/login");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const firstLetter = admin?.email?.charAt(0)?.toUpperCase() || "A";
@@ -107,11 +120,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   //     router.replace("/admin/login");
   //   }
   // }, [admin, isLoginPage, router]);
-  useEffect(() => {
-    if (!admin && !isLoginPage && !isSuperAdminRoute) {
-      router.replace("/admin/login");
-    }
-  }, [admin, isLoginPage, isSuperAdminRoute, router]);
+  // useEffect(() => {
+  //   if (!admin && !isLoginPage && !isSuperAdminRoute) {
+  //     router.replace("/admin/login");
+  //   }
+  // }, [admin, isLoginPage, isSuperAdminRoute, router]);
 
   if (isLoginPage || isSuperAdminRoute) {
     return <>{children}</>;
@@ -189,16 +202,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button> */}
       </div>
 
-      {/* Logout */}
-      {/* <div className="px-2 sm:px-3 pb-4 border-t border-gray-100 pt-3">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm text-gray-500 hover:text-red-500 hover:bg-red-50 transition"
-        >
-          <FiLogOut size={14} />
-          Logout
-        </button>
-      </div> */}
     </>
   );
 

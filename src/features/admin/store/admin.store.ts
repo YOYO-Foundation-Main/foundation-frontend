@@ -8,10 +8,15 @@ type Admin = {
   role: string;
 };
 
+// type AdminAuthState = {
+//   admin: Admin | null;
+//   adminToken: string | null;
+//   setAdmin: (admin: Admin, token: string) => void;
+//   logoutAdmin: () => void;
+// };
 type AdminAuthState = {
   admin: Admin | null;
-  adminToken: string | null;
-  setAdmin: (admin: Admin, token: string) => void;
+  setAdmin: (admin: Admin) => void;
   logoutAdmin: () => void;
 };
 
@@ -19,28 +24,41 @@ export const useAdminStore = create<AdminAuthState>()(
   persist(
     (set) => ({
       admin: null,
-      adminToken: null,
-
-      setAdmin: (admin, token) => {
-        // ✅ Save cookie for middleware protection
-        if (typeof document !== "undefined") {
-          document.cookie = `adminToken=${token}; path=/; max-age=${60 * 60 * 24}`;
-        }
-        set({ admin, adminToken: token });
+      // setAdmin: (admin, token) => {
+      //   // ✅ Save cookie for middleware protection
+      //   if (typeof document !== "undefined") {
+      //     document.cookie = `adminToken=${token}; path=/; max-age=${60 * 60 * 24}`;
+      //   }
+      //   set({ admin, adminToken: token });
+      // },
+      setAdmin: (admin) => {
+        set({
+          admin,
+        });
       },
-
+      // logoutAdmin: () => {
+      //   if (typeof document !== "undefined") {
+      //     document.cookie = "adminToken=; path=/; max-age=0";
+      //   }
+      //   set({ 
+      //     admin: null, 
+      //     adminToken: null
+      //    });
+      // },
       logoutAdmin: () => {
-        if (typeof document !== "undefined") {
-          document.cookie = "adminToken=; path=/; max-age=0";
-        }
-        set({ admin: null, adminToken: null });
+        set({
+          admin: null,
+        });
       },
     }),
     {
       name: "admin-auth-storage",
+      // partialize: (state) => ({
+      //   admin: state.admin,
+      //   adminToken: state.adminToken,
+      // }),
       partialize: (state) => ({
         admin: state.admin,
-        adminToken: state.adminToken,
       }),
     }
   )

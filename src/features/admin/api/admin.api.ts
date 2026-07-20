@@ -1,22 +1,22 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-function getAdminToken(): string {
-  if (typeof window === "undefined") return "";
-  try {
-    const stored = localStorage.getItem("admin-auth-storage");
-    if (!stored) return "";
-    return JSON.parse(stored)?.state?.adminToken || "";
-  } catch {
-    return "";
-  }
-}
+// function getAdminToken(): string {
+//   if (typeof window === "undefined") return "";
+//   try {
+//     const stored = localStorage.getItem("admin-auth-storage");
+//     if (!stored) return "";
+//     return JSON.parse(stored)?.state?.adminToken || "";
+//   } catch {
+//     return "";
+//   }
+// }
 
-function authHeaders() {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${getAdminToken()}`,
-  };
-}
+// function authHeaders() {
+//   return {
+//     "Content-Type": "application/json",
+//     Authorization: `Bearer ${getAdminToken()}`,
+//   };
+// }
 
 // ================= ADMIN LOGIN =================
 export const adminLogin = async (data: { email: string; password: string }) => {
@@ -24,7 +24,10 @@ export const adminLogin = async (data: { email: string; password: string }) => {
 
   const res = await fetch(`${BASE_URL}/api/admin/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
   });
 
@@ -39,6 +42,22 @@ export const adminLogin = async (data: { email: string; password: string }) => {
   return result;
 };
 
+//admin logout
+export const adminLogout = async () => {
+  const res = await fetch(`${BASE_URL}/api/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Logout failed");
+  }
+
+  return result;
+};
+
 // ================= DASHBOARD STATS =================
 // GET /api/admin/dashboard
 // { totalUsers, totalCampaigns, activeCampaigns, pendingCampaigns, totalDonors, totalAmount }
@@ -46,7 +65,7 @@ export const adminGetDashboard = async () => {
   console.log("📤 [ADMIN DASHBOARD]");
 
   const res = await fetch(`${BASE_URL}/api/admin/dashboard`, {
-    headers: authHeaders(),
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -62,7 +81,7 @@ export const adminGetDashboard = async () => {
 
 export const adminGetCauses = async () => {
   const res = await fetch(`${BASE_URL}/api/cause/admin`, {
-    headers: authHeaders(),
+    credentials: "include",
   });
 
   if (!res.ok) throw new Error("Failed to fetch causes");
@@ -73,9 +92,7 @@ export const adminGetCauses = async () => {
 export const adminCreateCause = async (data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/cause/create`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${getAdminToken()}`,
-    },
+    credentials: "include",
     body: data,
   });
 
@@ -89,9 +106,7 @@ export const adminCreateCause = async (data: FormData) => {
 export const adminUpdateCause = async (id: number, data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/cause/${id}`, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${getAdminToken()}`,
-    },
+   credentials: "include",
     body: data,
   });
 
@@ -105,7 +120,7 @@ export const adminUpdateCause = async (id: number, data: FormData) => {
 export const adminDeleteCause = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/cause/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+    credentials: "include",
   });
 
   const result = await res.json();
@@ -118,7 +133,7 @@ export const adminDeleteCause = async (id: number) => {
 export const adminToggleCauseStatus = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/cause/${id}/toggle`, {
     method: "PATCH",
-    headers: authHeaders(),
+   credentials: "include",
   });
 
   const result = await res.json();
@@ -170,7 +185,7 @@ export const adminGetCampaigns = async (
   const res = await fetch(
     `${BASE_URL}/api/campaigns?page=${page}&limit=${limit}`,
     {
-      headers: authHeaders(),
+      credentials: "include",
     }
   );
 
@@ -184,7 +199,7 @@ export const adminGetCampaigns = async (
 export const adminCreateCampaign = async (data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/campaigns`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${getAdminToken()}` },
+   credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -195,7 +210,7 @@ export const adminCreateCampaign = async (data: FormData) => {
 export const adminUpdateCampaign = async (id: number, data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/campaigns/${id}`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${getAdminToken()}` },
+    credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -214,7 +229,7 @@ export const adminAddCampaignProducts = async (data: {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${getAdminToken()}`,
+      credentials: "include",
     },
     body: JSON.stringify(data),
   });
@@ -233,7 +248,7 @@ export const adminUpdateCampaignStatus = async (id: number, status: string) => {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${getAdminToken()}`,
+      credentials: "include",
     },
     body: JSON.stringify({ status }),
   });
@@ -248,7 +263,7 @@ export const adminUpdateFeaturedStatus = async (id: number, status: boolean) => 
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${getAdminToken()}`,
+      credentials: "include",
     },
     body: JSON.stringify({ isFeatured: status }), // ✅ FIXED KEY
   });
@@ -263,7 +278,7 @@ export const adminUpdateFeaturedStatus = async (id: number, status: boolean) => 
 export const adminDeleteCampaign = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/campaigns/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to delete campaign");
   return res.json();
@@ -271,7 +286,8 @@ export const adminDeleteCampaign = async (id: number) => {
 
 // ================= EVENTS =================
 export const adminGetEvents = async () => {
-  const res = await fetch(`${BASE_URL}/api/events`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/api/events`,
+     {credentials: "include", });
   if (!res.ok) throw new Error("Failed to fetch events");
   return res.json();
 };
@@ -279,7 +295,7 @@ export const adminGetEvents = async () => {
 export const adminCreateEvent = async (data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/events`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${getAdminToken()}` },
+   credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -290,7 +306,7 @@ export const adminCreateEvent = async (data: FormData) => {
 export const adminUpdateEvent = async (id: number, data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/events/${id}`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${getAdminToken()}` },
+   credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -301,7 +317,7 @@ export const adminUpdateEvent = async (id: number, data: FormData) => {
 export const adminDeleteEvent = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/events/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to delete event");
   return res.json();
@@ -313,7 +329,7 @@ export const getDonations = async (params: any) => {
   const query = new URLSearchParams(params).toString();
 
   const res = await fetch(`${BASE_URL}/api/admin/donations?${query}`, {
-    headers: authHeaders(), // ✅ FIXED
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -328,7 +344,7 @@ export const getDonations = async (params: any) => {
 
 export const getDonationStats = async () => {
   const res = await fetch(`${BASE_URL}/api/admin/donations/stats`, {
-    headers: authHeaders(), // ✅ FIXED
+   credentials: "include",
     cache: "no-store",
   });
 
@@ -344,7 +360,7 @@ export const getDonationStats = async () => {
 // 🔹 Donor Donations
 export const getDonorDonations = async (userId: number) => {
   const res = await fetch(`${BASE_URL}/api/admin/donor/${userId}/donations`, {
-    headers: authHeaders(),
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -356,7 +372,7 @@ export const getDonorDonations = async (userId: number) => {
 // 🔹 Top Donors
 export const getTopDonors = async () => {
   const res = await fetch(`${BASE_URL}/api/admin/top-donors`, {
-    headers: authHeaders(),
+   credentials: "include",
   });
 
   const result = await res.json();
@@ -367,7 +383,7 @@ export const getTopDonors = async () => {
 // 🔹 Campaign Analytics
 export const getCampaignAnalytics = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/admin/campaign/${id}/analytics`, {
-    headers: authHeaders(),
+    credentials: "include",
   });
 
   const result = await res.json();
@@ -377,7 +393,7 @@ export const getCampaignAnalytics = async (id: number) => {
 
 // ================= BLOGS =================
 export const adminGetBlogs = async () => {
-  const res = await fetch(`${BASE_URL}/api/blog`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/api/blog`, { credentials: "include", });
   if (!res.ok) throw new Error("Failed to fetch blogs");
   return res.json();
 };
@@ -385,7 +401,7 @@ export const adminGetBlogs = async () => {
 export const adminCreateBlog = async (data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/blog/create`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${getAdminToken()}` },
+    credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -396,7 +412,7 @@ export const adminCreateBlog = async (data: FormData) => {
 export const adminUpdateBlog = async (id: number, data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/blog/${id}`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${getAdminToken()}` },
+   credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -407,7 +423,7 @@ export const adminUpdateBlog = async (id: number, data: FormData) => {
 export const adminDeleteBlog = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/blog/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to delete blog");
   return res.json();
@@ -433,7 +449,7 @@ export const adminGetUsers = async (params: GetUsersParams = {}) => {
   const res = await fetch(
     `${BASE_URL}/api/admin/users?${query.toString()}`,
     {
-      headers: authHeaders(),
+      credentials: "include",
     }
   );
 
@@ -446,7 +462,7 @@ export const adminGetUsers = async (params: GetUsersParams = {}) => {
 
 export const adminGetUserById = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/admin/users/${id}`, {
-    headers: authHeaders(),
+   credentials: "include",
   });
 
   const result = await res.json();
@@ -461,7 +477,7 @@ export const adminGetUserById = async (id: number) => {
 
 export const adminGetProducts = async () => {
   const res = await fetch(`${BASE_URL}/api/products`, {
-    headers: authHeaders(),
+    credentials: "include",
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to fetch products");
@@ -472,7 +488,7 @@ export const adminGetProducts = async () => {
 export const adminCreateProduct = async (data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/products`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${getAdminToken()}` },
+    credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -483,7 +499,7 @@ export const adminCreateProduct = async (data: FormData) => {
 export const adminUpdateProduct = async (id: number, data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/products/${id}`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${getAdminToken()}` },
+   credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -494,7 +510,7 @@ export const adminUpdateProduct = async (id: number, data: FormData) => {
 export const adminDeleteProduct = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/products/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+   credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to delete product");
   return res.json();
@@ -509,7 +525,7 @@ export const adminGetProductCategories =
     const res = await fetch(
       `${BASE_URL}/api/product-categories`,
       {
-        headers: authHeaders(),
+        credentials: "include",
         cache: "no-store",
       }
     );
@@ -531,7 +547,7 @@ export const adminGetProductCategoryById =
     const res = await fetch(
       `${BASE_URL}/api/product-categories/${id}`,
       {
-        headers: authHeaders(),
+       credentials: "include",
         cache: "no-store",
       }
     );
@@ -554,10 +570,7 @@ export const adminCreateProductCategory =
       `${BASE_URL}/api/product-categories`,
       {
         method: "POST",
-        headers: {
-          Authorization:
-            `Bearer ${getAdminToken()}`
-        },
+        credentials: "include",
         body: data,
       }
     );
@@ -586,10 +599,7 @@ export const adminUpdateProductCategory =
       `${BASE_URL}/api/product-categories/${id}`,
       {
         method: "PUT",
-        headers: {
-          Authorization:
-            `Bearer ${getAdminToken()}`
-        },
+        credentials: "include",
         body: data,
       }
     );
@@ -615,7 +625,7 @@ export const adminDeleteProductCategory =
       `${BASE_URL}/api/product-categories/${id}`,
       {
         method: "DELETE",
-        headers: authHeaders(),
+        credentials: "include",
       }
     );
 
@@ -638,7 +648,7 @@ export const adminDeleteProductCategory =
 // GET /api/kyc/admin — all user/campaigner KYC submissions
 export const adminGetUserKyc = async () => {
   const res = await fetch(`${BASE_URL}/api/kyc/admin`, {
-    headers: authHeaders(),
+   credentials: "include",
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to fetch user KYC");
@@ -650,7 +660,7 @@ export const adminGetUserKyc = async () => {
 export const adminUpdateUserKyc = async (id: number, status: string, remarks?: string) => {
   const res = await fetch(`${BASE_URL}/api/kyc/admin/${id}`, {
     method: "PUT",
-    headers: authHeaders(),
+    credentials: "include",
     body: JSON.stringify({ status, ...(remarks ? { remarks } : {}) }),
   });
   const result = await res.json();
@@ -661,7 +671,7 @@ export const adminUpdateUserKyc = async (id: number, status: string, remarks?: s
 // GET /api/campaign-kyc/admin — all campaign/beneficiary KYC submissions
 export const adminGetCampaignKyc = async () => {
   const res = await fetch(`${BASE_URL}/api/campaign-kyc/admin`, {
-    headers: authHeaders(),
+   credentials: "include",
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to fetch campaign KYC");
@@ -673,7 +683,7 @@ export const adminGetCampaignKyc = async () => {
 export const adminUpdateCampaignKyc = async (id: number, status: string, remarks?: string) => {
   const res = await fetch(`${BASE_URL}/api/campaign-kyc/admin/${id}`, {
     method: "PUT",
-    headers: authHeaders(),
+   credentials: "include",
     body: JSON.stringify({ status, ...(remarks ? { remarks } : {}) }),
   });
   const result = await res.json();
@@ -684,7 +694,7 @@ export const adminUpdateCampaignKyc = async (id: number, status: string, remarks
 //contact query api 
 export const getContactQueries = async () => {
   const res = await fetch(`${BASE_URL}/api/contact`, {
-    headers: authHeaders(),
+   credentials: "include",
   });
 
   if (!res.ok) throw new Error("Failed to fetch contact queries");
@@ -697,7 +707,7 @@ export const getContactQueries = async () => {
 export const getAllNgos = async () => {
   const res = await fetch(`${BASE_URL}/api/ngo/admin/ngos`,
     {
-      headers: authHeaders(),
+     credentials: "include",
     }
   );
 
@@ -718,7 +728,7 @@ export const getNgoById = async (
   const res = await fetch(
     `${BASE_URL}/api/ngo/admin/ngos/${id}`,
     {
-      headers: authHeaders(),
+      credentials: "include",
     }
   );
 
@@ -740,7 +750,7 @@ export const approveNgo = async (
     `${BASE_URL}/api/ngo/admin/ngos/${id}/approve`,
     {
       method: "PUT",
-      headers: authHeaders(),
+      credentials: "include",
     }
   );
 
@@ -763,7 +773,7 @@ export const rejectNgo = async (
     `${BASE_URL}/api/ngo/admin/ngos/${id}/reject`,
     {
       method: "PUT",
-      headers: authHeaders(),
+      credentials: "include",
       body: JSON.stringify({
         rejectionReason,
       }),
@@ -809,7 +819,7 @@ export const getAllVolunteers = async (
   const res = await fetch(
     `${BASE_URL}/api/volunteers/admin?${params.toString()}`,
     {
-      headers: authHeaders(),
+      credentials: "include",
     }
   );
 
@@ -831,7 +841,7 @@ export const getVolunteerById =
     const res = await fetch(
       `${BASE_URL}/api/volunteers/admin/${id}`,
       {
-        headers: authHeaders(),
+       credentials: "include",
       }
     );
 
@@ -862,11 +872,7 @@ export const updateVolunteerStatus =
       {
         method: "PATCH",
 
-        headers: {
-          ...authHeaders(),
-          "Content-Type":
-            "application/json",
-        },
+       credentials: "include",
 
         body: JSON.stringify({
           status,
@@ -893,7 +899,7 @@ export const getVolunteerStats =
     const res = await fetch(
       `${BASE_URL}/api/volunteers/admin/stats`,
       {
-        headers: authHeaders(),
+       credentials: "include",
       }
     );
 
@@ -918,7 +924,7 @@ export const deleteVolunteer =
       {
         method: "DELETE",
 
-        headers: authHeaders(),
+       credentials: "include",
       }
     );
 
@@ -940,7 +946,7 @@ export const deleteVolunteer =
 // Get All Gallery
 export const adminGetGallery = async () => {
   const res = await fetch(`${BASE_URL}/api/gallery`, {
-    headers: authHeaders(),
+   credentials: "include",
     cache: "no-store",
   });
 
@@ -959,9 +965,7 @@ export const adminCreateGallery = async (
     `${BASE_URL}/api/gallery`,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${getAdminToken()}`,
-      },
+      credentials: "include",
       body: data,
     }
   );
@@ -987,9 +991,7 @@ export const adminUpdateGallery = async (
     `${BASE_URL}/api/gallery/${id}`,
     {
       method: "PUT",
-      headers: {
-        Authorization: `Bearer ${getAdminToken()}`
-      },
+     credentials: "include",
       body: data,
     }
   );
@@ -1013,7 +1015,7 @@ export const adminDeleteGallery = async (
     `${BASE_URL}/api/gallery/${id}`,
     {
       method: "DELETE",
-      headers: authHeaders(),
+     credentials: "include",
     }
   );
 
@@ -1037,7 +1039,7 @@ export const adminDeleteGalleryImage = async (
     `${BASE_URL}/api/gallery/image/${imageId}`,
     {
       method: "DELETE",
-      headers: authHeaders(),
+      credentials: "include",
     }
   );
 
@@ -1061,7 +1063,7 @@ export const adminToggleFeaturedGallery =
       `${BASE_URL}/api/gallery/${id}/feature`,
       {
         method: "PATCH",
-        headers: authHeaders(),
+        credentials: "include",
       }
     );
 

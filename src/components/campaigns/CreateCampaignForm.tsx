@@ -232,21 +232,7 @@ export default function CreateCampaignForm() {
   }, []);
 
 
-  // Load products when reaching step 4
-  // useEffect(() => {
-  //   if (step !== 4 || products.length > 0) return;
-  //   const load = async () => {
-  //     try {
-  //       setLoadingProducts(true);
-  //       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products`);
-  //       const data = await res.json();
-  //       // Response: { success: true, Products: [...] }
-  //       setProducts(data?.Products || data?.products || []);
-  //     } catch { /* no products ok */ }
-  //     finally { setLoadingProducts(false); }
-  //   };
-  //   load();
-  // }, [step]);
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -404,9 +390,11 @@ export default function CreateCampaignForm() {
       );
 
       // Save JWT
-      const { token, user } = loginResponse;
+      // const { token, user } = loginResponse;
+      const { user } = loginResponse;
 
-      setUser(loginResponse.user, loginResponse.token);
+      setUser(user);
+
 
       // Resume campaign
       // const resume = await resumeCampaignDraft();

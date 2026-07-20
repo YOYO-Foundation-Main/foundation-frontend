@@ -31,9 +31,9 @@ export default function useAuth() {
 
       console.log("✅ [HOOK] OTP Verified:", res);
 
-if (res?.user && res?.token) {
-  setUser(res.user, res.token); 
-}
+      if (res?.user && res?.token) {
+        setUser(res.user);
+      }
 
       return res;
     } catch (err: any) {

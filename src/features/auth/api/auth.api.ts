@@ -6,6 +6,7 @@ export const loginUser = async (data: { email: string; password: string }) => {
 
   const res = await fetch(`${BASE_URL}/login`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
@@ -25,6 +26,7 @@ export const signupUser = async (data: any) => {
 
   const res = await fetch(`${BASE_URL}/signup`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
@@ -44,6 +46,7 @@ export const sendOtp = async (email: string) => {
 
   const res = await fetch(`${BASE_URL}/send-otp`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ identifier: email }),
   });
@@ -62,6 +65,7 @@ export const resendOtp = async (email: string) => {
 
   const res = await fetch(`${BASE_URL}/resend-otp`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ identifier: email }),
   });
@@ -80,6 +84,7 @@ export const verifyOtp = async (email: string, otp: string) => {
 
   const res = await fetch(`${BASE_URL}/verify-otp`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ identifier: email, otp }),
   });
@@ -99,18 +104,20 @@ export const googleLogin = async (idToken: string) => {
 
   const res = await fetch(`${BASE_URL}/google`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      idToken,
-    }),
+    body: JSON.stringify({ idToken }),
   });
 
-  const result = await res.json();
+  console.log("STATUS:", res.status);
 
-  console.log("📡 [GOOGLE LOGIN STATUS]:", res.status);
-  console.log("📥 [GOOGLE LOGIN RESPONSE]:", result);
+  const text = await res.text();
+
+  console.log("RAW RESPONSE:", text);
+
+  const result = JSON.parse(text);
 
   if (!res.ok) {
     throw new Error(result.message || result.error || "Google login failed");

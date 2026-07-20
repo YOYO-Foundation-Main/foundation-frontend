@@ -2,26 +2,26 @@ import { FinanceOverviewResponse } from "../types/finance.types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-function getAdminToken(): string {
-  if (typeof window === "undefined") return "";
+// function getAdminToken(): string {
+//   if (typeof window === "undefined") return "";
 
-  try {
-    const stored = localStorage.getItem("admin-auth-storage");
+//   try {
+//     const stored = localStorage.getItem("admin-auth-storage");
 
-    if (!stored) return "";
+//     if (!stored) return "";
 
-    return JSON.parse(stored)?.state?.adminToken || "";
-  } catch {
-    return "";
-  }
-}
+//     return JSON.parse(stored)?.state?.adminToken || "";
+//   } catch {
+//     return "";
+//   }
+// }
 
-function authHeaders() {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${getAdminToken()}`,
-  };
-}
+// function authHeaders() {
+//   return {
+//     "Content-Type": "application/json",
+//     Authorization: `Bearer ${getAdminToken()}`,
+//   };
+// }
 
 // ===============================
 // Finance Overview
@@ -32,7 +32,7 @@ export const getFinanceOverview =
     const res = await fetch(
       `${BASE_URL}/api/admin/finance/overview`,
       {
-        headers: authHeaders(),
+        credentials: "include",
         cache: "no-store",
       }
     );
@@ -51,7 +51,7 @@ export const getRevenueTrend = async () => {
   const res = await fetch(
     `${BASE_URL}/api/admin/finance/revenue-trend`,
     {
-      headers: authHeaders(),
+       credentials: "include",
       cache: "no-store",
     }
   );
@@ -70,7 +70,7 @@ export const getDonationAnalytics = async () => {
   const res = await fetch(
     `${BASE_URL}/api/admin/finance/donation-analytics`,
     {
-      headers: authHeaders(),
+       credentials: "include",
       cache: "no-store",
     }
   );
@@ -89,7 +89,7 @@ export const getTopCampaigns = async () => {
   const res = await fetch(
     `${BASE_URL}/api/admin/finance/top-campaigns`,
     {
-      headers: authHeaders(),
+      credentials: "include",
       cache: "no-store",
     }
   );
@@ -108,7 +108,7 @@ export const getPlatformIncome = async () => {
   const res = await fetch(
     `${BASE_URL}/api/admin/finance/platform-income`,
     {
-      headers: authHeaders(),
+       credentials: "include",
       cache: "no-store",
     }
   );
@@ -119,6 +119,23 @@ export const getPlatformIncome = async () => {
     throw new Error(
       result.message || "Failed to fetch platform income"
     );
+  }
+
+  return result;
+};
+
+
+//admin logout
+export const adminLogout = async () => {
+  const res = await fetch(`${BASE_URL}/api/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Logout failed");
   }
 
   return result;

@@ -169,7 +169,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAdminStore } from "@/features/admin/store/admin.store";
-
+import {
+  adminLogout,
+} from "@/features/admin/api/admin.api";
 import {
   FiGrid,
   FiUsers,
@@ -227,7 +229,7 @@ const NAV = [
   {
     label: "Campaigns",
     icon: FiUsers,
-     children: [
+    children: [
       {
         label: "Overview",
         href: "/admin/super/campaigns",
@@ -278,9 +280,20 @@ export default function SuperAdminLayout({
     }));
   };
 
-  const handleLogout = () => {
-    logoutAdmin();
-    router.replace("/admin/login");
+  // const handleLogout = () => {
+  //   logoutAdmin();
+  //   router.replace("/admin/login");
+  // };
+  const handleLogout = async () => {
+    try {
+      await adminLogout();      // backend logout
+
+      logoutAdmin();            // clear zustand
+
+      router.replace("/admin/login");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -288,6 +301,17 @@ export default function SuperAdminLayout({
       router.replace("/admin/dashboard");
     }
   }, [admin, router]);
+  // const pathname = usePathname();
+
+  // useEffect(() => {
+  //   if (
+  //     pathname.startsWith("/admin/super") &&
+  //     admin &&
+  //     admin.role !== "SUPER_ADMIN"
+  //   ) {
+  //     router.replace("/admin/dashboard");
+  //   }
+  // }, [pathname, admin, router]);
 
   if (!admin) return null;
 

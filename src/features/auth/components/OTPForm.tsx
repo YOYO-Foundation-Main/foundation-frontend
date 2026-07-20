@@ -100,7 +100,7 @@ export default function OTPForm({ email, onClose }: Props) {
         email: decoded?.email || email,
       };
 
-      setUser(user, res.token);
+      setUser(res.user);
       document.cookie = `token=${res.token}; path=/; max-age=${60 * 60 * 24 * 7}`;
 
       showToast("✅ Login successful!", "success");

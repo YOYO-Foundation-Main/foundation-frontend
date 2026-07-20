@@ -61,8 +61,7 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
       console.log("👤 USER TO SAVE:", user);
 
       // ✅ This saves to Zustand + localStorage "auth-storage" + cookie
-      setUser(user, res.token);
-
+      setUser(user);
       showToast("✅ Login successful!", "success");
       setTimeout(() => onClose(), 1000);
     } catch (err: any) {
@@ -170,7 +169,7 @@ export default function LoginForm({ setStep, setEmail, onClose }: Props) {
 
                 console.log("Backend Response:", res);
 
-                setUser(res.user, res.token);
+                setUser(res.user);
 
                 showToast(
                   "Google Login Successful",

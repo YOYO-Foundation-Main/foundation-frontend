@@ -6,18 +6,25 @@ const PROTECTED_ROUTES = ["/profile", "/donate", "/my-donations", "/campaigns/cr
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
-  const adminToken = request.cookies.get("adminToken")?.value;
+  const accessToken = request.cookies.get("accessToken")?.value;
 
-  // ✅ Admin login page — redirect to dashboard if already logged in
-  if (pathname === "/admin/login" && adminToken) {
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-  }
-
-  // ✅ Admin protected pages — redirect to login if no token
-  if (pathname.startsWith("/admin/") && pathname !== "/admin/login" && !adminToken) {
+  if (
+    pathname.startsWith("/admin") &&
+    pathname !== "/admin/login" &&
+    !accessToken
+  ) {
     return NextResponse.redirect(new URL("/admin/login", request.url));
   }
 
+  // Not logged in -> protect admin pages
+  if (
+    pathname === "/admin/login" &&
+    accessToken
+  ) {
+    return NextResponse.redirect(
+      new URL("/admin/dashboard", request.url)
+    );
+  }
   // ✅ User protected routes
   const isProtected = PROTECTED_ROUTES.some((r) => pathname.startsWith(r));
   if (isProtected && !token) {
@@ -36,6 +43,6 @@ export const config = {
     "/profile/:path*",
     "/donate/:path*",
     "/my-donations/:path*",
-    "/campaigns/create/:path*", // ✅ Added
+    "/campaigns/create/:path*", //Added
   ],
 };

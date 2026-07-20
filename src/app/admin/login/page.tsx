@@ -147,13 +147,26 @@ export default function AdminLoginPage() {
       setLoading(true);
       setError("");
       const res = await adminLogin({ email, password });
-      setAdmin(res.user, res.token);
+
+      console.log("STEP 1");
+
+      setAdmin(res.user);
+
+      console.log("STEP 2");
+
       if (res.user.role === "SUPER_ADMIN") {
+        console.log("GO SUPER");
         router.replace("/admin/super/dashboard");
       } else {
+        console.log("GO ADMIN");
         router.replace("/admin/dashboard");
       }
-      router.refresh();
+
+      setTimeout(() => {
+        console.log("Current URL:", window.location.pathname);
+      }, 1000);
+
+      console.log("STEP 4");
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {

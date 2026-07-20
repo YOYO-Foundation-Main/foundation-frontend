@@ -5,26 +5,26 @@ import {
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-function getAdminToken(): string {
-  if (typeof window === "undefined") return "";
+// function getAdminToken(): string {
+//   if (typeof window === "undefined") return "";
 
-  try {
-    const stored = localStorage.getItem("admin-auth-storage");
+//   try {
+//     const stored = localStorage.getItem("admin-auth-storage");
 
-    if (!stored) return "";
+//     if (!stored) return "";
 
-    return JSON.parse(stored)?.state?.adminToken || "";
-  } catch {
-    return "";
-  }
-}
+//     return JSON.parse(stored)?.state?.adminToken || "";
+//   } catch {
+//     return "";
+//   }
+// }
 
-function authHeaders() {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${getAdminToken()}`,
-  };
-}
+// function authHeaders() {
+//   return {
+//     "Content-Type": "application/json",
+//     Authorization: `Bearer ${getAdminToken()}`,
+//   };
+// }
 
 // ==========================
 // GET ALL ADMINS
@@ -32,7 +32,7 @@ function authHeaders() {
 
 export const getAdmins = async () => {
   const res = await fetch(`${BASE_URL}/api/admins`, {
-    headers: authHeaders(),
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -51,7 +51,7 @@ export const getAdmins = async () => {
 
 export const getAdmin = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/admins/${id}`, {
-    headers: authHeaders(),
+     credentials: "include",
   });
 
   const result = await res.json();
@@ -72,7 +72,7 @@ export const createAdmin = async (
 ) => {
   const res = await fetch(`${BASE_URL}/api/admins`, {
     method: "POST",
-    headers: authHeaders(),
+     credentials: "include",
     body: JSON.stringify(payload),
   });
 
@@ -95,7 +95,7 @@ export const updateAdmin = async (
 ) => {
   const res = await fetch(`${BASE_URL}/api/admins/${id}`, {
     method: "PUT",
-    headers: authHeaders(),
+     credentials: "include",
     body: JSON.stringify(payload),
   });
 
@@ -120,7 +120,7 @@ export const toggleAdminStatus = async (
     `${BASE_URL}/api/admins/${id}/status`,
     {
       method: "PATCH",
-      headers: authHeaders(),
+      credentials: "include",
       body: JSON.stringify({
         isActive,
       }),
@@ -145,7 +145,7 @@ export const deleteAdmin = async (
 ) => {
   const res = await fetch(`${BASE_URL}/api/admins/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+     credentials: "include",
   });
 
   const result = await res.json();

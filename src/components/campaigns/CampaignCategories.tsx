@@ -31,10 +31,10 @@ export default async function CampaignCategories() {
     const data = await getCampaigns();
     campaigns = data.campaigns;
   } catch (err) {
-    console.error("❌ CampaignCategories error:", err);
+    console.error("CampaignCategories error:", err);
   }
 
-  // ✅ Extract unique causes
+  //Extract unique causes
   const categoriesMap = new Map();
 
   campaigns.forEach((item) => {
