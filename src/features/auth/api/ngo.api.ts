@@ -155,32 +155,30 @@
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-function getToken(): string {
-  if (typeof window === "undefined") return "";
+// function getToken(): string {
+//   if (typeof window === "undefined") return "";
 
-  try {
-    const stored = localStorage.getItem("auth-storage");
-    if (!stored) return "";
+//   try {
+//     const stored = localStorage.getItem("auth-storage");
+//     if (!stored) return "";
 
-    return JSON.parse(stored)?.state?.token || "";
-  } catch {
-    return "";
-  }
-}
+//     return JSON.parse(stored)?.state?.token || "";
+//   } catch {
+//     return "";
+//   }
+// }
 
-function authHeaders() {
-  return {
-    Authorization: `Bearer ${getToken()}`,
-  };
-}
+// function authHeaders() {
+//   return {
+//     Authorization: `Bearer ${getToken()}`,
+//   };
+// }
 
 // ================= START NGO DRAFT =================
 export const startNgoDraft = async () => {
   const res = await fetch(`${BASE_URL}/api/ngo-draft/draft/start`, {
     method: "POST",
-    headers: {
-      ...authHeaders(),
-    },
+   credentials: "include",
   });
 
   const result = await res.json();
@@ -198,9 +196,10 @@ export const updateNgoBasicDetails = async (draftId: number, data: any) => {
     `${BASE_URL}/api/ngo-draft/draft/${draftId}/basic-details`,
     {
       method: "PUT",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...authHeaders(),
+       
       },
       body: JSON.stringify(data),
     }
@@ -224,9 +223,7 @@ export const uploadNgoDraftDocument = async (
     `${BASE_URL}/api/ngo-draft/draft/${draftId}/document`,
     {
       method: "POST",
-      headers: {
-        ...authHeaders(),
-      },
+      credentials: "include",
       body: data,
     }
   );
@@ -249,9 +246,10 @@ export const addNgoDraftRepresentative = async (
     `${BASE_URL}/api/ngo-draft/draft/${draftId}/representative`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...authHeaders(),
+       
       },
       body: JSON.stringify(data),
     }
@@ -275,8 +273,9 @@ export const addNgoDraftBank = async (
     `${BASE_URL}/api/ngo-draft/draft/${draftId}/bank`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
-        ...authHeaders(),
+        
       },
       body: data,
     }
@@ -299,8 +298,9 @@ export const submitNgoDraft = async (draftId: number) => {
     `${BASE_URL}/api/ngo-draft/draft/${draftId}/submit`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
-        ...authHeaders(),
+        
       },
     }
   );
@@ -320,8 +320,9 @@ export const getNgoDraft = async (draftId: number) => {
     `${BASE_URL}/api/ngo-draft/draft/${draftId}`,
     {
       method: "GET",
+      credentials: "include",
       headers: {
-        ...authHeaders(),
+       
       },
     }
   );
@@ -339,8 +340,9 @@ export const getNgoDraft = async (draftId: number) => {
 export const getMyNgoDrafts = async () => {
   const res = await fetch(`${BASE_URL}/api/ngo-draft/`, {
     method: "GET",
+    credentials: "include",
     headers: {
-      ...authHeaders(),
+      
     },
   });
 
@@ -359,8 +361,9 @@ export const deleteNgoDraft = async (draftId: number) => {
     `${BASE_URL}/api/ngo-draft/${draftId}`,
     {
       method: "DELETE",
+      credentials: "include",
       headers: {
-        ...authHeaders(),
+        
       },
     }
   );

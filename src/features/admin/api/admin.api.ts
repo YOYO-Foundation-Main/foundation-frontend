@@ -88,7 +88,7 @@ export const adminCreateCause = async (data: FormData) => {
 export const adminUpdateCause = async (id: number, data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/cause/${id}`, {
     method: "PUT",
-   credentials: "include",
+    credentials: "include",
     body: data,
   });
 
@@ -115,7 +115,7 @@ export const adminDeleteCause = async (id: number) => {
 export const adminToggleCauseStatus = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/cause/${id}/toggle`, {
     method: "PATCH",
-   credentials: "include",
+    credentials: "include",
   });
 
   const result = await res.json();
@@ -181,7 +181,7 @@ export const adminGetCampaigns = async (
 export const adminCreateCampaign = async (data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/campaigns`, {
     method: "POST",
-   credentials: "include",
+    credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -269,7 +269,7 @@ export const adminDeleteCampaign = async (id: number) => {
 // ================= EVENTS =================
 export const adminGetEvents = async () => {
   const res = await fetch(`${BASE_URL}/api/events`,
-     {credentials: "include", });
+    { credentials: "include", });
   if (!res.ok) throw new Error("Failed to fetch events");
   return res.json();
 };
@@ -277,7 +277,7 @@ export const adminGetEvents = async () => {
 export const adminCreateEvent = async (data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/events`, {
     method: "POST",
-   credentials: "include",
+    credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -288,7 +288,7 @@ export const adminCreateEvent = async (data: FormData) => {
 export const adminUpdateEvent = async (id: number, data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/events/${id}`, {
     method: "PUT",
-   credentials: "include",
+    credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -326,7 +326,7 @@ export const getDonations = async (params: any) => {
 
 export const getDonationStats = async () => {
   const res = await fetch(`${BASE_URL}/api/admin/donations/stats`, {
-   credentials: "include",
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -354,7 +354,7 @@ export const getDonorDonations = async (userId: number) => {
 // 🔹 Top Donors
 export const getTopDonors = async () => {
   const res = await fetch(`${BASE_URL}/api/admin/top-donors`, {
-   credentials: "include",
+    credentials: "include",
   });
 
   const result = await res.json();
@@ -394,7 +394,7 @@ export const adminCreateBlog = async (data: FormData) => {
 export const adminUpdateBlog = async (id: number, data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/blog/${id}`, {
     method: "PUT",
-   credentials: "include",
+    credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -444,7 +444,7 @@ export const adminGetUsers = async (params: GetUsersParams = {}) => {
 
 export const adminGetUserById = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/admin/users/${id}`, {
-   credentials: "include",
+    credentials: "include",
   });
 
   const result = await res.json();
@@ -481,7 +481,7 @@ export const adminCreateProduct = async (data: FormData) => {
 export const adminUpdateProduct = async (id: number, data: FormData) => {
   const res = await fetch(`${BASE_URL}/api/products/${id}`, {
     method: "PUT",
-   credentials: "include",
+    credentials: "include",
     body: data,
   });
   const result = await res.json();
@@ -492,7 +492,7 @@ export const adminUpdateProduct = async (id: number, data: FormData) => {
 export const adminDeleteProduct = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/products/${id}`, {
     method: "DELETE",
-   credentials: "include",
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to delete product");
   return res.json();
@@ -529,7 +529,7 @@ export const adminGetProductCategoryById =
     const res = await fetch(
       `${BASE_URL}/api/product-categories/${id}`,
       {
-       credentials: "include",
+        credentials: "include",
         cache: "no-store",
       }
     );
@@ -630,7 +630,8 @@ export const adminDeleteProductCategory =
 // GET /api/kyc/admin — all user/campaigner KYC submissions
 export const adminGetUserKyc = async () => {
   const res = await fetch(`${BASE_URL}/api/kyc/admin`, {
-   credentials: "include",
+    credentials: "include",
+
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to fetch user KYC");
@@ -643,6 +644,9 @@ export const adminUpdateUserKyc = async (id: number, status: string, remarks?: s
   const res = await fetch(`${BASE_URL}/api/kyc/admin/${id}`, {
     method: "PUT",
     credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ status, ...(remarks ? { remarks } : {}) }),
   });
   const result = await res.json();
@@ -653,7 +657,10 @@ export const adminUpdateUserKyc = async (id: number, status: string, remarks?: s
 // GET /api/campaign-kyc/admin — all campaign/beneficiary KYC submissions
 export const adminGetCampaignKyc = async () => {
   const res = await fetch(`${BASE_URL}/api/campaign-kyc/admin`, {
-   credentials: "include",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to fetch campaign KYC");
@@ -665,7 +672,10 @@ export const adminGetCampaignKyc = async () => {
 export const adminUpdateCampaignKyc = async (id: number, status: string, remarks?: string) => {
   const res = await fetch(`${BASE_URL}/api/campaign-kyc/admin/${id}`, {
     method: "PUT",
-   credentials: "include",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ status, ...(remarks ? { remarks } : {}) }),
   });
   const result = await res.json();
@@ -676,7 +686,7 @@ export const adminUpdateCampaignKyc = async (id: number, status: string, remarks
 //contact query api 
 export const getContactQueries = async () => {
   const res = await fetch(`${BASE_URL}/api/contact`, {
-   credentials: "include",
+    credentials: "include",
   });
 
   if (!res.ok) throw new Error("Failed to fetch contact queries");
@@ -689,7 +699,7 @@ export const getContactQueries = async () => {
 export const getAllNgos = async () => {
   const res = await fetch(`${BASE_URL}/api/ngo/admin/ngos`,
     {
-     credentials: "include",
+      credentials: "include",
     }
   );
 
@@ -823,7 +833,7 @@ export const getVolunteerById =
     const res = await fetch(
       `${BASE_URL}/api/volunteers/admin/${id}`,
       {
-       credentials: "include",
+        credentials: "include",
       }
     );
 
@@ -854,7 +864,7 @@ export const updateVolunteerStatus =
       {
         method: "PATCH",
 
-       credentials: "include",
+        credentials: "include",
 
         body: JSON.stringify({
           status,
@@ -881,7 +891,7 @@ export const getVolunteerStats =
     const res = await fetch(
       `${BASE_URL}/api/volunteers/admin/stats`,
       {
-       credentials: "include",
+        credentials: "include",
       }
     );
 
@@ -906,7 +916,7 @@ export const deleteVolunteer =
       {
         method: "DELETE",
 
-       credentials: "include",
+        credentials: "include",
       }
     );
 
@@ -928,7 +938,7 @@ export const deleteVolunteer =
 // Get All Gallery
 export const adminGetGallery = async () => {
   const res = await fetch(`${BASE_URL}/api/gallery`, {
-   credentials: "include",
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -973,7 +983,7 @@ export const adminUpdateGallery = async (
     `${BASE_URL}/api/gallery/${id}`,
     {
       method: "PUT",
-     credentials: "include",
+      credentials: "include",
       body: data,
     }
   );
@@ -997,7 +1007,7 @@ export const adminDeleteGallery = async (
     `${BASE_URL}/api/gallery/${id}`,
     {
       method: "DELETE",
-     credentials: "include",
+      credentials: "include",
     }
   );
 
