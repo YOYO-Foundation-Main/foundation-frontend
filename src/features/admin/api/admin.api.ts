@@ -1,23 +1,5 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-// function getAdminToken(): string {
-//   if (typeof window === "undefined") return "";
-//   try {
-//     const stored = localStorage.getItem("admin-auth-storage");
-//     if (!stored) return "";
-//     return JSON.parse(stored)?.state?.adminToken || "";
-//   } catch {
-//     return "";
-//   }
-// }
-
-// function authHeaders() {
-//   return {
-//     "Content-Type": "application/json",
-//     Authorization: `Bearer ${getAdminToken()}`,
-//   };
-// }
-
 // ================= ADMIN LOGIN =================
 export const adminLogin = async (data: { email: string; password: string }) => {
   console.log("📤 [ADMIN LOGIN]:", data.email);

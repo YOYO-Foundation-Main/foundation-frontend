@@ -27,7 +27,7 @@ export function middleware(request: NextRequest) {
   }
   // ✅ User protected routes
   const isProtected = PROTECTED_ROUTES.some((r) => pathname.startsWith(r));
-  if (isProtected && !token) {
+  if (isProtected && !accessToken) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     url.searchParams.set("login", "true");

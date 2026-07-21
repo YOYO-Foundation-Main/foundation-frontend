@@ -92,18 +92,12 @@ export const verifyCampaignOtp = async (
 
 //resume draft api
 export const resumeCampaignDraft = async (): Promise<any> => {
-  const token = getUserToken();
 
-  if (!token) {
-    throw new Error("User not logged in");
-  }
 
   const res = await fetch(
     `${BASE_URL}/api/campaign-draft/resume`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
 
@@ -132,10 +126,7 @@ export const updateCampaignProductCategory = async (
     `${BASE_URL}/api/campaign-draft/${draftId}/category`,
     {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
       body: JSON.stringify({
         productCategoryId,
       }),
@@ -238,37 +229,6 @@ export const updateCampaignDraftBeneficiary = async (
 
   return result?.data || result;
 };
-
-
-// ── Step 4: Add products to campaign draft ────────────────────────────────────
-// POST /api/campaign/products
-// Body: { draftId, products: [{ productId, quantity }] }
-// export const addCampaignProducts = async (
-//   draftId: number,
-//   products: { productId: number; quantity: number }[]
-// // )
-// export const addCampaignProducts = async (
-//   draftId: number,
-//   products: { productId: number; quantity: number }[],
-//   manualGoalAmount?: number
-// )
-//   : Promise<any> => {
-//   const token = getUserToken();
-//   if (!token) throw new Error("Please login to continue");
-
-//   const res = await fetch(`${BASE_URL}/api/campaign/products`, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-//     body: JSON.stringify({ draftId, products, manualGoalAmount}),
-//   });
-//   const result = await res.json();
-//   console.log("📡 [CAMPAIGN PRODUCTS]:", res.status, result);
-//   if (!res.ok) throw new Error(result.message || "Failed to add products");
-//   return result?.data || result;
-// };
-// =====================================
-// GET PRODUCT CATEGORIES
-// =====================================
 
 export const getProductCategories = async (): Promise<any[]> => {
   const res = await fetch(

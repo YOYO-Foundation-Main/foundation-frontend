@@ -395,14 +395,15 @@ export default function CreateCampaignForm() {
 
       setUser(user);
 
+      // resume immediately
+      const draft = await resumeCampaignDraft();
 
-      // Resume campaign
-      // const resume = await resumeCampaignDraft();
+      if (draft) {
+        setDraftId(draft.id);
+        setStep(draft.currentStep);
 
-      // if (resume?.draft) {
-      //   setDraftId(resume.draft.id);
-      //   setStep(resume.draft.currentStep);
-      // }
+        // restore all states here OR call a helper
+      }
 
       setOtpModalOpen(false);
 
