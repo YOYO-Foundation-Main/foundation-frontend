@@ -1,29 +1,29 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-const getUserToken = (): string | null => {
-  try {
-    const stored = localStorage.getItem("auth-storage");
-    if (!stored) return null;
-    const parsed = JSON.parse(stored);
-    return parsed?.state?.token || parsed?.token || null;
-  } catch (error) {
-    console.error("Error getting token:", error);
-    return null;
-  }
-};
+// const getUserToken = (): string | null => {
+//   try {
+//     const stored = localStorage.getItem("auth-storage");
+//     if (!stored) return null;
+//     const parsed = JSON.parse(stored);
+//     return parsed?.state?.token || parsed?.token || null;
+//   } catch (error) {
+//     console.error("Error getting token:", error);
+//     return null;
+//   }
+// };
 
 const authFetch = async (url: string, options: RequestInit = {}) => {
-  const token = getUserToken();
-  if (!token) throw new Error("No authentication token found");
+ 
 
   const isFormData = options.body instanceof FormData;
 
   return fetch(url, {
     ...options,
+    credentials: "include",
     headers: {
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(options.headers || {}),
-      Authorization: `Bearer ${token}`,
+      
     },
   });
 };

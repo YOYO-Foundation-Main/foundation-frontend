@@ -24,8 +24,14 @@ export const createOrder = async (donationId: string) => {
     body: JSON.stringify({ donationId }),
   });
 
-  if (!res.ok) throw new Error("Order creation failed");
-  return res.json();
+  const result = await res.json();
+
+  if (!res.ok) {
+    console.error(result);
+    throw new Error(result.message || "Order creation failed");
+  }
+
+  return result;
 };
 
 // 3. VERIFY PAYMENT

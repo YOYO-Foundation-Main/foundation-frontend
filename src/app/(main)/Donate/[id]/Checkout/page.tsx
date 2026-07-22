@@ -122,6 +122,7 @@ export default function CheckoutPage() {
         payload.amount = donationData?.donationAmount;
       }
       const donationRes = await donate(payload);
+      console.log("DONATION RESPONSE =", donationRes);
       const donationId = donationRes?.data?.id;
       if (!donationId) return alert("Donation creation failed");
       const orderRes = await createOrder(donationId);

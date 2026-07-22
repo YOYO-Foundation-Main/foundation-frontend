@@ -3,18 +3,18 @@ import { Campaign } from "../types/campaign.types";
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // ── Token helper ──────────────────────────────────────────────────────────────
-export const getUserToken = (): string | null => {
-  try {
-    const stored = localStorage.getItem("auth-storage");
-    if (!stored) return null;
-    const parsed = JSON.parse(stored);
-    return parsed?.state?.token || parsed?.token || null;
-  } catch {
-    return null;
-  }
-};
+// export const getUserToken = (): string | null => {
+//   try {
+//     const stored = localStorage.getItem("auth-storage");
+//     if (!stored) return null;
+//     const parsed = JSON.parse(stored);
+//     return parsed?.state?.token || parsed?.token || null;
+//   } catch {
+//     return null;
+//   }
+// };
 
-export const isUserAuthenticated = (): boolean => !!getUserToken();
+// export const isUserAuthenticated = (): boolean => !!getUserToken();
 
 // ── Step 1: Start draft ───────────────────────────────────────────────────────
 // POST /api/campaign-draft/start
@@ -71,6 +71,7 @@ export const verifyCampaignOtp = async (
     `${BASE_URL}/api/campaign-draft/verify-otp`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -116,17 +117,20 @@ export const updateCampaignProductCategory = async (
   productCategoryId: number
 ): Promise<any> => {
 
-  const token = getUserToken();
+  // const token = getUserToken();
 
-  if (!token) {
-    throw new Error("Please login to continue");
-  }
+  // if (!token) {
+  //   throw new Error("Please login to continue");
+  // }
 
   const res = await fetch(
     `${BASE_URL}/api/campaign-draft/${draftId}/category`,
     {
       method: "PUT",
       credentials: "include",
+       headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         productCategoryId,
       }),
@@ -145,12 +149,13 @@ export const updateCampaignProductCategory = async (
 // ── Step 2: Update campaign details ──────────────────────────────────────────
 // PUT /api/campaign-draft/:id — FormData { title, description, image }
 export const updateCampaignDraftDetails = async (draftId: number, data: FormData): Promise<any> => {
-  const token = getUserToken();
-  if (!token) throw new Error("Please login to continue");
+  // const token = getUserToken();
+  // if (!token) throw new Error("Please login to continue");
 
   const res = await fetch(`${BASE_URL}/api/campaign-draft/${draftId}`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
+    headers: {  },
     body: data,
   });
   const result = await res.json();
@@ -201,19 +206,20 @@ export const updateCampaignDraftBeneficiary = async (
     beneficiaryState?: string;
   }
 ): Promise<any> => {
-  const token = getUserToken();
+  // const token = getUserToken();
 
-  if (!token) {
-    throw new Error("Please login to continue");
-  }
+  // if (!token) {
+  //   throw new Error("Please login to continue");
+  // }
 
   const res = await fetch(
     `${BASE_URL}/api/campaign-draft/${draftId}/beneficiary`,
     {
       method: "PUT",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+       
       },
       body: JSON.stringify(data),
     }
@@ -281,19 +287,20 @@ export const addCampaignProducts = async (
 
 ): Promise<any> => {
 
-  const token = getUserToken();
+  // const token = getUserToken();
 
-  if (!token) {
-    throw new Error("Please login to continue");
-  }
+  // if (!token) {
+  //   throw new Error("Please login to continue");
+  // }
 
   const res = await fetch(
     `${BASE_URL}/api/campaign-draft/${draftId}/funding`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+       
       },
       body: JSON.stringify({
         products,
@@ -314,12 +321,13 @@ export const addCampaignProducts = async (
 // ── Step 5: Submit draft ──────────────────────────────────────────────────────
 // POST /api/campaign-draft/:id/submit
 export const submitCampaignDraft = async (draftId: number): Promise<any> => {
-  const token = getUserToken();
-  if (!token) throw new Error("Please login to continue");
+  // const token = getUserToken();
+  // if (!token) throw new Error("Please login to continue");
 
   const res = await fetch(`${BASE_URL}/api/campaign-draft/${draftId}/submit`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    credentials: "include",
+    headers: { "Content-Type": "application/json",  },
   });
   const result = await res.json();
   console.log("📡 [DRAFT SUBMIT]:", res.status, result);
@@ -329,12 +337,12 @@ export const submitCampaignDraft = async (draftId: number): Promise<any> => {
 
 // ── Legacy single-step (kept for backward compat) ─────────────────────────────
 export const userCreateCampaign = async (formData: FormData): Promise<Campaign> => {
-  const token = getUserToken();
-  if (!token) throw new Error("Please login to create a campaign");
+  
 
   const res = await fetch(`${BASE_URL}/api/campaigns`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
+    headers: {  },
     body: formData,
   });
   const result = await res.json();

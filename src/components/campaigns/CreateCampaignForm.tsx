@@ -365,10 +365,17 @@ export default function CreateCampaignForm() {
 
       setDraftId(id);
 
+      // User already authenticated
+      if (user?.id) {
+        setStep(2);
+        return;
+      }
       setIdentifier(step1.email);
 
       await sendCampaignOtp(step1.email);
+
       setOtpModalOpen(true);
+
       // setStep(2);
     } catch (err: any) {
       showToast(err.message || "Failed to start draft", "error");
@@ -390,7 +397,6 @@ export default function CreateCampaignForm() {
       );
 
       // Save JWT
-      // const { token, user } = loginResponse;
       const { user } = loginResponse;
 
       setUser(user);
@@ -400,12 +406,11 @@ export default function CreateCampaignForm() {
 
       if (draft) {
         setDraftId(draft.id);
-        setStep(draft.currentStep);
-
+        // setStep(draft.currentStep);
         // restore all states here OR call a helper
       }
-
       setOtpModalOpen(false);
+      setStep(2);
 
       showToast("Logged in successfully", "success");
 
@@ -1509,7 +1514,7 @@ export default function CreateCampaignForm() {
               )}
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-xs text-yellow-700">
-                📋 Your campaign will be reviewed by our admin team before going live.
+                Your campaign will be reviewed by our admin team before going live.
               </div>
             </div>
           )}
