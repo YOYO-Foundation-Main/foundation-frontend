@@ -99,11 +99,19 @@ export default function CheckoutPage() {
         donorMobile: form.donorMobile,
         isAnonymous: form.isAnonymous,
 
-        tipAmount:
-          platformSettings?.isTipEnabled
-            ? tipAmount
-            : 0,
+        // tipAmount:
+        //   platformSettings?.isTipEnabled
+        //     ? tipAmount
+        //     : 0,
+
       };
+        if(platformSettings?.isTipEnabled) {
+          if (useCustomTip) {
+            payload.customTipAmount = customTip;
+          } else if (selectedTipPercent > 0) {
+            payload.selectedTipPercent = selectedTipPercent;
+          }
+        }
       if (donationData?.mode === "products") {
         payload.items = donationData?.selectedProductDetails?.map((p: any) => ({
           campaignProductId: p.campaignProductId,
@@ -320,7 +328,7 @@ export default function CheckoutPage() {
             </div>
           )}
 
-
+          
           {platformSettings?.isTipEnabled && (
             <div className="border-t border-gray-100 p-5 space-y-4">
 
@@ -343,6 +351,7 @@ export default function CheckoutPage() {
                       onClick={() => {
                         setUseCustomTip(false);
                         setSelectedTipPercent(tip);
+                        setCustomTip(0);
                       }}
                       className={`px-3 py-2 rounded-xl border text-sm font-semibold ${!useCustomTip &&
                         selectedTipPercent === tip
@@ -357,7 +366,11 @@ export default function CheckoutPage() {
 
                 <button
                   type="button"
-                  onClick={() => setUseCustomTip(true)}
+                  // onClick={() => setUseCustomTip(true)}
+                  onClick={() => {
+                    setUseCustomTip(true);
+                    setSelectedTipPercent(0);
+                  }}
                   className={`px-3 py-2 rounded-xl border text-sm font-semibold ${useCustomTip
                     ? "border-[#D2252B] bg-[#D2252B]/10 text-[#D2252B]"
                     : "border-gray-200 text-gray-600"
@@ -371,6 +384,7 @@ export default function CheckoutPage() {
                   onClick={() => {
                     setUseCustomTip(false);
                     setSelectedTipPercent(0);
+                    setCustomTip(0);
                   }}
                   className="px-3 py-2 rounded-xl border border-gray-200 text-sm font-semibold"
                 >
@@ -383,7 +397,7 @@ export default function CheckoutPage() {
                   type="number"
                   value={customTip}
                   onChange={(e) =>
-                    setCustomTip(Number(e.target.value))
+                    setCustomTip(Number(e.target.value) || 0)
                   }
                   placeholder="Enter custom tip"
                   className="w-full border rounded-xl px-4 py-3 text-sm"
