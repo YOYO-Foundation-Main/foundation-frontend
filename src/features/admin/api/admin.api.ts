@@ -228,9 +228,9 @@ export const adminAddCampaignProducts = async (data: {
 export const adminUpdateCampaignStatus = async (id: number, status: string) => {
   const res = await fetch(`${BASE_URL}/api/campaigns/${id}/status`, {
     method: "PATCH",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      credentials: "include",
     },
     body: JSON.stringify({ status }),
   });
@@ -865,6 +865,10 @@ export const updateVolunteerStatus =
         method: "PATCH",
 
         credentials: "include",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
 
         body: JSON.stringify({
           status,
