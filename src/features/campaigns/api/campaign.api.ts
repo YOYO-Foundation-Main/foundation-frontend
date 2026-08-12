@@ -1,11 +1,14 @@
-import { Campaign, CampaignResponse} from "../types/campaign.types"
+import { Campaign, CampaignResponse } from "../types/campaign.types"
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 
 export const getCampaigns = async (): Promise<CampaignResponse> => {
-    const res = await fetch(`${BASE_URL}/api/campaigns`,{
-        next: {revalidate: 60},
+    const res = await fetch(`${BASE_URL}/api/campaigns`, {
+        next: { revalidate: 60 },
+        headers: {
+            "ngrok-skip-browser-warning": "true",
+        },
 
     });
     console.log(res);
@@ -14,9 +17,12 @@ export const getCampaigns = async (): Promise<CampaignResponse> => {
 };
 
 
-export const getCampaignById = async (id: string): Promise<Campaign> =>{
-    const res = await fetch(`${BASE_URL}/api/campaigns/${id}`,{
+export const getCampaignById = async (id: string): Promise<Campaign> => {
+    const res = await fetch(`${BASE_URL}/api/campaigns/${id}`, {
         cache: "no-store",
+        headers: {
+            "ngrok-skip-browser-warning": "true",
+        },
     });
     if (!res.ok) throw new Error(`Failed to fetch compaign: ${res.status}`);
 
