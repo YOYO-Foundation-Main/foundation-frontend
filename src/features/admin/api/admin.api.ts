@@ -245,8 +245,8 @@ export const adminUpdateFeaturedStatus = async (id: number, status: boolean) => 
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      credentials: "include",
     },
+    credentials: "include",
     body: JSON.stringify({ isFeatured: status }), // ✅ FIXED KEY
   });
 
@@ -627,59 +627,406 @@ export const adminDeleteProductCategory =
 
 // ================= KYC (paste these at the bottom of admin.api.ts) =================
 
-// GET /api/kyc/admin — all user/campaigner KYC submissions
+// ===============================
+// KYC / CAMPAIGN APPROVAL APIs
+// ===============================
+
+export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+
+// =====================================================
+// GET ALL USER KYC
+// GET /api/kyc/admin
+// =====================================================
+
 export const adminGetUserKyc = async () => {
   const res = await fetch(`${BASE_URL}/api/kyc/admin`, {
+    method: "GET",
     credentials: "include",
-
     cache: "no-store",
   });
-  if (!res.ok) throw new Error("Failed to fetch user KYC");
-  return res.json();
-};
 
-// PUT /api/kyc/admin/:id — approve or reject a user KYC
-// body: { status: "APPROVED" | "REJECTED", remarks?: string }
-export const adminUpdateUserKyc = async (id: number, status: string, remarks?: string) => {
-  const res = await fetch(`${BASE_URL}/api/kyc/admin/${id}`, {
-    method: "PUT",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ status, ...(remarks ? { remarks } : {}) }),
-  });
   const result = await res.json();
-  if (!res.ok) throw new Error(result.message || "Failed to update KYC");
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to fetch user KYC"
+    );
+  }
+
   return result;
 };
 
-// GET /api/campaign-kyc/admin — all campaign/beneficiary KYC submissions
-export const adminGetCampaignKyc = async () => {
-  const res = await fetch(`${BASE_URL}/api/campaign-kyc/admin`, {
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error("Failed to fetch campaign KYC");
-  return res.json();
+
+// =====================================================
+// UPDATE USER IDENTITY KYC
+// PATCH /api/kyc/admin/:id
+//
+// body:
+// {
+//   status: "APPROVED" | "REJECTED",
+//   rejectionNote?: string
+// }
+// =====================================================
+
+export const adminUpdateUserKyc = async (
+  id: number,
+  status: ApprovalStatus,
+  rejectionNote?: string
+) => {
+  const res = await fetch(
+    `${BASE_URL}/api/kyc/admin/${id}`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status,
+        ...(status === "REJECTED" && rejectionNote
+          ? { rejectionNote }
+          : {}),
+      }),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to update user KYC"
+    );
+  }
+
+  return result;
 };
 
-// PUT /api/campaign-kyc/admin/:id — approve or reject a campaign KYC
-// body: { status: "APPROVED" | "REJECTED", remarks?: string }
-export const adminUpdateCampaignKyc = async (id: number, status: string, remarks?: string) => {
-  const res = await fetch(`${BASE_URL}/api/campaign-kyc/admin/${id}`, {
-    method: "PUT",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ status, ...(remarks ? { remarks } : {}) }),
-  });
+
+// =====================================================
+// UPDATE USER BANK
+// PATCH /api/kyc/admin/bank/:id
+//
+// body:
+// {
+//   status: "APPROVED" | "REJECTED",
+//   rejectionReason?: string
+// }
+// =====================================================
+
+export const adminUpdateUserBank = async (
+  id: number,
+  status: ApprovalStatus,
+  rejectionReason?: string
+) => {
+  const res = await fetch(
+    `${BASE_URL}/api/kyc/admin/bank/${id}`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status,
+        ...(status === "REJECTED" && rejectionReason
+          ? { rejectionReason }
+          : {}),
+      }),
+    }
+  );
+
   const result = await res.json();
-  if (!res.ok) throw new Error(result.message || "Failed to update campaign KYC");
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to update user bank status"
+    );
+  }
+
+  return result;
+};
+
+
+// =====================================================
+// APPROVE / REJECT BENEFICIARY IDENTITY
+// PATCH /api/kyc/campaigns/:campaignId/beneficiary-identity
+//
+// body:
+// {
+//   status: "APPROVED" | "REJECTED",
+//   rejectionReason?: string
+// }
+// =====================================================
+
+export const adminUpdateBeneficiaryIdentity = async (
+  campaignId: number,
+  status: ApprovalStatus,
+  rejectionReason?: string
+) => {
+  const res = await fetch(
+    `${BASE_URL}/api/kyc/campaigns/${campaignId}/beneficiary-identity`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status,
+        ...(status === "REJECTED" && rejectionReason
+          ? { rejectionReason }
+          : {}),
+      }),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message ||
+        "Failed to update beneficiary identity status"
+    );
+  }
+
+  return result;
+};
+
+
+// =====================================================
+// APPROVE / REJECT BENEFICIARY BANK
+// PATCH /api/kyc/campaigns/:campaignId/beneficiary-bank
+//
+// body:
+// {
+//   status: "APPROVED" | "REJECTED",
+//   rejectionReason?: string
+// }
+// =====================================================
+
+export const adminUpdateBeneficiaryBank = async (
+  campaignId: number,
+  status: ApprovalStatus,
+  rejectionReason?: string
+) => {
+  const res = await fetch(
+    `${BASE_URL}/api/kyc/campaigns/${campaignId}/beneficiary-bank`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status,
+        ...(status === "REJECTED" && rejectionReason
+          ? { rejectionReason }
+          : {}),
+      }),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message ||
+        "Failed to update beneficiary bank status"
+    );
+  }
+
+  return result;
+};
+
+// =====================================================
+// GET ALL CAMPAIGN PROOFS
+// GET /api/campaign/admin
+//
+// Returns all campaign proof submissions for admin
+// =====================================================
+
+export const adminGetCampaignProofs = async () => {
+  const res = await fetch(
+    `${BASE_URL}/api/campaign/admin`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to fetch campaign proofs"
+    );
+  }
+
+  return result;
+};
+
+
+// =====================================================
+// APPROVE / REJECT CAMPAIGN PROOF
+// PATCH /api/kyc/admin/campaign-proof/:id
+//
+// body:
+// {
+//   status: "APPROVED" | "REJECTED",
+//   rejectionNote?: string
+// }
+// =====================================================
+
+export const adminUpdateCampaignProof = async (
+  id: number,
+  status: ApprovalStatus,
+  rejectionNote?: string
+) => {
+  const res = await fetch(
+    `${BASE_URL}/api/kyc/admin/campaign-proof/${id}`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status,
+        ...(status === "REJECTED" && rejectionNote
+          ? { rejectionNote }
+          : {}),
+      }),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message ||
+        "Failed to update campaign proof status"
+    );
+  }
+
+  return result;
+};
+
+// =====================================================
+// GET ALL SELF IDENTITY KYC
+// GET /api/kyc/admin/identity
+//
+// Returns only USER type KYC records
+// =====================================================
+
+export const adminGetSelfIdentity = async () => {
+  const res = await fetch(
+    // `${BASE_URL}/api/kyc/admin/identity`,
+     `${BASE_URL}/api/kyc/admin`,
+    {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to fetch self identity KYC"
+    );
+  }
+
+  return result;
+};
+
+
+// =====================================================
+// GET ALL SELF BANK
+// GET /api/kyc/admin/bank
+//
+// Returns user bank KYC records
+// =====================================================
+
+export const adminGetSelfBank = async () => {
+  const res = await fetch(
+    `${BASE_URL}/api/kyc/admin/bank`,
+    {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to fetch self bank KYC"
+    );
+  }
+
+  return result;
+};
+
+
+// =====================================================
+// GET ALL INDIVIDUAL BENEFICIARY IDENTITY
+// GET /api/kyc/admin/beneficiary-identity
+//
+// Returns only INDIVIDUAL beneficiary identity records
+// =====================================================
+
+export const adminGetBeneficiaryIdentity = async () => {
+  const res = await fetch(
+    `${BASE_URL}/api/kyc/admin/beneficiary-identity`,
+    {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message ||
+        "Failed to fetch beneficiary identity KYC"
+    );
+  }
+
+  return result;
+};
+
+
+// =====================================================
+// GET ALL INDIVIDUAL BENEFICIARY BANK
+// GET /api/kyc/admin/beneficiary-bank
+//
+// Returns only INDIVIDUAL beneficiary bank records
+// =====================================================
+
+export const adminGetBeneficiaryBank = async () => {
+  const res = await fetch(
+    `${BASE_URL}/api/kyc/admin/beneficiary-bank`,
+    {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message ||
+        "Failed to fetch beneficiary bank KYC"
+    );
+  }
+
   return result;
 };
 

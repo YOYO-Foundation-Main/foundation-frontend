@@ -105,13 +105,13 @@ export default function CheckoutPage() {
         //     : 0,
 
       };
-        if(platformSettings?.isTipEnabled) {
-          if (useCustomTip) {
-            payload.customTipAmount = customTip;
-          } else if (selectedTipPercent > 0) {
-            payload.selectedTipPercent = selectedTipPercent;
-          }
+      if (platformSettings?.isTipEnabled) {
+        if (useCustomTip) {
+          payload.customTipAmount = customTip;
+        } else if (selectedTipPercent > 0) {
+          payload.selectedTipPercent = selectedTipPercent;
         }
+      }
       if (donationData?.mode === "products") {
         payload.items = donationData?.selectedProductDetails?.map((p: any) => ({
           campaignProductId: p.campaignProductId,
@@ -138,15 +138,28 @@ export default function CheckoutPage() {
         description: "Support Campaign",
         order_id: order.id,
         handler: async function (response: any) {
+
+          // console.log("========== RAZORPAY TEST PAYMENT ==========");
+          // console.log("donationId:", donationId);
+          // console.log("razorpay_order_id:", response.razorpay_order_id);
+          // console.log("razorpay_payment_id:", response.razorpay_payment_id);
+          // console.log("razorpay_signature:", response.razorpay_signature);
+          // console.log("============================================");
+
+
+          // TEMPORARILY DISABLED FOR RACE TEST
           await verifyPayment({
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
             donationId,
           });
+
+          // DON'T redirect yet
           localStorage.removeItem("donationData");
           router.push(`/Donate/success?donationId=${donationId}`);
         },
+
         prefill: {
           name: payload.donorName,
           email: payload.donorEmail,
@@ -329,7 +342,7 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          
+
           {platformSettings?.isTipEnabled && (
             <div className="border-t border-gray-100 p-5 space-y-4">
 
