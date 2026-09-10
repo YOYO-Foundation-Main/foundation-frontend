@@ -1,5 +1,107 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+// =====================================================
+// CENTRAL AUTH FETCH
+// Automatically refreshes expired access token once.
+// Uses a single shared refresh request for concurrent 401s.
+// =====================================================
+
+let refreshPromise: Promise<boolean> | null = null;
+
+const refreshAccessToken = async (): Promise<boolean> => {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      try {
+        // IMPORTANT: native fetch, NOT authFetch
+        const response = await fetch(
+          `${BASE_URL}/api/auth/refresh`,
+          {
+            method: "POST",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          console.error(
+            "❌ [AUTH REFRESH FAILED]:",
+            response.status
+          );
+
+          return false;
+        }
+
+        console.log("✅ [AUTH REFRESH SUCCESS]");
+
+        return true;
+      } catch (error) {
+        console.error(
+          "❌ [AUTH REFRESH ERROR]:",
+          error
+        );
+
+        return false;
+      }
+    })().finally(() => {
+      refreshPromise = null;
+    });
+  }
+
+  return refreshPromise;
+};
+
+const authFetch = async (
+  input: RequestInfo | URL,
+  init: RequestInit = {}
+): Promise<Response> => {
+  const requestInit: RequestInit = {
+    ...init,
+    credentials: "include",
+  };
+
+  // IMPORTANT: native fetch, NOT authFetch
+  let response = await fetch(input, requestInit);
+
+  // Everything except 401 passes through normally.
+  if (response.status !== 401) {
+    return response;
+  }
+
+  const url = String(input);
+
+  // Never refresh login, logout, or refresh requests.
+  if (
+    url.includes("/api/admin/login") ||
+    url.includes("/api/auth/logout") ||
+    url.includes("/api/auth/refresh")
+  ) {
+    return response;
+  }
+
+  console.warn(
+    "⚠️ [AUTH 401] Access token expired. Refreshing..."
+  );
+
+  const refreshed = await refreshAccessToken();
+
+  if (!refreshed) {
+    console.error(
+      "❌ [AUTH] Unable to refresh access token"
+    );
+
+    return response;
+  }
+
+  console.log(
+    "🔄 [AUTH] Retrying original request..."
+  );
+
+  // IMPORTANT: native fetch, NOT authFetch
+  response = await fetch(input, requestInit);
+
+  return response;
+};
+
+
 // ================= ADMIN LOGIN =================
 export const adminLogin = async (data: { email: string; password: string }) => {
   console.log("📤 [ADMIN LOGIN]:", data.email);
@@ -26,7 +128,7 @@ export const adminLogin = async (data: { email: string; password: string }) => {
 
 //admin logout
 export const adminLogout = async () => {
-  const res = await fetch(`${BASE_URL}/api/auth/logout`, {
+  const res = await authFetch(`${BASE_URL}/api/auth/logout`, {
     method: "POST",
     credentials: "include",
   });
@@ -46,7 +148,7 @@ export const adminLogout = async () => {
 export const adminGetDashboard = async () => {
   console.log("📤 [ADMIN DASHBOARD]");
 
-  const res = await fetch(`${BASE_URL}/api/admin/dashboard`, {
+  const res = await authFetch(`${BASE_URL}/api/admin/dashboard`, {
     credentials: "include",
     cache: "no-store",
   });
@@ -62,7 +164,7 @@ export const adminGetDashboard = async () => {
 // ================= CAUSES =================
 
 export const adminGetCauses = async () => {
-  const res = await fetch(`${BASE_URL}/api/cause/admin`, {
+  const res = await authFetch(`${BASE_URL}/api/cause/admin`, {
     credentials: "include",
   });
 
@@ -72,7 +174,7 @@ export const adminGetCauses = async () => {
 };
 
 export const adminCreateCause = async (data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/cause/create`, {
+  const res = await authFetch(`${BASE_URL}/api/cause/create`, {
     method: "POST",
     credentials: "include",
     body: data,
@@ -86,7 +188,7 @@ export const adminCreateCause = async (data: FormData) => {
 };
 
 export const adminUpdateCause = async (id: number, data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/cause/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/cause/${id}`, {
     method: "PUT",
     credentials: "include",
     body: data,
@@ -100,7 +202,7 @@ export const adminUpdateCause = async (id: number, data: FormData) => {
 };
 
 export const adminDeleteCause = async (id: number) => {
-  const res = await fetch(`${BASE_URL}/api/cause/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/cause/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -113,7 +215,7 @@ export const adminDeleteCause = async (id: number) => {
 };
 
 export const adminToggleCauseStatus = async (id: number) => {
-  const res = await fetch(`${BASE_URL}/api/cause/${id}/toggle`, {
+  const res = await authFetch(`${BASE_URL}/api/cause/${id}/toggle`, {
     method: "PATCH",
     credentials: "include",
   });
@@ -134,7 +236,7 @@ export const adminToggleCauseStatus = async (id: number) => {
 //   let totalPages = 1;
 
 //   do {
-//     const res = await fetch(
+//     const res = await authFetch(
 //       `${BASE_URL}/api/campaigns?page=${page}&limit=${limit}`,
 //       {
 //         headers: authHeaders(),
@@ -164,7 +266,7 @@ export const adminGetCampaigns = async (
   page = 1,
   limit = 10
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/campaigns?page=${page}&limit=${limit}`,
     {
       credentials: "include",
@@ -179,7 +281,7 @@ export const adminGetCampaigns = async (
 };
 
 export const adminCreateCampaign = async (data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/campaigns`, {
+  const res = await authFetch(`${BASE_URL}/api/campaigns`, {
     method: "POST",
     credentials: "include",
     body: data,
@@ -190,7 +292,7 @@ export const adminCreateCampaign = async (data: FormData) => {
 };
 
 export const adminUpdateCampaign = async (id: number, data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/campaigns/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/campaigns/${id}`, {
     method: "PUT",
     credentials: "include",
     body: data,
@@ -207,7 +309,7 @@ export const adminAddCampaignProducts = async (data: {
     quantity: number;
   }[];
 }) => {
-  const res = await fetch(`${BASE_URL}/api/campaign/products`, {
+  const res = await authFetch(`${BASE_URL}/api/campaign/products`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -226,7 +328,7 @@ export const adminAddCampaignProducts = async (data: {
 };
 
 export const adminUpdateCampaignStatus = async (id: number, status: string) => {
-  const res = await fetch(`${BASE_URL}/api/campaigns/${id}/status`, {
+  const res = await authFetch(`${BASE_URL}/api/campaigns/${id}/status`, {
     method: "PATCH",
     credentials: "include",
     headers: {
@@ -241,7 +343,7 @@ export const adminUpdateCampaignStatus = async (id: number, status: string) => {
 };
 
 export const adminUpdateFeaturedStatus = async (id: number, status: boolean) => {
-  const res = await fetch(`${BASE_URL}/api/campaigns/${id}/featured`, {
+  const res = await authFetch(`${BASE_URL}/api/campaigns/${id}/featured`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -258,7 +360,7 @@ export const adminUpdateFeaturedStatus = async (id: number, status: boolean) => 
 
 
 export const adminDeleteCampaign = async (id: number) => {
-  const res = await fetch(`${BASE_URL}/api/campaigns/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/campaigns/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -268,14 +370,14 @@ export const adminDeleteCampaign = async (id: number) => {
 
 // ================= EVENTS =================
 export const adminGetEvents = async () => {
-  const res = await fetch(`${BASE_URL}/api/events`,
+  const res = await authFetch(`${BASE_URL}/api/events`,
     { credentials: "include", });
   if (!res.ok) throw new Error("Failed to fetch events");
   return res.json();
 };
 
 export const adminCreateEvent = async (data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/events`, {
+  const res = await authFetch(`${BASE_URL}/api/events`, {
     method: "POST",
     credentials: "include",
     body: data,
@@ -286,7 +388,7 @@ export const adminCreateEvent = async (data: FormData) => {
 };
 
 export const adminUpdateEvent = async (id: number, data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/events/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/events/${id}`, {
     method: "PUT",
     credentials: "include",
     body: data,
@@ -297,7 +399,7 @@ export const adminUpdateEvent = async (id: number, data: FormData) => {
 };
 
 export const adminDeleteEvent = async (id: number) => {
-  const res = await fetch(`${BASE_URL}/api/events/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/events/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -310,7 +412,7 @@ export const adminDeleteEvent = async (id: number) => {
 export const getDonations = async (params: any) => {
   const query = new URLSearchParams(params).toString();
 
-  const res = await fetch(`${BASE_URL}/api/admin/donations?${query}`, {
+  const res = await authFetch(`${BASE_URL}/api/admin/donations?${query}`, {
     credentials: "include",
     cache: "no-store",
   });
@@ -325,7 +427,7 @@ export const getDonations = async (params: any) => {
 };
 
 export const getDonationStats = async () => {
-  const res = await fetch(`${BASE_URL}/api/admin/donations/stats`, {
+  const res = await authFetch(`${BASE_URL}/api/admin/donations/stats`, {
     credentials: "include",
     cache: "no-store",
   });
@@ -341,7 +443,7 @@ export const getDonationStats = async () => {
 
 // 🔹 Donor Donations
 export const getDonorDonations = async (userId: number) => {
-  const res = await fetch(`${BASE_URL}/api/admin/donor/${userId}/donations`, {
+  const res = await authFetch(`${BASE_URL}/api/admin/donor/${userId}/donations`, {
     credentials: "include",
     cache: "no-store",
   });
@@ -353,7 +455,7 @@ export const getDonorDonations = async (userId: number) => {
 
 // 🔹 Top Donors
 export const getTopDonors = async () => {
-  const res = await fetch(`${BASE_URL}/api/admin/top-donors`, {
+  const res = await authFetch(`${BASE_URL}/api/admin/top-donors`, {
     credentials: "include",
   });
 
@@ -364,7 +466,7 @@ export const getTopDonors = async () => {
 
 // 🔹 Campaign Analytics
 export const getCampaignAnalytics = async (id: number) => {
-  const res = await fetch(`${BASE_URL}/api/admin/campaign/${id}/analytics`, {
+  const res = await authFetch(`${BASE_URL}/api/admin/campaign/${id}/analytics`, {
     credentials: "include",
   });
 
@@ -375,13 +477,13 @@ export const getCampaignAnalytics = async (id: number) => {
 
 // ================= BLOGS =================
 export const adminGetBlogs = async () => {
-  const res = await fetch(`${BASE_URL}/api/blog`, { credentials: "include", });
+  const res = await authFetch(`${BASE_URL}/api/blog`, { credentials: "include", });
   if (!res.ok) throw new Error("Failed to fetch blogs");
   return res.json();
 };
 
 export const adminCreateBlog = async (data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/blog/create`, {
+  const res = await authFetch(`${BASE_URL}/api/blog/create`, {
     method: "POST",
     credentials: "include",
     body: data,
@@ -392,7 +494,7 @@ export const adminCreateBlog = async (data: FormData) => {
 };
 
 export const adminUpdateBlog = async (id: number, data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/blog/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/blog/${id}`, {
     method: "PUT",
     credentials: "include",
     body: data,
@@ -403,7 +505,7 @@ export const adminUpdateBlog = async (id: number, data: FormData) => {
 };
 
 export const adminDeleteBlog = async (id: number) => {
-  const res = await fetch(`${BASE_URL}/api/blog/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/blog/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -428,7 +530,7 @@ export const adminGetUsers = async (params: GetUsersParams = {}) => {
   if (params.search) query.append("search", params.search);
   if (params.sortBy) query.append("sortBy", params.sortBy);
 
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/admin/users?${query.toString()}`,
     {
       credentials: "include",
@@ -443,7 +545,7 @@ export const adminGetUsers = async (params: GetUsersParams = {}) => {
 };
 
 export const adminGetUserById = async (id: number) => {
-  const res = await fetch(`${BASE_URL}/api/admin/users/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/admin/users/${id}`, {
     credentials: "include",
   });
 
@@ -458,7 +560,7 @@ export const adminGetUserById = async (id: number) => {
 
 
 export const adminGetProducts = async () => {
-  const res = await fetch(`${BASE_URL}/api/products`, {
+  const res = await authFetch(`${BASE_URL}/api/products`, {
     credentials: "include",
     cache: "no-store",
   });
@@ -468,7 +570,7 @@ export const adminGetProducts = async () => {
 
 
 export const adminCreateProduct = async (data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/products`, {
+  const res = await authFetch(`${BASE_URL}/api/products`, {
     method: "POST",
     credentials: "include",
     body: data,
@@ -479,7 +581,7 @@ export const adminCreateProduct = async (data: FormData) => {
 };
 
 export const adminUpdateProduct = async (id: number, data: FormData) => {
-  const res = await fetch(`${BASE_URL}/api/products/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/products/${id}`, {
     method: "PUT",
     credentials: "include",
     body: data,
@@ -490,7 +592,7 @@ export const adminUpdateProduct = async (id: number, data: FormData) => {
 };
 
 export const adminDeleteProduct = async (id: number) => {
-  const res = await fetch(`${BASE_URL}/api/products/${id}`, {
+  const res = await authFetch(`${BASE_URL}/api/products/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -504,7 +606,7 @@ export const adminDeleteProduct = async (id: number) => {
 export const adminGetProductCategories =
   async () => {
 
-    const res = await fetch(
+    const res = await authFetch(
       `${BASE_URL}/api/product-categories`,
       {
         credentials: "include",
@@ -526,7 +628,7 @@ export const adminGetProductCategories =
 export const adminGetProductCategoryById =
   async (id: number) => {
 
-    const res = await fetch(
+    const res = await authFetch(
       `${BASE_URL}/api/product-categories/${id}`,
       {
         credentials: "include",
@@ -548,7 +650,7 @@ export const adminGetProductCategoryById =
 export const adminCreateProductCategory =
   async (data: FormData) => {
 
-    const res = await fetch(
+    const res = await authFetch(
       `${BASE_URL}/api/product-categories`,
       {
         method: "POST",
@@ -577,7 +679,7 @@ export const adminUpdateProductCategory =
     data: FormData
   ) => {
 
-    const res = await fetch(
+    const res = await authFetch(
       `${BASE_URL}/api/product-categories/${id}`,
       {
         method: "PUT",
@@ -603,7 +705,7 @@ export const adminUpdateProductCategory =
 export const adminDeleteProductCategory =
   async (id: number) => {
 
-    const res = await fetch(
+    const res = await authFetch(
       `${BASE_URL}/api/product-categories/${id}`,
       {
         method: "DELETE",
@@ -640,7 +742,7 @@ export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED";
 // =====================================================
 
 export const adminGetUserKyc = async () => {
-  const res = await fetch(`${BASE_URL}/api/kyc/admin`, {
+  const res = await authFetch(`${BASE_URL}/api/kyc/admin`, {
     method: "GET",
     credentials: "include",
     cache: "no-store",
@@ -674,7 +776,7 @@ export const adminUpdateUserKyc = async (
   status: ApprovalStatus,
   rejectionNote?: string
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/kyc/admin/${id}`,
     {
       method: "PATCH",
@@ -719,7 +821,7 @@ export const adminUpdateUserBank = async (
   status: ApprovalStatus,
   rejectionReason?: string
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/kyc/admin/bank/${id}`,
     {
       method: "PATCH",
@@ -764,7 +866,7 @@ export const adminUpdateBeneficiaryIdentity = async (
   status: ApprovalStatus,
   rejectionReason?: string
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/kyc/campaigns/${campaignId}/beneficiary-identity`,
     {
       method: "PATCH",
@@ -810,7 +912,7 @@ export const adminUpdateBeneficiaryBank = async (
   status: ApprovalStatus,
   rejectionReason?: string
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/kyc/campaigns/${campaignId}/beneficiary-bank`,
     {
       method: "PATCH",
@@ -847,7 +949,7 @@ export const adminUpdateBeneficiaryBank = async (
 // =====================================================
 
 export const adminGetCampaignProofs = async () => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/campaign/admin`,
     {
       method: "GET",
@@ -883,7 +985,7 @@ export const adminUpdateCampaignProof = async (
   status: ApprovalStatus,
   rejectionNote?: string
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/kyc/admin/campaign-proof/${id}`,
     {
       method: "PATCH",
@@ -920,7 +1022,7 @@ export const adminUpdateCampaignProof = async (
 // =====================================================
 
 export const adminGetSelfIdentity = async () => {
-  const res = await fetch(
+  const res = await authFetch(
     // `${BASE_URL}/api/kyc/admin/identity`,
      `${BASE_URL}/api/kyc/admin`,
     {
@@ -950,7 +1052,7 @@ export const adminGetSelfIdentity = async () => {
 // =====================================================
 
 export const adminGetSelfBank = async () => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/kyc/admin/bank`,
     {
       method: "GET",
@@ -979,7 +1081,7 @@ export const adminGetSelfBank = async () => {
 // =====================================================
 
 export const adminGetBeneficiaryIdentity = async () => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/kyc/admin/beneficiary-identity`,
     {
       method: "GET",
@@ -1009,7 +1111,7 @@ export const adminGetBeneficiaryIdentity = async () => {
 // =====================================================
 
 export const adminGetBeneficiaryBank = async () => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/kyc/admin/beneficiary-bank`,
     {
       method: "GET",
@@ -1032,7 +1134,7 @@ export const adminGetBeneficiaryBank = async () => {
 
 //contact query api 
 export const getContactQueries = async () => {
-  const res = await fetch(`${BASE_URL}/api/contact`, {
+  const res = await authFetch(`${BASE_URL}/api/contact`, {
     credentials: "include",
   });
 
@@ -1044,7 +1146,7 @@ export const getContactQueries = async () => {
 
 //NGOs 
 export const getAllNgos = async () => {
-  const res = await fetch(`${BASE_URL}/api/ngo/admin/ngos`,
+  const res = await authFetch(`${BASE_URL}/api/ngo/admin/ngos`,
     {
       credentials: "include",
     }
@@ -1064,7 +1166,7 @@ export const getAllNgos = async () => {
 export const getNgoById = async (
   id: number
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/ngo/admin/ngos/${id}`,
     {
       credentials: "include",
@@ -1085,7 +1187,7 @@ export const getNgoById = async (
 export const approveNgo = async (
   id: number
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/ngo/admin/ngos/${id}/approve`,
     {
       method: "PUT",
@@ -1108,7 +1210,7 @@ export const rejectNgo = async (
   id: number,
   rejectionReason: string
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/ngo/admin/ngos/${id}/reject`,
     {
       method: "PUT",
@@ -1155,7 +1257,7 @@ export const getAllVolunteers = async (
     params.append("status", status);
   }
 
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/volunteers/admin?${params.toString()}`,
     {
       credentials: "include",
@@ -1177,7 +1279,7 @@ export const getAllVolunteers = async (
 export const getVolunteerById =
   async (id: number) => {
 
-    const res = await fetch(
+    const res = await authFetch(
       `${BASE_URL}/api/volunteers/admin/${id}`,
       {
         credentials: "include",
@@ -1206,7 +1308,7 @@ export const updateVolunteerStatus =
       | "REJECTED"
   ) => {
 
-    const res = await fetch(
+    const res = await authFetch(
       `${BASE_URL}/api/volunteers/admin/${id}/status`,
       {
         method: "PATCH",
@@ -1239,7 +1341,7 @@ export const updateVolunteerStatus =
 export const getVolunteerStats =
   async () => {
 
-    const res = await fetch(
+    const res = await authFetch(
       `${BASE_URL}/api/volunteers/admin/stats`,
       {
         credentials: "include",
@@ -1262,7 +1364,7 @@ export const getVolunteerStats =
 export const deleteVolunteer =
   async (id: number) => {
 
-    const res = await fetch(
+    const res = await authFetch(
       `${BASE_URL}/api/volunteers/admin/${id}`,
       {
         method: "DELETE",
@@ -1288,7 +1390,7 @@ export const deleteVolunteer =
 
 // Get All Gallery
 export const adminGetGallery = async () => {
-  const res = await fetch(`${BASE_URL}/api/gallery`, {
+  const res = await authFetch(`${BASE_URL}/api/gallery`, {
     credentials: "include",
     cache: "no-store",
   });
@@ -1304,7 +1406,7 @@ export const adminGetGallery = async () => {
 export const adminCreateGallery = async (
   data: FormData
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/gallery`,
     {
       method: "POST",
@@ -1330,7 +1432,7 @@ export const adminUpdateGallery = async (
   id: number,
   data: FormData
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/gallery/${id}`,
     {
       method: "PUT",
@@ -1354,7 +1456,7 @@ export const adminUpdateGallery = async (
 export const adminDeleteGallery = async (
   id: number
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/gallery/${id}`,
     {
       method: "DELETE",
@@ -1378,7 +1480,7 @@ export const adminDeleteGallery = async (
 export const adminDeleteGalleryImage = async (
   imageId: number
 ) => {
-  const res = await fetch(
+  const res = await authFetch(
     `${BASE_URL}/api/gallery/image/${imageId}`,
     {
       method: "DELETE",
@@ -1402,7 +1504,7 @@ export const adminDeleteGalleryImage = async (
 
 export const adminToggleFeaturedGallery =
   async (id: number) => {
-    const res = await fetch(
+    const res = await authFetch(
       `${BASE_URL}/api/gallery/${id}/feature`,
       {
         method: "PATCH",
