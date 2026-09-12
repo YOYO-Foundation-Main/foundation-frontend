@@ -14,7 +14,7 @@ const refreshAccessToken = async (): Promise<boolean> => {
       try {
         // IMPORTANT: native fetch, NOT authFetch
         const response = await fetch(
-          `${BASE_URL}/api/auth/refresh`,
+          `${BASE_URL}/api/auth/admin-refresh`,
           {
             method: "POST",
             credentials: "include",
@@ -72,7 +72,7 @@ const authFetch = async (
   if (
     url.includes("/api/admin/login") ||
     url.includes("/api/auth/logout") ||
-    url.includes("/api/auth/refresh")
+    url.includes("/api/auth/admin-refresh")
   ) {
     return response;
   }

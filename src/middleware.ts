@@ -51,21 +51,15 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
+  const adminAccessToken = request.cookies.get("adminAccessToken");
 
-  const accessToken = request.cookies.get("accessToken");
-  
-  console.log("==== MIDDLEWARE ====");
+  console.log("==== ADMIN MIDDLEWARE ====");
   console.log("PATH:", request.nextUrl.pathname);
-    console.log("COOKIE:", accessToken?.value);
-
+  console.log("ADMIN COOKIE:", adminAccessToken?.value);
+  console.log("ALL COOKIES:", request.cookies.getAll());
   console.log(
-    "ALL COOKIES:",
-    request.cookies.getAll()
-  );
-
-  console.log(
-    "ACCESS:",
-    request.cookies.get("accessToken")
+    "ADMIN ACCESS:",
+    request.cookies.get("adminAccessToken")
   );
 
   return NextResponse.next();
