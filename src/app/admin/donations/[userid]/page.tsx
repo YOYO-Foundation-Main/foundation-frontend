@@ -341,7 +341,10 @@ export default function DonorDetailPage() {
   }
 
   const donor = data[0];
-  const totalAmount = data.reduce((sum, d) => sum + d.amount, 0);
+  // const totalAmount = data.reduce((sum, d) => sum + d.amount, 0);
+  const totalAmount = data
+  .filter((d) => ["SUCCESS", "COMPLETED"].includes(d.status?.toUpperCase()))
+  .reduce((sum, d) => sum + d.amount, 0);
   const successCount = data.filter((d) =>
     ["SUCCESS", "COMPLETED"].includes(d.status?.toUpperCase())
   ).length;
