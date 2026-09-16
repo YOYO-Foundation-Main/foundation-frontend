@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   FiGrid, FiHeart, FiFlag, FiCalendar,
-  FiFileText, FiUsers, FiLogOut, FiChevronDown,
-  FiPackage, FiDollarSign, FiMenu, FiX, FiShield,
+  FiFileText,FiUsers, FiLogOut, FiChevronDown,
+  FiPackage, FiDollarSign, FiMenu, FiX, FiShield, 
 } from "react-icons/fi";
 import { useAdminStore } from "@/features/admin/store/admin.store";
 import {
@@ -52,6 +52,9 @@ const NAV = [
 
   // ───── CONTENT ─────
   { label: "Blogs", href: "/admin/blogs", icon: FiFileText },
+
+  { label: "News", href: "/admin/News", icon: FiFileText },
+
   { label: "Events", href: "/admin/events", icon: FiCalendar },
 
   // ───── SUPPORT ─────

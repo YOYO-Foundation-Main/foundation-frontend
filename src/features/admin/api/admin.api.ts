@@ -513,6 +513,104 @@ export const adminDeleteBlog = async (id: number) => {
   return res.json();
 };
 
+
+// ================= NEWS =================
+
+// Get all news for admin
+export const adminGetNews = async () => {
+  const res = await authFetch(`${BASE_URL}/api/news/admin`, {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to fetch news");
+  }
+
+  return result;
+};
+
+// Get single news by ID
+export const adminGetNewsById = async (id: number) => {
+  const res = await authFetch(`${BASE_URL}/api/news/admin/${id}`, {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to fetch news");
+  }
+
+  return result;
+};
+// ============================================================
+// NEWS
+// ============================================================
+
+// Create news
+export const adminCreateNews = async (data: FormData) => {
+  const res = await authFetch(`${BASE_URL}/api/news`, {
+    method: "POST",
+    credentials: "include",
+    body: data,
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to create news"
+    );
+  }
+
+  return result;
+};
+
+// Update news
+export const adminUpdateNews = async (
+  id: number,
+  data: FormData
+) => {
+  const res = await authFetch(
+    `${BASE_URL}/api/news/admin/${id}`,
+    {
+      method: "PUT",
+      credentials: "include",
+      body: data,
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to update news"
+    );
+  }
+
+  return result;
+};
+
+// Delete news
+export const adminDeleteNews = async (id: number) => {
+  const res = await authFetch(`${BASE_URL}/api/news/admin/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to delete news");
+  }
+
+  return result;
+};
+
 // ================= USERS =================
 
 type GetUsersParams = {
