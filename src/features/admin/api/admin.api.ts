@@ -1001,7 +1001,7 @@ export const adminUpdateBeneficiaryIdentity = async (
   if (!res.ok) {
     throw new Error(
       result.message ||
-        "Failed to update beneficiary identity status"
+      "Failed to update beneficiary identity status"
     );
   }
 
@@ -1047,7 +1047,7 @@ export const adminUpdateBeneficiaryBank = async (
   if (!res.ok) {
     throw new Error(
       result.message ||
-        "Failed to update beneficiary bank status"
+      "Failed to update beneficiary bank status"
     );
   }
 
@@ -1120,7 +1120,7 @@ export const adminUpdateCampaignProof = async (
   if (!res.ok) {
     throw new Error(
       result.message ||
-        "Failed to update campaign proof status"
+      "Failed to update campaign proof status"
     );
   }
 
@@ -1137,7 +1137,7 @@ export const adminUpdateCampaignProof = async (
 export const adminGetSelfIdentity = async () => {
   const res = await authFetch(
     // `${BASE_URL}/api/kyc/admin/identity`,
-     `${BASE_URL}/api/kyc/admin`,
+    `${BASE_URL}/api/kyc/admin`,
     {
       method: "GET",
       credentials: "include",
@@ -1208,7 +1208,7 @@ export const adminGetBeneficiaryIdentity = async () => {
   if (!res.ok) {
     throw new Error(
       result.message ||
-        "Failed to fetch beneficiary identity KYC"
+      "Failed to fetch beneficiary identity KYC"
     );
   }
 
@@ -1238,7 +1238,7 @@ export const adminGetBeneficiaryBank = async () => {
   if (!res.ok) {
     throw new Error(
       result.message ||
-        "Failed to fetch beneficiary bank KYC"
+      "Failed to fetch beneficiary bank KYC"
     );
   }
 
@@ -1344,6 +1344,100 @@ export const rejectNgo = async (
 
   return result;
 };
+
+// ─────────────────────────────────────────────
+// NGO DOCUMENT APPROVAL
+// ─────────────────────────────────────────────
+
+export async function approveNgoDocument(docId: number) {
+  const res = await authFetch(
+    `${BASE_URL}/api/ngo/admin/ngos/documents/${docId}/approve`,
+    {
+      method: "PUT",
+      credentials: "include",
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to approve document");
+  }
+
+  return data;
+}
+
+export async function rejectNgoDocument(
+  docId: number,
+  rejectionReason: string
+) {
+  const res = await authFetch(
+    `${BASE_URL}/api/ngo/admin/ngos/documents/${docId}/reject`,
+    {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ rejectionReason }),
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to reject document");
+  }
+
+  return data;
+}
+
+// ─────────────────────────────────────────────
+// NGO BANK APPROVAL
+// ─────────────────────────────────────────────
+
+export async function approveNgoBank(bankId: number) {
+  const res = await authFetch(
+    `${BASE_URL}/api/ngo/admin/ngos/bank/${bankId}/approve`,
+    {
+      method: "PUT",
+      credentials: "include",
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to approve bank");
+  }
+
+  return data;
+}
+
+export async function rejectNgoBank(
+  bankId: number,
+  rejectionReason: string
+) {
+  const res = await authFetch(
+    `${BASE_URL}/api/ngo/admin/ngos/bank/${bankId}/reject`,
+    {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ rejectionReason }),
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to reject bank");
+  }
+
+  return data;
+}
 
 
 // =====================================

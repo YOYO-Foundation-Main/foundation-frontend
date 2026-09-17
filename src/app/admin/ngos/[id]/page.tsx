@@ -626,6 +626,10 @@ import {
   getNgoById,
   approveNgo,
   rejectNgo,
+  approveNgoDocument,
+  rejectNgoDocument,
+  approveNgoBank,
+  rejectNgoBank,
 } from "@/features/admin/api/admin.api";
 import {
   ArrowLeft,
@@ -661,55 +665,55 @@ import { toast } from "sonner";
 ───────────────────────────────────────────── */
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-async function approveDocument(docId: number) {
-  const res = await fetch(
-    `${BASE_URL}/api/ngo/admin/ngos/documents/${docId}/approve`,
-    { method: "POST", credentials: "include" }
-  );
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to approve document");
-  return data;
-}
+// async function approveDocument(docId: number) {
+//   const res = await authFetch(
+//     `${BASE_URL}/api/ngo/admin/ngos/documents/${docId}/approve`,
+//     { method: "PUT", credentials: "include" }
+//   );
+//   const data = await res.json();
+//   if (!res.ok) throw new Error(data.message || "Failed to approve document");
+//   return data;
+// }
 
-async function rejectDocument(docId: number, rejectionReason: string) {
-  const res = await fetch(
-    `${BASE_URL}/api/ngo/admin/ngos/documents/${docId}/reject`,
-    {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rejectionReason }),
-    }
-  );
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to reject document");
-  return data;
-}
+// async function rejectDocument(docId: number, rejectionReason: string) {
+//   const res = await authFetch(
+//     `${BASE_URL}/api/ngo/admin/ngos/documents/${docId}/reject`,
+//     {
+//       method: "PUT",
+//       credentials: "include",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ rejectionReason }),
+//     }
+//   );
+//   const data = await res.json();
+//   if (!res.ok) throw new Error(data.message || "Failed to reject document");
+//   return data;
+// }
 
-async function approveBank(bankId: number) {
-  const res = await fetch(
-    `${BASE_URL}/api/ngo/admin/ngos/bank/${bankId}/approve`,
-    { method: "POST", credentials: "include" }
-  );
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to approve bank");
-  return data;
-}
+// async function approveBank(bankId: number) {
+//   const res = await authFetch(
+//     `${BASE_URL}/api/ngo/admin/ngos/bank/${bankId}/approve`,
+//     { method: "PUT", credentials: "include" }
+//   );
+//   const data = await res.json();
+//   if (!res.ok) throw new Error(data.message || "Failed to approve bank");
+//   return data;
+// }
 
-async function rejectBank(bankId: number, rejectionReason: string) {
-  const res = await fetch(
-    `${BASE_URL}/api/ngo/admin/ngos/bank/${bankId}/reject`,
-    {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rejectionReason }),
-    }
-  );
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to reject bank");
-  return data;
-}
+// async function rejectBank(bankId: number, rejectionReason: string) {
+//   const res = await authFetch(
+//     `${BASE_URL}/api/ngo/admin/ngos/bank/${bankId}/reject`,
+//     {
+//       method: "PUT",
+//       credentials: "include",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ rejectionReason }),
+//     }
+//   );
+//   const data = await res.json();
+//   if (!res.ok) throw new Error(data.message || "Failed to reject bank");
+//   return data;
+// }
 
 /* ─────────────────────────────────────────────
    STATUS HELPERS
@@ -906,7 +910,7 @@ export default function SingleNgoPage() {
     if (!modal.targetId) return;
     try {
       setModalLoading(true);
-      await approveDocument(modal.targetId);
+      await approveNgoDocument(modal.targetId);
       toast.success("Document approved");
       setModal({ type: null });
       fetchNgo();
@@ -921,7 +925,7 @@ export default function SingleNgoPage() {
     if (!modal.targetId) return;
     try {
       setModalLoading(true);
-      await rejectDocument(modal.targetId, reason);
+      await rejectNgoDocument(modal.targetId, reason);
       toast.success("Document rejected");
       setModal({ type: null });
       fetchNgo();
@@ -936,7 +940,7 @@ export default function SingleNgoPage() {
   const handleBankApprove = async () => {
     try {
       setModalLoading(true);
-      await approveBank(ngo.bank.id);
+      await approveNgoBank(ngo.bank.id);
       toast.success("Bank details approved");
       setModal({ type: null });
       fetchNgo();
@@ -950,7 +954,7 @@ export default function SingleNgoPage() {
   const handleBankReject = async (reason: string) => {
     try {
       setModalLoading(true);
-      await rejectBank(ngo.bank.id, reason);
+      await rejectNgoBank(ngo.bank.id, reason);
       toast.success("Bank details rejected");
       setModal({ type: null });
       fetchNgo();
