@@ -476,10 +476,25 @@ export const getCampaignAnalytics = async (id: number) => {
 };
 
 // ================= BLOGS =================
-export const adminGetBlogs = async () => {
-  const res = await authFetch(`${BASE_URL}/api/blog`, { credentials: "include", });
-  if (!res.ok) throw new Error("Failed to fetch blogs");
-  return res.json();
+export const adminGetBlogs = async (
+  page: number = 1,
+  limit: number = 10
+) => {
+  const res = await authFetch(
+    `${BASE_URL}/api/blog?page=${page}&limit=${limit}`,
+    {
+      credentials: "include",
+      cache: "no-store",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to fetch blogs");
+  }
+
+  return result;
 };
 
 export const adminCreateBlog = async (data: FormData) => {

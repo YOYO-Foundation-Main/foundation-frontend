@@ -18,6 +18,9 @@ export default function AdminBlogsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
   const [toast, setToast] = useState({ msg: "", type: "" });
 
   const showToast = (msg: string, type: "success" | "error") => {
@@ -28,11 +31,18 @@ export default function AdminBlogsPage() {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const data = await adminGetBlogs();
-      // API returns { total, page, limit, data: [] } OR direct array
-      const list: Blog[] = data?.data || (Array.isArray(data) ? data : []);
+
+      const result = await adminGetBlogs(page, limit);
+
+      const list: Blog[] = result?.data ?? [];
+
       setBlogs(list);
-      if (list.length > 0 && !selected) setSelected(list[0]);
+      setTotal(result?.total ?? 0);
+
+      // Select first blog only when there is no selected blog
+      if (list.length > 0 && !selected) {
+        setSelected(list[0]);
+      }
     } catch (err) {
       console.error("❌ Blogs fetch error:", err);
     } finally {
@@ -40,7 +50,9 @@ export default function AdminBlogsPage() {
     }
   };
 
-  useEffect(() => { fetchBlogs(); }, []);
+  useEffect(() => {
+    fetchBlogs();
+  }, [page, limit]);
 
   const handleDelete = async () => {
     if (!selected) return;
@@ -70,9 +82,8 @@ export default function AdminBlogsPage() {
 
       {/* Global toast */}
       {toast.msg && (
-        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-xl text-sm font-medium shadow-lg ${
-          toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
-        }`}>{toast.msg}</div>
+        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-xl text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+          }`}>{toast.msg}</div>
       )}
 
       <div className="flex gap-5 min-h-full">
@@ -111,9 +122,8 @@ export default function AdminBlogsPage() {
 
               return (
                 <div key={blog.id} onClick={() => setSelected(blog)}
-                  className={`flex items-center gap-4 px-5 py-4 cursor-pointer transition border-b border-gray-50 last:border-0 ${
-                    isSelected ? "bg-blue-50/60" : "hover:bg-gray-50"
-                  }`}
+                  className={`flex items-center gap-4 px-5 py-4 cursor-pointer transition border-b border-gray-50 last:border-0 ${isSelected ? "bg-blue-50/60" : "hover:bg-gray-50"
+                    }`}
                 >
                   {/* Thumbnail */}
                   <div className="w-16 h-14 rounded-xl overflow-hidden shrink-0 bg-gray-100 flex items-center justify-center">
@@ -138,8 +148,9 @@ export default function AdminBlogsPage() {
                   </div>
 
                   {/* Content preview */}
-                  <p className="hidden lg:block text-xs text-gray-400 max-w-[200px] line-clamp-2 shrink-0">
-                    {blog.content}
+                  <p className="hidden lg:block text-xs text-gray-400 max-w-[200px] shrink-0">
+                    {blog.content.trim().split(/\s+/).slice(0, 15).join(" ")}
+                    {blog.content.trim().split(/\s+/).length > 15 ? "..." : ""}
                   </p>
 
                   {/* Action buttons */}
@@ -157,6 +168,39 @@ export default function AdminBlogsPage() {
               );
             })}
           </div>
+
+          {/* Pagination */}
+          {!loading && total > 0 && (
+            <div className="flex items-center justify-between gap-4 mt-4 px-1">
+              <p className="text-xs text-gray-400">
+                Page {page} of {Math.ceil(total / limit)}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={page === 1}
+                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                  className="px-3 py-2 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+
+                <span className="px-3 py-2 text-xs font-semibold rounded-lg bg-blue-50 text-blue-600">
+                  {page}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={page >= Math.ceil(total / limit)}
+                  onClick={() => setPage((prev) => prev + 1)}
+                  className="px-3 py-2 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Count */}
           {!loading && (
@@ -205,10 +249,15 @@ export default function AdminBlogsPage() {
                 <span>{new Date(selected.createdAt).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</span>
               </div>
 
-              {/* Content preview */}
+              {/* Full Content */}
               <div>
-                <p className="text-xs font-semibold text-gray-600 mb-1">Content</p>
-                <p className="text-xs text-gray-500 leading-relaxed line-clamp-8">{selected.content}</p>
+                <p className="text-xs font-semibold text-gray-600 mb-1">
+                  Content
+                </p>
+
+                <div className="text-xs text-gray-500 leading-relaxed whitespace-pre-wrap break-words">
+                  {selected.content}
+                </div>
               </div>
 
               {/* Actions */}
