@@ -267,7 +267,7 @@ export const adminGetCampaigns = async (
   limit = 10
 ) => {
   const res = await authFetch(
-    `${BASE_URL}/api/campaigns?page=${page}&limit=${limit}`,
+   `${BASE_URL}/api/campaigns/admin?page=${page}&limit=${limit}`,
     {
       credentials: "include",
     }
