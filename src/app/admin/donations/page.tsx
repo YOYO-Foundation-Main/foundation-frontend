@@ -12,7 +12,7 @@ export default function DonationsPage() {
     const [stats, setStats] = useState<any>(null);
     const [pagination, setPagination] = useState<any>({
         page: 1,
-        pages: 1,
+        totalPages: 1,
         total: 0,
     });
     const [loading, setLoading] = useState(false);

@@ -342,7 +342,7 @@ export default function CausesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingCause, setEditingCause] = useState<Cause | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
+  const [deleteError, setDeleteError] = useState("");
   // Confirmation states
   const [deleteTarget, setDeleteTarget] = useState<Cause | null>(null);
   const [toggleTarget, setToggleTarget] = useState<Cause | null>(null);
@@ -375,6 +375,10 @@ export default function CausesPage() {
   // ── CREATE / UPDATE ──
   const handleSubmit = async () => {
     if (!form.name.trim() || !form.description.trim()) return;
+    if (!editingCause && !form.image) {
+      alert("Please upload a cover image.");
+      return;
+    }
     try {
       setSubmitting(true);
       const formData = new FormData();
@@ -423,14 +427,21 @@ export default function CausesPage() {
 
   // ── DELETE ──
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || deleteError) return;
+
     try {
+      setDeleteError("");
+
       await adminDeleteCause(deleteTarget.id);
-      fetchCauses();
-    } catch {
-      alert("Delete failed");
-    } finally {
+
       setDeleteTarget(null);
+      fetchCauses();
+    } catch (err: any) {
+      setDeleteError(
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to delete cause."
+      );
     }
   };
 
@@ -564,11 +575,10 @@ export default function CausesPage() {
                       <td className="px-5 py-3.5">
                         <button
                           onClick={() => setToggleTarget(cause)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 hover:scale-105 active:scale-95 ${
-                            cause.isActive
-                              ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                              : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                          }`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 hover:scale-105 active:scale-95 ${cause.isActive
+                            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                            }`}
                         >
                           {cause.isActive ? (
                             <FiToggleRight className="text-base text-emerald-500" />
@@ -671,7 +681,7 @@ export default function CausesPage() {
               {/* Image Upload */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                  Cover Image
+                  Cover Image <span className="text-rose-500">*</span>
                 </label>
                 <label className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-200 rounded-xl cursor-pointer bg-gray-50 hover:bg-rose-50 hover:border-rose-300 transition-colors py-5 gap-2">
                   {imagePreview ? (
@@ -709,7 +719,12 @@ export default function CausesPage() {
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={submitting || !form.name.trim() || !form.description.trim()}
+                disabled={
+                  submitting ||
+                  !form.name.trim() ||
+                  !form.description.trim() ||
+                  !form.image
+                }
                 className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow-md shadow-rose-200 transition-all active:scale-95"
               >
                 {submitting ? "Saving..." : editingCause ? "Update Cause" : "Create Cause"}
@@ -723,12 +738,23 @@ export default function CausesPage() {
       {deleteTarget && (
         <ConfirmModal
           title="Delete Cause?"
-          message={`"${deleteTarget.name}" will be permanently removed. This action cannot be undone.`}
-          confirmLabel="Yes, Delete"
-          confirmClass="text-rose-600 hover:bg-rose-50"
+          message={
+            deleteError
+              ? deleteError
+              : `"${deleteTarget.name}" will be permanently deleted. If this cause is linked to any campaigns, deletion will be blocked.`
+          }
+          confirmLabel={deleteError ? "Cannot Delete" : "Yes, Delete"}
+          confirmClass={
+            deleteError
+              ? "text-gray-400 cursor-not-allowed"
+              : "text-rose-600 hover:bg-rose-50"
+          }
           icon={<FiTrash2 />}
           onConfirm={confirmDelete}
-          onCancel={() => setDeleteTarget(null)}
+          onCancel={() => {
+            setDeleteTarget(null);
+            setDeleteError("");
+          }}
         />
       )}
 

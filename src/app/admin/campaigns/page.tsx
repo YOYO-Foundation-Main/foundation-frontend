@@ -101,8 +101,6 @@ export default function AdminCampaignsPage() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("All");
   const [selected, setSelected] = useState<Campaign | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   // const [perPage, setPerPage] = useState(10);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingCampaign, setPendingCampaign] = useState<Campaign | null>(null);
@@ -116,7 +114,9 @@ export default function AdminCampaignsPage() {
   const [showDelete, setShowDelete] = useState(false);
   const [statusLoading, setStatusLoading] = useState<number | null>(null);
   const [toast, setToast] = useState({ msg: "", type: "" });
-
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCampaigns, setTotalCampaigns] = useState(0);
   const showToast = (msg: string, type: "success" | "error") => {
     setToast({ msg, type });
     setTimeout(() => setToast({ msg: "", type: "" }), 3000);
@@ -151,7 +151,7 @@ export default function AdminCampaignsPage() {
 
       setTotalPages(data.totalPages);
 
-      setCampaigns(list);
+      setTotalCampaigns(data.total);
 
       // ✅ IMPORTANT FIX
       if (selected) {
@@ -283,7 +283,7 @@ export default function AdminCampaignsPage() {
     //   (activeTab === "Completed" && c.status?.toUpperCase() === "COMPLETED") ||
     //   (activeTab === "Featured" && c.isFeatured);
     const tabMatch =
-      (activeTab === "All" && c.isActive) ||
+      activeTab === "All"  ||
 
       (activeTab === "Active" &&
         c.isActive &&
@@ -521,7 +521,7 @@ export default function AdminCampaignsPage() {
             })}
           </div>
 
-          <div className="flex items-center justify-between mt-4">
+          {/* <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <span>Show</span>
 
@@ -542,7 +542,112 @@ export default function AdminCampaignsPage() {
                 Next
               </button>
             </div>
+          </div> */}
+
+          {/* =====================================================
+            CAMPAIGN PAGINATION
+          ===================================================== */}
+
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+
+            {/* Results count */}
+            <div className="text-sm text-gray-500">
+              Showing{" "}
+              <span className="font-medium text-gray-700">
+                {campaigns.length === 0
+                  ? 0
+                  : (page - 1) * 10 + 1}
+              </span>
+              {" "}–{" "}
+              <span className="font-medium text-gray-700">
+                {Math.min(
+                  page * 10,
+                  totalCampaigns
+                )}
+              </span>
+              {" "}of{" "}
+              <span className="font-medium text-gray-700">
+                {totalCampaigns}
+              </span>
+              {" "}results
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center gap-1">
+
+              {/* Previous */}
+              <button
+                type="button"
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className={`flex items-center justify-center h-9 px-3 rounded-lg border text-sm transition ${page === 1
+                  ? "border-gray-100 text-gray-300 cursor-not-allowed"
+                  : "border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+              >
+                Previous
+              </button>
+
+              {/* Page numbers */}
+              {Array.from(
+                { length: totalPages },
+                (_, index) => index + 1
+              )
+                .filter((pageNumber) => {
+                  return (
+                    pageNumber === 1 ||
+                    pageNumber === totalPages ||
+                    Math.abs(pageNumber - page) <= 1
+                  );
+                })
+                .map((pageNumber, index, visiblePages) => {
+                  const previousPage = visiblePages[index - 1];
+
+                  return (
+                    <div
+                      key={pageNumber}
+                      className="flex items-center gap-1"
+                    >
+                      {previousPage &&
+                        pageNumber - previousPage > 1 && (
+                          <span className="flex items-center justify-center w-9 h-9 text-sm text-gray-400">
+                            ...
+                          </span>
+                        )}
+
+                      <button
+                        type="button"
+                        onClick={() => setPage(pageNumber)}
+                        className={`flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition ${page === pageNumber
+                          ? "bg-gray-900 text-white shadow-sm"
+                          : "text-gray-600 hover:bg-gray-100"
+                          }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    </div>
+                  );
+                })}
+
+              {/* Next */}
+              <button
+                type="button"
+                disabled={page === totalPages}
+                onClick={() =>
+                  setPage((p) => Math.min(totalPages, p + 1))
+                }
+                className={`flex items-center justify-center h-9 px-3 rounded-lg border text-sm transition ${page === totalPages
+                  ? "border-gray-100 text-gray-300 cursor-not-allowed"
+                  : "border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+              >
+                Next
+              </button>
+
+            </div>
           </div>
+
+
         </div>
 
         {/* ── RIGHT: Detail Panel with Products ── */}

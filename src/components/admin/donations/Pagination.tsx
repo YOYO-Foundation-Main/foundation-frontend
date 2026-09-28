@@ -35,16 +35,22 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 export default function Pagination({ pagination, setFilters }: any) {
   if (!pagination) return null;
 
-  const { page, pages, total } = pagination;
+  const { page, totalPages, total } = pagination;
 
-  const goTo = (p: number) => setFilters((prev: any) => ({ ...prev, page: p }));
+  const goTo = (p: number) => {
+    if (p < 1 || p > totalPages) return;
 
+    setFilters((prev: any) => ({
+      ...prev,
+      page: p,
+    }));
+  };
   // Build page number list with ellipsis
   const getPageNumbers = () => {
-    if (pages <= 5) return Array.from({ length: pages }, (_, i) => i + 1);
-    if (page <= 3) return [1, 2, 3, 4, "...", pages];
-    if (page >= pages - 2) return [1, "...", pages - 3, pages - 2, pages - 1, pages];
-    return [1, "...", page - 1, page, page + 1, "...", pages];
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (page <= 3) return [1, 2, 3, 4, "...", totalPages];
+    if (page >= totalPages - 2) return [1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    return [1, "...", page - 1, page, page + 1, "...", totalPages];
   };
 
   const pageNumbers = getPageNumbers();
@@ -57,7 +63,7 @@ export default function Pagination({ pagination, setFilters }: any) {
         Page{" "}
         <span className="text-gray-700 font-bold">{page}</span>
         {" "}of{" "}
-        <span className="text-gray-700 font-bold">{pages}</span>
+        <span className="text-gray-700 font-bold">{totalPages}</span>
         {total && (
           <>
             {" "}·{" "}
@@ -93,11 +99,10 @@ export default function Pagination({ pagination, setFilters }: any) {
               <button
                 key={p}
                 onClick={() => goTo(p as number)}
-                className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
-                  p === page
+                className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${p === page
                     ? "bg-rose-500 text-white shadow-md shadow-rose-200"
                     : "text-gray-500 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 {p}
               </button>
@@ -107,7 +112,7 @@ export default function Pagination({ pagination, setFilters }: any) {
 
         {/* Next */}
         <button
-          disabled={page === pages}
+          disabled={page === totalPages}
           onClick={() => goTo(page + 1)}
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all
             disabled:opacity-40 disabled:cursor-not-allowed

@@ -533,7 +533,7 @@ export default function AdminProductsPage() {
                 {/* Card Body */}
                 <div className="p-4">
                   <h3 className="text-sm font-black text-slate-800 truncate tracking-tight">{product.name}</h3>
-                  <p className="text-xs text-slate-400 mt-0.5 truncate font-medium">{product.description || "No description"}</p>
+                  <p className="text-xs text-slate-400 mt-0.5 truncate font-medium">{product.description || " "}</p>
 
                   <div className="flex items-center justify-between mt-3.5 pt-3.5 border-t-2 border-slate-50">
                     <div>
@@ -605,7 +605,7 @@ export default function AdminProductsPage() {
                 {/* Info */}
                 <div className="min-w-0">
                   <p className="text-sm font-black text-slate-800 truncate">{product.name}</p>
-                  <p className="text-xs text-slate-400 font-medium truncate mt-0.5">{product.description || "No description"}</p>
+                  <p className="text-xs text-slate-400 font-medium truncate mt-0.5">{product.description || " "}</p>
                 </div>
 
                 {/* Price */}
