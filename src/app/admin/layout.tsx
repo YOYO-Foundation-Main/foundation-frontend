@@ -50,6 +50,10 @@ const NAV = [
   // -------NGO---------------------
   { label: "NGO Verification ", href: "/admin/ngos", icon: FiShield },
 
+     //--Ngo queries data-------------
+  { label: "NGO Queries", href: "/admin/ngo-queries", icon: Contact },
+
+
   // ───── CONTENT ─────
   { label: "Blogs", href: "/admin/blogs", icon: FiFileText },
 

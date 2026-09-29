@@ -1439,6 +1439,139 @@ export async function rejectNgoBank(
   return data;
 }
 
+export type TicketStatus =
+  | "IN_PROGRESS"
+  | "RESOLVED";
+
+export interface SupportMessage {
+  id: number;
+  ticketId: number;
+  senderType: "NGO" | "ADMIN";
+  senderId: number;
+  message: string;
+  createdAt: string;
+}
+
+export interface SupportTicket {
+  id: number;
+  ticketNumber: string;
+  userId: number;
+  ngoId: number;
+  category: string;
+  subject: string;
+  status: TicketStatus;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string | null;
+
+  ngo: {
+    id: number;
+    ngoName: string;
+    logoUrl?: string | null;
+  };
+
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
+
+  messages?: SupportMessage[];
+}
+// =====================================================
+// ADMIN SUPPORT TICKETS
+// =====================================================
+
+export const getAdminSupportTickets = async () => {
+  const res = await authFetch(
+    `${BASE_URL}/api/admin/support/tickets`,
+    {
+      credentials: "include",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to fetch support tickets"
+    );
+  }
+
+  return result.data ?? [];
+};
+
+export const getAdminSupportTicket = async (
+  id: number
+) => {
+  const res = await authFetch(
+    `${BASE_URL}/api/admin/support/tickets/${id}`,
+    {
+      credentials: "include",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to fetch support ticket"
+    );
+  }
+
+  return result;
+};
+
+export const replyToAdminSupportTicket = async (
+  id: number,
+  message: string
+) => {
+  const res = await authFetch(
+    `${BASE_URL}/api/admin/support/tickets/${id}/reply`,
+     {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message,
+      }),
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to send support response"
+    );
+  }
+
+  return result;
+};
+
+export const resolveAdminSupportTicket = async (
+  id: number
+) => {
+  const res = await authFetch(
+    `${BASE_URL}/api/admin/support/tickets/${id}/resolve`,
+    {
+      method: "PATCH",
+      credentials: "include",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      result.message || "Failed to resolve support ticket"
+    );
+  }
+
+  return result;
+};
 
 // =====================================
 // VOLUNTEERS
