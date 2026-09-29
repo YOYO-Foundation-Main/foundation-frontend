@@ -1084,7 +1084,7 @@ export default function SingleNgoPage() {
         {/* ── TOP HEADER ── */}
         <div className="border-b border-slate-200 bg-white sticky top-0 z-30">
           <div className="h-1 bg-gradient-to-r from-red-600 via-red-500 to-orange-400" />
-          <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
+          <div className="mx-auto max-w-9xl px-4 py-5 sm:px-6">
             <button
               onClick={() => router.back()}
               className="mb-4 flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-900"
@@ -1130,7 +1130,7 @@ export default function SingleNgoPage() {
         </div>
 
         {/* ── BODY ── */}
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-9xl px-4 py-6 sm:px-6">
 
           {/* Quick stat strip */}
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">

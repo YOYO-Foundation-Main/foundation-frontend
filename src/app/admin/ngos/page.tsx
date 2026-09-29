@@ -274,7 +274,7 @@ export default function AdminNgosPage() {
   ];
  
   return (
-    <div className="min-h-screen bg-[#f8f7f4] font-sans">
+    <div className="min-h-screen bg-[#f8f7f4] font-sans mx-auto w-full max-w-8xl">
       {/* ── Toast Container ── */}
       <div className="fixed top-5 right-5 z-50 flex flex-col gap-2">
         {toasts.map((t) => (
@@ -284,7 +284,7 @@ export default function AdminNgosPage() {
  
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
+        <div className="mx-auto max-w-9xl px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             {/* Title */}
             <div className="flex items-center gap-3">
@@ -317,7 +317,7 @@ export default function AdminNgosPage() {
       </header>
  
       {/* ── Body ── */}
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <main className="mx-auto max-w-9xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Search + Filter Bar */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           {/* Search */}
@@ -328,7 +328,7 @@ export default function AdminNgosPage() {
               placeholder="Search by NGO name…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
+              className="w-56 bg-transparent text-sm outline-none placeholder:text-gray-400"
             />
             {search && (
               <button

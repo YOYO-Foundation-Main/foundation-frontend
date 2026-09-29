@@ -500,7 +500,7 @@ export default function AdminSupportPage() {
   const hasFilters = search.trim() !== "" || statusFilter !== "ALL" || categoryFilter !== "ALL";
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6">
+    <div className="mx-auto w-full max-w-8xl space-y-6 p-4 sm:p-6">
       {/* header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
