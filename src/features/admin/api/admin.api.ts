@@ -369,11 +369,95 @@ export const adminDeleteCampaign = async (id: number) => {
 };
 
 // ================= EVENTS =================
-export const adminGetEvents = async () => {
-  const res = await authFetch(`${BASE_URL}/api/events`,
-    { credentials: "include", });
-  if (!res.ok) throw new Error("Failed to fetch events");
+// export const adminGetEvents = async () => {
+//   const res = await authFetch(`${BASE_URL}/api/events`,
+//     { credentials: "include", });
+//   if (!res.ok) throw new Error("Failed to fetch events");
+//   return res.json();
+// };
+
+export const adminGetEvents = async (status = "ALL") => {
+  const params = new URLSearchParams();
+
+  if (status !== "ALL") {
+    params.set("status", status);
+  }
+
+  const query = params.toString();
+
+  const res = await authFetch(
+    `${BASE_URL}/api/events/admin/list${query ? `?${query}` : ""}`,
+    {
+      credentials: "include",
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch admin events");
+  }
+
   return res.json();
+};
+
+export const adminGetEventById = async (id: number | string) => {
+  const res = await authFetch(
+    `${BASE_URL}/api/events/admin/${id}`,
+    {
+      credentials: "include",
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch admin event details");
+  }
+
+  return res.json();
+};
+
+
+export const adminApproveEvent = async (id: number) => {
+  const res = await authFetch(
+    `${BASE_URL}/api/events/admin/${id}/approve`,
+    {
+      method: "PATCH",
+      credentials: "include",
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to approve event");
+  }
+
+  return data;
+};
+
+export const adminRejectEvent = async (
+  id: number,
+  rejectionReason: string
+) => {
+  const res = await authFetch(
+    `${BASE_URL}/api/events/admin/${id}/reject`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        rejectionReason,
+      }),
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to reject event");
+  }
+
+  return data;
 };
 
 export const adminCreateEvent = async (data: FormData) => {
