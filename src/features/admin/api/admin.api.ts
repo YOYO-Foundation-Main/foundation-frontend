@@ -267,7 +267,7 @@ export const adminGetCampaigns = async (
   limit = 10
 ) => {
   const res = await authFetch(
-   `${BASE_URL}/api/campaigns/admin?page=${page}&limit=${limit}`,
+    `${BASE_URL}/api/campaigns/admin?page=${page}&limit=${limit}`,
     {
       credentials: "include",
     }
@@ -482,14 +482,25 @@ export const adminUpdateEvent = async (id: number, data: FormData) => {
   return result;
 };
 
-export const adminDeleteEvent = async (id: number) => {
-  const res = await authFetch(`${BASE_URL}/api/events/${id}`, {
+
+export async function adminDeleteEvent(id: number) {
+  const res = await fetch(`${BASE_URL}/api/.../events/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
-  if (!res.ok) throw new Error("Failed to delete event");
-  return res.json();
-};
+
+  const data = await res.json();
+
+  if (!res.ok || data.success === false) {
+    throw new Error(
+      data.message || "Failed to delete event"
+    );
+  }
+
+  return data;
+}
+
+
 
 //-------------------DONATIONS--------------
 
@@ -1612,7 +1623,7 @@ export const replyToAdminSupportTicket = async (
 ) => {
   const res = await authFetch(
     `${BASE_URL}/api/admin/support/tickets/${id}/reply`,
-     {
+    {
       method: "POST",
       credentials: "include",
       headers: {
