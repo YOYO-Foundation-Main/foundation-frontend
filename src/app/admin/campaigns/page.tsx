@@ -350,7 +350,7 @@ export default function AdminCampaignsPage() {
             </div>
             <button
               onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2 bg-[#334E79] hover:bg-[#2a3e60] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-sm shadow-blue-200"
+              className="flex items-center gap-2 bg-[#E7000B] hover:bg-[#cc000a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-sm shadow-blue-200"
             >
               <FiPlus size={16} /> Create Campaign
             </button>
@@ -360,7 +360,7 @@ export default function AdminCampaignsPage() {
             <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 flex-wrap">
               {(["All", "Active", "Pending", "Draft", "Completed", "Featured", "Archived",] as const).map((tab) => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${activeTab === tab ? "bg-[#334E79] text-white" : "text-gray-500 hover:text-gray-700"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${activeTab === tab ? "bg-[#E7000B] text-white" : "text-gray-500 hover:text-gray-700"
                     }`}
                 >
                   {tab}
@@ -839,7 +839,7 @@ export default function AdminCampaignsPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowEdit(true)}
-                    className="flex-1 bg-[#334E79] hover:bg-[#2a3e60] text-white text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2"
+                    className="flex-1 bg-[#E7000B] hover:bg-[#cc000a] text-white text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2"
                   >
                     <FiEdit2 size={13} /> Edit Campaign
                   </button>

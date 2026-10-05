@@ -283,8 +283,6 @@ function DeleteModal({
     }
   };
 
-
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl border border-slate-100">

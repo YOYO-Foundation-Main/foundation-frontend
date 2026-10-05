@@ -343,7 +343,7 @@ export default function AdminProductsPage() {
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 active:scale-95 text-white text-sm font-bold px-5 py-3 rounded-2xl transition-all duration-200 shadow-lg shadow-violet-200"
+          className="flex items-center gap-2 bg-[#E7000B] hover:bg-[#cc000a] active:scale-95 text-white text-sm font-bold px-5 py-3 rounded-2xl transition-all duration-200 shadow-lg shadow-violet-200"
         >
           <FiPlus size={16} />
           Add Product
@@ -354,7 +354,7 @@ export default function AdminProductsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
         {/* Total */}
         <div className="bg-white rounded-2xl border border-slate-100 p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow duration-200">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-200 flex items-center justify-center text-white shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-[#E7000B] shadow-lg shadow-violet-200 flex items-center justify-center text-white shrink-0">
             <FiPackage size={20} />
           </div>
           <div>
@@ -412,7 +412,7 @@ export default function AdminProductsPage() {
           <button
             onClick={() => setViewMode("grid")}
             className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-150 ${
-              viewMode === "grid" ? "bg-violet-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
+              viewMode === "grid" ? "bg-[#E7000B] text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
             }`}
           >
             <FiGrid size={14} />
@@ -420,7 +420,7 @@ export default function AdminProductsPage() {
           <button
             onClick={() => setViewMode("list")}
             className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-150 ${
-              viewMode === "list" ? "bg-violet-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
+              viewMode === "list" ? "bg-[#E7000B] text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
             }`}
           >
             <FiList size={14} />

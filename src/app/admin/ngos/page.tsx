@@ -288,7 +288,7 @@ export default function AdminNgosPage() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             {/* Title */}
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f97316] shadow-sm shadow-orange-200">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#E7000B] shadow-sm shadow-orange-200">
                 <ShieldCheck className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -321,7 +321,7 @@ export default function AdminNgosPage() {
         {/* Search + Filter Bar */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           {/* Search */}
-          <div className="flex flex-1 items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition-all">
+          <div className="flex flex-1 items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm focus-within:border-red-400 focus-within:ring-2 focus-within:ring-orange-100 transition-all">
             <Search className="h-4 w-4 shrink-0 text-gray-400" />
             <input
               type="text"
@@ -344,7 +344,7 @@ export default function AdminNgosPage() {
           <button
             onClick={fetchNgos}
             disabled={loading}
-            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-600 shadow-sm hover:border-orange-300 hover:text-orange-600 transition disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-600 shadow-sm hover:border-red-300 hover:text-red-600 transition disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
@@ -359,8 +359,8 @@ export default function AdminNgosPage() {
               onClick={() => setStatusFilter(s)}
               className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition-all ${
                 statusFilter === s
-                  ? "bg-[#f97316] text-white border-[#f97316] shadow-sm shadow-orange-200"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:text-orange-600"
+                  ? "bg-[#E7000B] text-white border-[#f97316] shadow-sm shadow-orange-200"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-red-300 hover:text-red-600"
               }`}
             >
               {s === "ALL" ? "All" : s.replace("_", " ")}
@@ -398,7 +398,7 @@ export default function AdminNgosPage() {
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="mt-4 rounded-lg bg-orange-50 px-4 py-2 text-sm font-medium text-orange-600 hover:bg-orange-100 transition"
+                className="mt-4 rounded-lg bg-orange-50 px-4 py-2 text-sm font-medium text-orange-600 hover:bg-red-100 transition"
               >
                 Clear Search
               </button>
@@ -409,7 +409,7 @@ export default function AdminNgosPage() {
             {filteredNgos.map((ngo) => (
               <div
                 key={ngo.id}
-                className="group relative rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-orange-200 sm:p-6"
+                className="group relative rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-red-200 sm:p-6"
               >
                 {/* Top Row */}
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
@@ -488,7 +488,7 @@ export default function AdminNgosPage() {
                   <div className="shrink-0">
                     <Link
                       href={`/admin/ngos/${ngo.id}`}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#f97316] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-orange-200 transition-all hover:bg-orange-600 hover:shadow-orange-300 active:scale-95 group-hover:gap-3"
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#E7000B] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-orange-200 transition-all hover:bg-[#cc000a] hover:shadow-red-300 active:scale-95 group-hover:gap-3"
                     >
                       Review NGO
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -497,7 +497,7 @@ export default function AdminNgosPage() {
                 </div>
  
                 {/* Bottom accent bar on hover */}
-                <div className="absolute bottom-0 left-0 h-0.5 w-0 rounded-b-2xl bg-gradient-to-r from-orange-400 to-amber-400 transition-all duration-300 group-hover:w-full" />
+                <div className="absolute bottom-0 left-0 h-0.5 w-0 rounded-b-2xl bg-gradient-to-r from-red-400 to-red-400 transition-all duration-300 group-hover:w-full" />
               </div>
             ))}
           </div>

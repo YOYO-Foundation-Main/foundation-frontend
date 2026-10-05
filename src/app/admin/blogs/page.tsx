@@ -98,7 +98,7 @@ export default function AdminBlogsPage() {
               <p className="text-xs text-gray-400 mt-0.5">Dashboard / Blogs</p>
             </div>
             <button onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-sm shadow-blue-200">
+              className="flex items-center gap-2 bg-[#E7000B] hover:bg-[#cc000a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-sm shadow-blue-200">
               <FiPlus size={16} /> Create Blog
             </button>
           </div>
@@ -263,7 +263,7 @@ export default function AdminBlogsPage() {
               {/* Actions */}
               <div className="flex gap-2 pt-2">
                 <button onClick={() => setShowEdit(true)}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+                  className="flex-1 bg-[#E7000B] hover:bg-[#cc000a] text-white text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
                   <FiEdit2 size={13} /> Edit Blog
                 </button>
                 <button onClick={() => setShowDelete(true)}
