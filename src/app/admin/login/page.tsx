@@ -20,17 +20,25 @@ export default function AdminLoginPage() {
   useEffect(() => { setMounted(true); }, []);
 
   const handleLogin = async () => {
-    if (!email || !password) { setError("Please fill all fields"); return; }
+    console.log("🔥 LOGIN BUTTON CLICKED");
+
+    if (!email || !password) {
+      console.log("❌ EMAIL OR PASSWORD EMPTY");
+      setError("Please fill all fields");
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
+
+      console.log("🔥 CALLING adminLogin");
+
       const res = await adminLogin({ email, password });
 
-      console.log("STEP 1");
+      console.log("🔥 adminLogin RESPONSE:", res);
 
-      setAdmin(res.user);
-
-      console.log("STEP 2");
+      // existing code continues...
 
       if (res.user.role === "SUPER_ADMIN") {
         console.log("GO SUPER");

@@ -378,9 +378,9 @@ export default function AdminCampaignsPage() {
                 className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none focus:border-blue-400 placeholder:text-gray-400" />
             </div>
 
-            <button className="w-9 h-9 flex items-center justify-center bg-white border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 transition">
+            {/* <button className="w-9 h-9 flex items-center justify-center bg-white border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 transition">
               <HiOutlineAdjustmentsHorizontal size={16} />
-            </button>
+            </button> */}
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

@@ -47,6 +47,9 @@
 //   ],
 // };
 
+
+
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -68,3 +71,38 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: ["/admin/:path*"],
 };
+
+
+
+// import { NextResponse } from "next/server";
+// import type { NextRequest } from "next/server";
+
+// export function middleware(request: NextRequest) {
+//   const { pathname } = request.nextUrl;
+
+//   const accessToken = request.cookies.get("accessToken")?.value;
+
+//   // Protect all admin pages except /admin/login
+//   if (
+//     pathname.startsWith("/admin") &&
+//     pathname !== "/admin/login" &&
+//     !accessToken
+//   ) {
+//     return NextResponse.redirect(
+//       new URL("/admin/login", request.url)
+//     );
+//   }
+
+//   // If already logged in, don't allow /admin/login
+//   if (pathname === "/admin/login" && accessToken) {
+//     return NextResponse.redirect(
+//       new URL("/admin/dashboard", request.url)
+//     );
+//   }
+
+//   return NextResponse.next();
+// }
+
+// export const config = {
+//   matcher: ["/admin/:path*"],
+// };

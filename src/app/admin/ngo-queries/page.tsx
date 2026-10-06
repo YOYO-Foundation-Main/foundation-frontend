@@ -31,21 +31,21 @@ import {
 const formatDate = (iso?: string | null) =>
   iso
     ? new Date(iso).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
     : "—";
 
 const formatDateTime = (iso?: string | null) =>
   iso
     ? new Date(iso).toLocaleString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     : "—";
 
 const getErrorMessage = (err: unknown, fallback: string) => {
@@ -57,11 +57,10 @@ function StatusBadge({ status }: { status: TicketStatus }) {
   const resolved = status === "RESOLVED";
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold tracking-wide ${
-        resolved
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold tracking-wide ${resolved
           ? "border-green-200 bg-green-50 text-green-700"
           : "border-amber-200 bg-amber-50 text-amber-700"
-      }`}
+        }`}
     >
       {resolved ? <CheckCircle className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
       {resolved ? "RESOLVED" : "IN PROGRESS"}
@@ -251,17 +250,15 @@ function TicketDrawer({
             return (
               <div key={m.id} className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[88%] rounded-2xl border px-4 py-3 shadow-sm ${
-                    isAdmin
+                  className={`max-w-[88%] rounded-2xl border px-4 py-3 shadow-sm ${isAdmin
                       ? "border-[#D2252B]/20 bg-[#D2252B]/5"
                       : "border-gray-200 bg-white"
-                  }`}
+                    }`}
                 >
                   <div className="mb-1.5 flex items-center justify-between gap-6">
                     <span
-                      className={`text-xs font-bold tracking-wide ${
-                        isAdmin ? "text-[#D2252B]" : "text-gray-600"
-                      }`}
+                      className={`text-xs font-bold tracking-wide ${isAdmin ? "text-[#D2252B]" : "text-gray-600"
+                        }`}
                     >
                       {isAdmin ? "ADMIN" : "NGO"}
                     </span>
@@ -413,29 +410,103 @@ export default function AdminSupportPage() {
     setConfirmOpen(false);
   };
 
+  //  const handleSend = async () => {
+  //     if (!selected || sendingRef.current) return;
+  //     const message = reply.trim();
+  //     if (!message) {
+  //       toast.error("Please write a response before sending");
+  //       return;
+  //     }
+  //     sendingRef.current = true;
+  //     setSending(true);
+  //     try {
+  //       await replyToAdminSupportTicket(selected.id, message);
+  //       setReply("");
+  //       const full = await getAdminSupportTicket(selected.id);
+  //       if (full) upsertTicket(full);
+  //       toast.success("Response sent");
+  //     } catch (err) {
+  //       console.error("Failed to send reply", err);
+  //       toast.error(getErrorMessage(err, "Failed to send response"));
+  //     } finally {
+  //       sendingRef.current = false;
+  //       setSending(false);
+  //     }
+  //   };
+
+
   const handleSend = async () => {
     if (!selected || sendingRef.current) return;
+
     const message = reply.trim();
+
     if (!message) {
       toast.error("Please write a response before sending");
       return;
     }
+
     sendingRef.current = true;
     setSending(true);
+
     try {
-      await replyToAdminSupportTicket(selected.id, message);
+      const response = await replyToAdminSupportTicket(
+        selected.id,
+        message
+      );
+
       setReply("");
-      const full = await getAdminSupportTicket(selected.id);
-      if (full) upsertTicket(full);
+
+      /*
+       * IMPORTANT:
+       * Update the conversation immediately from the reply API response.
+       * Do not depend on an immediate GET because that can return cached data.
+       */
+      const newMessage = response?.data;
+
+      if (newMessage) {
+        setSelected((prev) => {
+          if (!prev || prev.id !== selected.id) return prev;
+
+          return {
+            ...prev,
+            messages: [
+              ...(prev.messages ?? []),
+              newMessage,
+            ],
+          };
+        });
+
+        setTickets((prev) =>
+          prev.map((ticket) =>
+            ticket.id === selected.id
+              ? {
+                ...ticket,
+                messages: [
+                  ...(ticket.messages ?? []),
+                  newMessage,
+                ],
+              }
+              : ticket
+          )
+        );
+      }
+
       toast.success("Response sent");
     } catch (err) {
       console.error("Failed to send reply", err);
-      toast.error(getErrorMessage(err, "Failed to send response"));
+
+      toast.error(
+        getErrorMessage(
+          err,
+          "Failed to send response"
+        )
+      );
     } finally {
       sendingRef.current = false;
       setSending(false);
     }
   };
+
 
   const handleResolve = async () => {
     if (!selected || resolvingRef.current) return;
@@ -455,6 +526,8 @@ export default function AdminSupportPage() {
         });
       }
       setConfirmOpen(false);
+
+      setSelected(null);
       toast.success("Ticket resolved");
     } catch (err) {
       console.error("Failed to resolve ticket", err);

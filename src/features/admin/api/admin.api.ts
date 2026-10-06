@@ -1617,12 +1617,41 @@ export const getAdminSupportTicket = async (
   return result;
 };
 
-export const replyToAdminSupportTicket = async (
-  id: number,
+// export const replyToAdminSupportTicket = async (
+//   id: number,
+//   message: string
+// ) => {
+//   const res = await authFetch(
+//     `${BASE_URL}/api/admin/support/tickets/${id}/reply`,
+//     {
+//       method: "POST",
+//       credentials: "include",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         message,
+//       }),
+//     }
+//   );
+
+//   const result = await res.json();
+
+//   if (!res.ok) {
+//     throw new Error(
+//       result.message || "Failed to send support response"
+//     );
+//   }
+
+//   return result;
+// };
+
+export async function replyToAdminSupportTicket(
+  ticketId: number,
   message: string
-) => {
-  const res = await authFetch(
-    `${BASE_URL}/api/admin/support/tickets/${id}/reply`,
+) {
+  const res = await fetch(
+    `${BASE_URL}/api/admin/support/tickets/${ticketId}/reply`,
     {
       method: "POST",
       credentials: "include",
@@ -1635,16 +1664,19 @@ export const replyToAdminSupportTicket = async (
     }
   );
 
-  const result = await res.json();
+  const data = await res.json();
 
-  if (!res.ok) {
+  if (!res.ok || data.success === false) {
     throw new Error(
-      result.message || "Failed to send support response"
+      data.message || "Failed to send response"
     );
   }
 
-  return result;
-};
+  return data;
+}
+
+
+
 
 export const resolveAdminSupportTicket = async (
   id: number

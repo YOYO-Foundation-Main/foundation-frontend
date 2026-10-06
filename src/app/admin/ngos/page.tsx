@@ -160,7 +160,7 @@ function StatusBadge({ status }: { status: string }) {
     };
  
   const cfg = map[status] ?? {
-    cls: "bg-orange-50 text-orange-700 border-orange-200",
+    cls: "bg-orange-50 text-red-700 border-orange-200",
     icon: <Clock3 className="h-3.5 w-3.5" />,
     label: status,
   };
@@ -418,7 +418,7 @@ export default function AdminNgosPage() {
                     {/* Name + Badges */}
                     <div className="flex flex-wrap items-center gap-2">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-50">
-                        <Building2 className="h-4 w-4 text-orange-500" />
+                        <Building2 className="h-4 w-4 text-red-500" />
                       </div>
                       <h2 className="text-base font-bold text-gray-900 sm:text-lg truncate">
                         {ngo.ngoName}
@@ -447,7 +447,7 @@ export default function AdminNgosPage() {
                           Location
                         </p>
                         <p className="mt-0.5 flex items-center gap-1 text-sm font-semibold text-gray-700">
-                          <MapPin className="h-3 w-3 text-orange-400 shrink-0" />
+                          <MapPin className="h-3 w-3 text-red-400 shrink-0" />
                           {ngo.district}, {ngo.state}
                         </p>
                       </div>
@@ -456,7 +456,7 @@ export default function AdminNgosPage() {
                           Documents
                         </p>
                         <p className="mt-0.5 flex items-center gap-1 text-sm font-semibold text-gray-700">
-                          <FileText className="h-3 w-3 text-orange-400 shrink-0" />
+                          <FileText className="h-3 w-3 text-red-400 shrink-0" />
                           {ngo.documents.length} Uploaded
                         </p>
                       </div>
@@ -465,7 +465,7 @@ export default function AdminNgosPage() {
                           Representatives
                         </p>
                         <p className="mt-0.5 flex items-center gap-1 text-sm font-semibold text-gray-700">
-                          <Users className="h-3 w-3 text-orange-400 shrink-0" />
+                          <Users className="h-3 w-3 text-red-400 shrink-0" />
                           {ngo.representatives.length} Added
                         </p>
                       </div>
