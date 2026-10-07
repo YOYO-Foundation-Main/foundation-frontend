@@ -39,12 +39,23 @@ export default function AdminBlogsPage() {
       setBlogs(list);
       setTotal(result?.total ?? 0);
 
-      // Select first blog only when there is no selected blog
-      if (list.length > 0 && !selected) {
+      // Keep right-side detail panel synchronized with refreshed blog data
+      if (selected) {
+        const updatedSelectedBlog = list.find(
+          (blog) => blog.id === selected.id
+        );
+
+        if (updatedSelectedBlog) {
+          setSelected(updatedSelectedBlog);
+        } else {
+          setSelected(null);
+        }
+      } else if (list.length > 0) {
+        // Select first blog only when there is no selected blog
         setSelected(list[0]);
       }
     } catch (err) {
-      console.error("❌ Blogs fetch error:", err);
+      console.error("Blogs fetch error:", err);
     } finally {
       setLoading(false);
     }
