@@ -912,14 +912,32 @@ export default function AdminDashboardPage() {
             <div className="h-44 flex items-center justify-center text-xs text-gray-400">No categories</div>
           ) : (
             <div className="flex flex-col sm:flex-row lg:flex-col items-center gap-4">
+
               <PieChart width={110} height={110}>
-                <Pie data={data.categoryData} cx={55} cy={55}
-                  innerRadius={30} outerRadius={50} dataKey="percentage" paddingAngle={2}>
+                <Pie
+                  data={data.categoryData}
+                  cx={55}
+                  cy={55}
+                  innerRadius={30}
+                  outerRadius={50}
+                  dataKey="percentage"
+                  paddingAngle={2}
+                >
                   {data.categoryData.map((_, i) => (
-                    <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+                    <Cell
+                      key={i}
+                      fill={PALETTE[i % PALETTE.length]}
+                    />
                   ))}
                 </Pie>
+
+                <Tooltip
+                  formatter={(value) => [`${value}%`]}
+                  labelFormatter={(label) => `${label}`}
+                />
               </PieChart>
+
+
               <div className="w-full space-y-1.5">
                 {data.categoryData.map((cat, i) => (
                   <div key={cat.name} className="flex items-start justify-between gap-2">

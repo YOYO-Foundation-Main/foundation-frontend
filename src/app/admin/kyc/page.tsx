@@ -2164,10 +2164,6 @@
 //   );
 // }
 
-
-
-
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -3287,8 +3283,8 @@ export default function AdminKycPage() {
           <button key={t.key}
             onClick={() => { setActiveTab(t.key); setSearch(""); setStatusFilter("ALL"); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${activeTab === t.key
-                ? "bg-red-600 text-white shadow-sm"
-                : "bg-white text-slate-500 border border-slate-200 hover:text-slate-700"
+              ? "bg-red-600 text-white shadow-sm"
+              : "bg-white text-slate-500 border border-slate-200 hover:text-slate-700"
               }`}>
             {t.icon}
             {t.label}
@@ -3305,11 +3301,11 @@ export default function AdminKycPage() {
           {STATUS_FILTERS.map((s) => (
             <button key={s} onClick={() => setStatusFilter(s)}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition ${statusFilter === s
-                  ? s === "APPROVED" ? "bg-emerald-600 text-white"
-                    : s === "REJECTED" ? "bg-red-600 text-white"
-                      : s === "PENDING" ? "bg-amber-500 text-white"
-                        : "bg-red-600 text-white"
-                  : "text-slate-500 hover:bg-slate-50"
+                ? s === "APPROVED" ? "bg-emerald-600 text-white"
+                  : s === "REJECTED" ? "bg-red-600 text-white"
+                    : s === "PENDING" ? "bg-amber-500 text-white"
+                      : "bg-red-600 text-white"
+                : "text-slate-500 hover:bg-slate-50"
                 }`}>
               {s}
             </button>
@@ -3465,7 +3461,7 @@ export default function AdminKycPage() {
         )}
 
         {/* Footer */}
-        {!loading && (
+        {/* {!loading && (
           <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
             <p className="text-xs text-slate-400">
               {activeTab === "self-identity" && <><span className="font-bold text-slate-600">{filteredSelfId.length}</span> of <span className="font-bold text-slate-600">{selfIdentityList.length}</span> records</>}
@@ -3480,7 +3476,90 @@ export default function AdminKycPage() {
               </button>
             )}
           </div>
+        )} */}
+
+
+        {/* Footer */}
+        {!loading && (
+          <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+            <p className="text-xs text-slate-400">
+              {activeTab === "self-identity" && (
+                <>
+                  <span className="font-bold text-slate-600">
+                    {filteredSelfId.length}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-bold text-slate-600">
+                    {filteredSelfId.length === 0 ? 0 : selfIdentityList.length}
+                  </span>{" "}
+                  records
+                </>
+              )}
+
+              {activeTab === "self-bank" && (
+                <>
+                  <span className="font-bold text-slate-600">
+                    {filteredSelfBank.length}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-bold text-slate-600">
+                    {filteredSelfBank.length === 0 ? 0 : selfBankList.length}
+                  </span>{" "}
+                  records
+                </>
+              )}
+
+              {activeTab === "beneficiary-identity" && (
+                <>
+                  <span className="font-bold text-slate-600">
+                    {filteredBenId.length}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-bold text-slate-600">
+                    {filteredBenId.length === 0 ? 0 : beneficiaryIdentityList.length}
+                  </span>{" "}
+                  records
+                </>
+              )}
+
+              {activeTab === "beneficiary-bank" && (
+                <>
+                  <span className="font-bold text-slate-600">
+                    {filteredBenBank.length}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-bold text-slate-600">
+                    {filteredBenBank.length === 0 ? 0 : beneficiaryBankList.length}
+                  </span>{" "}
+                  records
+                </>
+              )}
+
+              {activeTab === "campaign-proof" && (
+                <>
+                  <span className="font-bold text-slate-600">
+                    {filteredProofs.length}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-bold text-slate-600">
+                    {filteredProofs.length === 0 ? 0 : campaignProofList.length}
+                  </span>{" "}
+                  records
+                </>
+              )}
+            </p>
+
+            {statusFilter !== "ALL" && (
+              <button
+                onClick={() => setStatusFilter("ALL")}
+                className="text-xs text-red-600 font-semibold hover:text-red-700 transition"
+              >
+                Clear filter ×
+              </button>
+            )}
+          </div>
         )}
+
       </div>
     </>
   );
