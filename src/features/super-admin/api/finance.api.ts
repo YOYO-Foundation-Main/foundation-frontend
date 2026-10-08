@@ -145,6 +145,28 @@ export const getNgoInsights = async () => {
   return result;
 };
 
+// ================= USER INSIGHTS =================
+
+export const getUserInsights = async () => {
+  const res = await fetch(
+    `${BASE_URL}/api/admin/finance/users/insights`,
+    {
+      credentials: "include",
+      cache: "no-store",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok || !result.success) {
+    throw new Error(
+      result.message || "Failed to fetch user insights"
+    );
+  }
+
+  return result;
+};
+
 
 //admin logout
 export const adminLogout = async () => {

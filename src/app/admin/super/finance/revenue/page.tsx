@@ -51,7 +51,7 @@ export default function RevenueTrendPage() {
   const selected = activeMonth ? data.find((d) => d.month === activeMonth) : null;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-10">
+    <div className="max-w-8xl mx-auto space-y-6 pb-10">
 
       {/* Header */}
       <div>

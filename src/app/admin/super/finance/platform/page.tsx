@@ -163,7 +163,7 @@ export default function PlatformIncomePage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-10">
+    <div className="max-w-8xl mx-auto space-y-6 pb-10">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">

@@ -67,13 +67,13 @@ export default function SuperFinanceDashboard() {
   const isPositiveGrowth = growth >= 0;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-10">
+    <div className="max-w-8xl mx-auto space-y-8 pb-10">
 
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <p className="text-xs font-semibold tracking-widest uppercase text-red-500 mb-1">Finance Overview</p>
-          <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">Super Admin Dashboard</h1>
+          <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">Real-time snapshot of platform-wide financial activity.</p>
         </div>
         <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 px-3 py-1.5 rounded-full self-start sm:self-auto">

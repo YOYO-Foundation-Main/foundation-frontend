@@ -1,139 +1,3 @@
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import { getFinanceOverview } from "@/features/super-admin/api/finance.api";
-
-// type FinanceOverview = {
-//   totalDonations: number;
-//   totalDonationAmount: number;
-//   totalPlatformTips: number;
-//   totalPaidAmount: number;
-//   todayRevenue: number;
-//   monthRevenue: number;
-//   yearRevenue: number;
-//   revenueGrowth: number;
-//   totalDonors: number;
-//   totalCampaigns: number;
-// };
-
-// export default function SuperDashboard() {
-//   const [data, setData] = useState<FinanceOverview | null>(null);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     loadOverview();
-//   }, []);
-
-//   const loadOverview = async () => {
-//     try {
-//       setLoading(true);
-//       const res = await getFinanceOverview();
-//       setData(res.data);
-//     } catch (err) {
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const cards = [
-//     {
-//       title: "Total Donations",
-//       value: data?.totalDonations ?? 0,
-//       color: "bg-blue-500",
-//     },
-//     {
-//       title: "Donation Amount",
-//       value: `₹${(data?.totalDonationAmount ?? 0).toLocaleString()}`,
-//       color: "bg-green-500",
-//     },
-//     {
-//       title: "Platform Tips",
-//       value: `₹${(data?.totalPlatformTips ?? 0).toLocaleString()}`,
-//       color: "bg-purple-500",
-//     },
-//     {
-//       title: "Total Revenue",
-//       value: `₹${(data?.totalPaidAmount ?? 0).toLocaleString()}`,
-//       color: "bg-red-500",
-//     },
-//     {
-//       title: "Today's Revenue",
-//       value: `₹${(data?.todayRevenue ?? 0).toLocaleString()}`,
-//       color: "bg-orange-500",
-//     },
-//     {
-//       title: "Monthly Revenue",
-//       value: `₹${(data?.monthRevenue ?? 0).toLocaleString()}`,
-//       color: "bg-indigo-500",
-//     },
-//     {
-//       title: "Yearly Revenue",
-//       value: `₹${(data?.yearRevenue ?? 0).toLocaleString()}`,
-//       color: "bg-cyan-500",
-//     },
-//     {
-//       title: "Revenue Growth",
-//       value: `${data?.revenueGrowth ?? 0}%`,
-//       color: "bg-emerald-500",
-//     },
-//     {
-//       title: "Total Donors",
-//       value: data?.totalDonors ?? 0,
-//       color: "bg-pink-500",
-//     },
-//     {
-//       title: "Campaigns",
-//       value: data?.totalCampaigns ?? 0,
-//       color: "bg-yellow-500",
-//     },
-//   ];
-
-//   if (loading) {
-//     return (
-//       <div className="p-6">
-//         <p className="text-gray-500">Loading dashboard...</p>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="space-y-8">
-
-//       <div>
-//         <h1 className="text-3xl font-bold text-gray-800">
-//           Super Admin Dashboard
-//         </h1>
-
-//         <p className="text-gray-500 mt-2">
-//           Finance Overview
-//         </p>
-//       </div>
-
-//       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-//         {cards.map((card) => (
-//           <div
-//             key={card.title}
-//             className="bg-white rounded-xl shadow-sm border p-5"
-//           >
-//             <div
-//               className={`w-12 h-12 rounded-lg ${card.color} mb-4`}
-//             />
-
-//             <p className="text-sm text-gray-500">
-//               {card.title}
-//             </p>
-
-//             <h2 className="text-2xl font-bold mt-2 text-gray-800">
-//               {card.value}
-//             </h2>
-//           </div>
-//         ))}
-//       </div>
-
-//     </div>
-//   );
-// }
 
 "use client";
 
@@ -203,13 +67,13 @@ export default function SuperFinanceDashboard() {
   const isPositiveGrowth = growth >= 0;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-10">
+    <div className="max-w-8xl mx-auto space-y-8 pb-10">
 
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold tracking-widest uppercase text-red-500 mb-1">Finance Overview</p>
-          <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">Super Admin Dashboard</h1>
+          <p className="text-xs font-semibold tracking-widest uppercase text-red-500 mb-1">Overview</p>
+          <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">Real-time snapshot of platform-wide financial activity.</p>
         </div>
         <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 px-3 py-1.5 rounded-full self-start sm:self-auto">
