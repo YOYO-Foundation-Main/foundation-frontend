@@ -125,6 +125,27 @@ export const getPlatformIncome = async () => {
 };
 
 
+// ================= NGO INSIGHTS =================
+
+export const getNgoInsights = async () => {
+  const res = await fetch(
+    `${BASE_URL}/api/admin/finance/ngo/insights`,
+    {
+      credentials: "include",
+      cache: "no-store",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok || !result.success) {
+    throw new Error(result.message || "Failed to fetch NGO insights");
+  }
+
+  return result;
+};
+
+
 //admin logout
 export const adminLogout = async () => {
   const res = await fetch(`${BASE_URL}/api/auth/logout`, {

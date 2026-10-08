@@ -111,49 +111,106 @@ export default function AdminFormModal({
 
         <div className="space-y-4">
 
-          <input
-            name="name"
-            placeholder="Name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
-          />
+          {/* Name */}
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Name
+            </label>
 
-          <input
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
-          />
+            <input
+              id="name"
+              name="name"
+              placeholder="Enter admin name"
+              value={form.name}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-3"
+            />
+          </div>
 
-          <input
-            name="mobile"
-            placeholder="+919876543210"
-            value={form.mobile}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
-          />
+          {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Email
+            </label>
+
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Enter admin email"
+              value={form.email}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-3"
+            />
+          </div>
+
+          {/* Mobile */}
+          <div>
+            <label
+              htmlFor="mobile"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Mobile Number
+            </label>
+
+            <input
+              id="mobile"
+              name="mobile"
+              type="tel"
+              placeholder="+919876543210"
+              value={form.mobile}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-3"
+            />
+          </div>
 
           {mode === "create" && (
             <>
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={form.password}
-                onChange={handleChange}
-                className="w-full border rounded-lg px-4 py-3"
-              />
+              {/* Password */}
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1.5"
+                >
+                  Password
+                </label>
 
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                className="w-full border rounded-lg px-4 py-3"
-              />
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  placeholder="Enter password"
+                  value={form.password}
+                  onChange={handleChange}
+                  className="w-full border rounded-lg px-4 py-3"
+                />
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 mb-1.5"
+                >
+                  Confirm Password
+                </label>
+
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Re-enter password"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full border rounded-lg px-4 py-3"
+                />
+              </div>
             </>
           )}
 
@@ -176,8 +233,8 @@ export default function AdminFormModal({
             {loading
               ? "Saving..."
               : mode === "create"
-              ? "Create Admin"
-              : "Update Admin"}
+                ? "Create Admin"
+                : "Update Admin"}
           </button>
 
         </div>

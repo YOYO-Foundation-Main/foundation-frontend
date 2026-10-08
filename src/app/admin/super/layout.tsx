@@ -1,168 +1,3 @@
-// "use client";
-// import { useEffect } from "react";
-// import Link from "next/link";
-// import { usePathname, useRouter } from "next/navigation";
-// import { useAdminStore } from "@/features/admin/store/admin.store";
-
-// import {
-//   FiGrid,
-//   FiUsers,
-//   FiDollarSign,
-//   FiSettings,
-//   FiLogOut,
-//   FiShield,
-// } from "react-icons/fi";
-
-// const NAV = [
-//   {
-//     label: "Dashboard",
-//     href: "/admin/super/dashboard",
-//     icon: FiGrid,
-//   },
-//   {
-//     label: "Admin Management",
-//     href: "/admin/super/admins",
-//     icon: FiShield,
-//   },
-//   {
-//     label: "Finance",
-//     href: "/admin/super/finance",
-//     icon: FiDollarSign,
-//   },
-//   {
-//     label: "NGOs",
-//     href: "/admin/super/ngos",
-//     icon: FiUsers,
-//   },
-//   {
-//     label: "Users",
-//     href: "/admin/super/users",
-//     icon: FiUsers,
-//   },
-//   {
-//     label: "Platform Settings",
-//     href: "/admin/super/settings",
-//     icon: FiSettings,
-//   },
-// ];
-
-// export default function SuperAdminLayout({
-//   children,
-// }: {
-//   children: React.ReactNode;
-// }) {
-//   const pathname = usePathname();
-
-//   const router = useRouter();
-
-//   const { admin, logoutAdmin } = useAdminStore();
-
-//   const handleLogout = () => {
-//     logoutAdmin();
-//     router.replace("/admin/login");
-//   };
-//   // if (admin.role !== "SUPER_ADMIN") {
-//   //   router.replace("/admin/dashboard");
-//   //   return null;
-//   // }
-//   useEffect(() => {
-//     if (admin && admin.role !== "SUPER_ADMIN") {
-//       router.replace("/admin/dashboard");
-//     }
-//   }, [admin, router]);
-
-//   if (!admin) return null;
-
-//   return (
-//     <div className="min-h-screen flex bg-[#F0F2F6]">
-
-//       {/* Sidebar */}
-
-//       <aside className="w-[240px] bg-white border-r">
-
-//         <div className="px-6 py-5 border-b">
-//           <h2 className="font-bold text-lg">
-//             Super Admin
-//           </h2>
-//         </div>
-
-//         <nav className="p-3 space-y-2">
-
-//           {NAV.map((item) => {
-
-//             const active = pathname === item.href;
-
-//             return (
-//               <Link
-//                 key={item.href}
-//                 href={item.href}
-//                 className={`flex items-center gap-3 rounded-lg px-4 py-3 transition ${active
-//                   ? "bg-red-100 text-red-600"
-//                   : "hover:bg-gray-100"
-//                   }`}
-//               >
-//                 <item.icon size={18} />
-//                 {item.label}
-//               </Link>
-//             );
-//           })}
-
-//         </nav>
-
-//         <div className="absolute bottom-6 left-0 w-[240px] px-3">
-
-//           <button
-//             onClick={handleLogout}
-//             className="w-full flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-red-50 text-red-500"
-//           >
-//             <FiLogOut />
-//             Logout
-//           </button>
-
-//         </div>
-
-//       </aside>
-
-//       {/* Main */}
-
-//       <div className="flex-1">
-
-//         <div className="h-16 bg-white border-b flex justify-between items-center px-8">
-
-//           <div>
-
-//             <h1 className="font-bold text-xl">
-//               Super Admin Panel
-//             </h1>
-
-//             <p className="text-sm text-gray-500">
-//               Welcome {admin.email}
-//             </p>
-
-//           </div>
-
-//           <div className="text-sm">
-
-//             Role :
-//             <span className="font-bold ml-2">
-//               {admin.role}
-//             </span>
-
-//           </div>
-
-//         </div>
-
-//         <div className="p-6">
-
-//           {children}
-
-//         </div>
-
-//       </div>
-
-//     </div>
-//   );
-// }
 
 "use client";
 import { useEffect, useState } from "react";
@@ -176,12 +11,13 @@ import {
 import {
   FiGrid,
   FiUsers,
-  FiDollarSign,
   FiSettings,
   FiLogOut,
   FiShield,
   FiChevronDown,
+  FiTarget,
 } from "react-icons/fi";
+import { FaRupeeSign,FaHandHoldingHeart} from "react-icons/fa";
 // import { LuBuildingIcon } from "lucide-react";
 
 const NAV = [
@@ -202,7 +38,7 @@ const NAV = [
   // },
   {
     label: "Finance",
-    icon: FiDollarSign,
+    icon: FaRupeeSign,
     children: [
       {
         label: "Overview",
@@ -225,11 +61,11 @@ const NAV = [
   {
     label: "NGOs",
     href: "/admin/super/ngos",
-    icon: FiUsers,
+    icon: FaHandHoldingHeart,
   },
   {
     label: "Campaigns",
-    icon: FiUsers,
+    icon: FiTarget,
     children: [
       {
         label: "Overview",

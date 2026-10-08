@@ -5,8 +5,11 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   FiGrid, FiHeart, FiFlag, FiCalendar,
   FiFileText,FiUsers, FiLogOut, FiChevronDown,
-  FiPackage, FiDollarSign, FiMenu, FiX, FiShield, 
+  FiPackage, FiDollarSign, FiMenu, FiX, FiShield, FiTarget,  FiPlusCircle,
+  FiCheckCircle,
 } from "react-icons/fi";
+import { FaRupeeSign,FaHandHoldingHeart} from "react-icons/fa";
+
 import { useAdminStore } from "@/features/admin/store/admin.store";
 import {
   adminLogout,
@@ -20,7 +23,7 @@ const NAV = [
   // ───── CORE ─────
   {
     label: "Campaigns",
-    icon: FiFlag,
+    icon: FiTarget,
     children: [
       { label: "All Campaigns", href: "/admin/campaigns" },
       { label: "Analytics", href: "/admin/campaigns/analytics" },
@@ -31,7 +34,7 @@ const NAV = [
 
   {
     label: "Donations",
-    icon: FiDollarSign,
+    icon: FaRupeeSign,
     children: [
       { label: "All Donations", href: "/admin/donations" },
       { label: "Top Donors", href: "/admin/top-donors" },
@@ -45,10 +48,10 @@ const NAV = [
 
   // ───── USERS & TRUST ─────
   { label: "Users", href: "/admin/users", icon: FiUsers },
-  { label: "KYC Verification", href: "/admin/kyc", icon: FiShield },
+  { label: "KYC Verification", href: "/admin/kyc", icon: FiCheckCircle },
 
   // -------NGO---------------------
-  { label: "NGO Verification ", href: "/admin/ngos", icon: FiShield },
+  { label: "NGO Verification ", href: "/admin/ngos", icon: FaHandHoldingHeart },
 
      //--Ngo queries data-------------
   { label: "NGO Queries", href: "/admin/ngo-queries", icon: Contact },
@@ -57,7 +60,7 @@ const NAV = [
   // ───── CONTENT ─────
   { label: "Blogs", href: "/admin/blogs", icon: FiFileText },
 
-  { label: "News", href: "/admin/News", icon: FiFileText },
+  { label: "News", href: "/admin/News", icon: FiPlusCircle },
 
   { label: "Events", href: "/admin/events", icon: FiCalendar },
 
