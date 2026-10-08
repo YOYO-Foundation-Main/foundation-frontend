@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
   useEffect(() => { setMounted(true); }, []);
 
   const handleLogin = async () => {
-    console.log("🔥 LOGIN BUTTON CLICKED");
+    // console.log("🔥 LOGIN BUTTON CLICKED");
 
     if (!email || !password) {
       console.log("❌ EMAIL OR PASSWORD EMPTY");
@@ -32,18 +32,24 @@ export default function AdminLoginPage() {
       setLoading(true);
       setError("");
 
-      console.log("🔥 CALLING adminLogin");
+      // console.log("🔥 CALLING adminLogin");
 
       const res = await adminLogin({ email, password });
 
-      console.log("🔥 adminLogin RESPONSE:", res);
-
+      // console.log("🔥 adminLogin RESPONSE:", res);
+       
+      // console.log("🔥 USER BEFORE SET ADMIN:", res.user);
       // existing code continues...
+      setAdmin(res.user);
 
+      // console.log(
+      //   "🔥 ADMIN STORED:",
+      //   useAdminStore.getState().admin
+      // );
       if (res.user.role === "SUPER_ADMIN") {
-        console.log("GO SUPER");
-        // router.replace("/admin/super/dashboard");
-        window.location.href = "/admin/super/dashboard";
+        // console.log("GO SUPER");
+        router.replace("/admin/super/dashboard");
+        // window.location.href = "/admin/super/dashboard";
       } else {
         console.log("GO ADMIN");
         // router.replace("/admin/dashboard");
@@ -51,10 +57,10 @@ export default function AdminLoginPage() {
       }
 
       setTimeout(() => {
-        console.log("Current URL:", window.location.pathname);
+        // console.log("Current URL:", window.location.pathname);
       }, 1000);
 
-      console.log("STEP 4");
+      // console.log("STEP 4");
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {

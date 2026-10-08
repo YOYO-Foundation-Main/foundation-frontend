@@ -104,7 +104,7 @@ const authFetch = async (
 
 // ================= ADMIN LOGIN =================
 export const adminLogin = async (data: { email: string; password: string }) => {
-  console.log("📤 [ADMIN LOGIN]:", data.email);
+  // console.log("📤 [ADMIN LOGIN]:", data.email);
 
   const res = await fetch(`${BASE_URL}/api/admin/login`, {
     method: "POST",
@@ -116,8 +116,8 @@ export const adminLogin = async (data: { email: string; password: string }) => {
   });
 
   const result = await res.json();
-  console.log("📡 [ADMIN LOGIN STATUS]:", res.status);
-  console.log("📥 [ADMIN LOGIN RESPONSE]:", result);
+  // console.log("📡 [ADMIN LOGIN STATUS]:", res.status);
+  // console.log("📥 [ADMIN LOGIN RESPONSE]:", result);
 
   if (!res.ok || !result.success) {
     throw new Error(result.message || "Admin login failed");

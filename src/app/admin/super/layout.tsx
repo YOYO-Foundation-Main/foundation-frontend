@@ -166,6 +166,7 @@
 
 "use client";
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAdminStore } from "@/features/admin/store/admin.store";
@@ -256,7 +257,11 @@ export default function SuperAdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { admin, logoutAdmin } = useAdminStore();
-
+  // console.log("SUPER LAYOUT ADMIN:", admin);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -313,8 +318,18 @@ export default function SuperAdminLayout({
   //   }
   // }, [pathname, admin, router]);
 
-  if (!admin) return null;
+  // if (!admin) return null;
+  if (!hydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    );
+  }
 
+  if (!admin) {
+    return null;
+  }
   // Derive initials from email
   const initials = admin.email
     ? admin.email.slice(0, 2).toUpperCase()
