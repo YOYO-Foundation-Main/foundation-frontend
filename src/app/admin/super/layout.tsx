@@ -17,7 +17,7 @@ import {
   FiChevronDown,
   FiTarget,
 } from "react-icons/fi";
-import { FaRupeeSign,FaHandHoldingHeart} from "react-icons/fa";
+import { FaRupeeSign, FaHandHoldingHeart } from "react-icons/fa";
 // import { LuBuildingIcon } from "lucide-react";
 
 const NAV = [
@@ -79,8 +79,8 @@ const NAV = [
     icon: FiUsers,
   },
   {
-    label: "Platform Settings",
-    href: "/admin/super/settings",
+    label: "Platform Intelligence",
+    href: "/admin/super/platforminsight",
     icon: FiSettings,
   },
 ];
@@ -172,15 +172,26 @@ export default function SuperAdminLayout({
     : "SA";
 
   // Derive page title from current path
-  const activeNav = NAV.find((n) => n.href === pathname);
-  const pageTitle = activeNav?.label ?? "Super Admin";
+  // const activeNav = NAV.find((n) => n.href === pathname);
+  // const pageTitle = activeNav?.label ?? "Super Admin";
+
+  // Derive the active sidebar item and header title
+  const activeNav = NAV.find(
+    (item) =>
+      item.href === pathname ||
+      item.children?.some((child) => child.href === pathname)
+  );
+
+  const activeChild = NAV.flatMap((item) => item.children ?? []).find(
+    (child) => child.href === pathname
+  );
+
+  const pageTitle = activeChild?.label ?? activeNav?.label ?? "Super Admin";
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-
+    <div className="h-screen flex overflow-hidden bg-gray-50">
       {/* ── Sidebar ── */}
-      <aside className="w-64 shrink-0 flex flex-col min-h-screen bg-gray-950 relative">
-
+      <aside className="w-64 shrink-0 flex flex-col h-full overflow-y-auto overflow-x-hidden bg-gray-950 relative">
         {/* Subtle red accent line at top */}
         <div className="h-0.5 w-full bg-gradient-to-r from-red-600 via-red-500 to-transparent" />
 
@@ -315,48 +326,73 @@ export default function SuperAdminLayout({
               </p>
             </div>
           </div>
-
-          {/* Logout */}
-          <button
-            onClick={handleLogout}
-            className="w-full group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-red-600/10 hover:text-red-400 transition-all duration-150"
-          >
-            <FiLogOut size={16} className="group-hover:translate-x-0.5 transition-transform duration-150" />
-            Sign out
-          </button>
         </div>
       </aside>
 
       {/* ── Main content area ── */}
-      <div className="flex-1 flex flex-col min-h-screen min-w-0">
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
 
+        {/* LEFT SIDE: Current page title */}
+        <div className="flex items-center gap-3">
+          {activeNav && (
+            <span className="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center">
+              <activeNav.icon size={14} className="text-red-600" />
+            </span>
+          )}
+
+          <h1 className="font-bold text-gray-900 text-base">
+            {pageTitle}
+          </h1>
+        </div>
         {/* Topbar */}
         <header className="h-16 shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10">
-          <div className="flex items-center gap-3">
-            {/* Breadcrumb-style current page */}
-            <div className="flex items-center gap-2">
-              {activeNav && (
-                <span className="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center">
-                  <activeNav.icon size={14} className="text-red-600" />
-                </span>
-              )}
-              <h1 className="font-bold text-gray-900 text-base">{pageTitle}</h1>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-3">
+          <div className="ml-auto flex items-center justify-end gap-3">
             <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 bg-red-50 border border-red-100 px-3 py-1.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
               {admin.role?.replace("_", " ")}
             </span>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">{initials}</span>
+
+            {/* Profile hover dropdown */}
+            <div className="relative group">
+              <button
+                type="button"
+                aria-label="Open admin profile menu"
+                className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center ring-2 ring-transparent group-hover:ring-red-200 transition-all"
+              >
+                <span className="text-white text-xs font-bold">{initials}</span>
+              </button>
+
+              {/* Dropdown menu */}
+              <div className="absolute right-0 top-full pt-2 w-64 hidden group-hover:block group-focus-within:block z-50">
+                <div className="bg-white rounded-xl border border-gray-200 shadow-xl p-3">
+                  <div className="px-2 py-2 border-b border-gray-100 mb-2">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
+                      {admin.email}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {admin.role?.replace("_", " ")}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <FiLogOut size={16} />
+                    Sign out
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+
+
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 min-h-0 min-w-0 p-6 overflow-y-auto overflow-x-hidden">
           {children}
         </main>
       </div>

@@ -135,3 +135,4 @@ export const deleteAdmin = async (
 
   return result;
 };
+

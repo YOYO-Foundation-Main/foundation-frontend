@@ -2251,3 +2251,6 @@ export default function NgoInsightsPage() {
         </div>
     );
 }
+
+
+

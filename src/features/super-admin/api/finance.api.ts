@@ -168,6 +168,32 @@ export const getUserInsights = async () => {
 };
 
 
+
+/* -------------------------------------------------------------------------- */
+/*                         PLATFORM INTELLIGENCE                              */
+/* -------------------------------------------------------------------------- */
+
+export const getPlatformIntelligence = async () => {
+  const res = await fetch(
+    `${BASE_URL}/api/admin/finance/platform/insights`,
+    {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    }
+  );
+
+  const result = await res.json();
+
+  if (!res.ok || !result.success) {
+    throw new Error(
+      result.message || "Failed to fetch platform intelligence"
+    );
+  }
+
+  return result.data;
+};
+
 //admin logout
 export const adminLogout = async () => {
   const res = await fetch(`${BASE_URL}/api/auth/logout`, {
