@@ -142,7 +142,7 @@ export default function AdminLoginPage() {
         {/* Bottom */}
         <div className="relative z-10">
           <p className="text-white/40 text-xs">
-            © 2025 YOYO Foundation · Admin Access Only
+            © 2026 YOYO Foundation · Admin Access Only
           </p>
         </div>
       </div>

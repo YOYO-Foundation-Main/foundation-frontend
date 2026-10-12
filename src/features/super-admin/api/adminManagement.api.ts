@@ -30,7 +30,7 @@ export const getAdmins = async () => {
 
 export const getAdmin = async (id: number) => {
   const res = await fetch(`${BASE_URL}/api/admins/${id}`, {
-     credentials: "include",
+    credentials: "include",
   });
 
   const result = await res.json();
@@ -51,7 +51,10 @@ export const createAdmin = async (
 ) => {
   const res = await fetch(`${BASE_URL}/api/admins`, {
     method: "POST",
-     credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
 
@@ -74,7 +77,10 @@ export const updateAdmin = async (
 ) => {
   const res = await fetch(`${BASE_URL}/api/admins/${id}`, {
     method: "PUT",
-     credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
 
@@ -99,6 +105,9 @@ export const toggleAdminStatus = async (
     `${BASE_URL}/api/admins/${id}/status`,
     {
       method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
       credentials: "include",
       body: JSON.stringify({
         isActive,
@@ -124,7 +133,7 @@ export const deleteAdmin = async (
 ) => {
   const res = await fetch(`${BASE_URL}/api/admins/${id}`, {
     method: "DELETE",
-     credentials: "include",
+    credentials: "include",
   });
 
   const result = await res.json();
